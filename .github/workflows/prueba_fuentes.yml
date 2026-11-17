@@ -17,12 +17,12 @@ jobs:
                   return json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'benitooo'}), timeout=40).read().decode())
               except urllib.error.HTTPError as e:
                   return {'HTTP': e.code, 'body': e.read().decode()[:300]}
-          d = get('/odds', tournamentId=8, bookmakers='bwin.es')
-          if isinstance(d, dict) and 'HTTP' in d: print('ERROR', d)
+          fx = get('/fixtures', tournamentId=8, **{'from': '2026-11-19', 'to': '2026-11-24'})
+          if isinstance(fx, dict) and 'HTTP' in fx: print('ERROR fixtures', fx)
           else:
-              L = d.get('data', d) if isinstance(d, dict) else d
-              print('tipo', type(d).__name__, 'n', len(L) if hasattr(L, '__len__') else '?')
-              f = L[0] if isinstance(L, list) and L else L
-              print('claves fixture:', list(f)[:20] if isinstance(f, dict) else f)
-              print(json.dumps(f)[:1800])
+              L = fx.get('data', fx) if isinstance(fx, dict) else fx
+              print('fixtures n', len(L)); print(json.dumps(L[0])[:600])
+              fid = L[0].get('fixtureId') or L[0].get('id')
+              d = get('/odds', fixtureId=fid, bookmakers='bwin.es')
+              print('ODDS', json.dumps(d)[:2200])
           PY
