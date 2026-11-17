@@ -74,6 +74,7 @@ def main():
         fx.columns = [str(c).replace('\ufeff', '').replace('ï»¿', '').strip() for c in fx.columns]
         print('fixtures:', len(fx), 'filas; ligas:', sorted(fx.Div.dropna().unique())[:12])
         fx = fx[fx.Div == 'SP2'].dropna(subset=['HomeTeam', 'AwayTeam']).copy()
+        print('SP2 en fixtures:', len(fx), 'fechas:', sorted(fx.Date.astype(str).unique())[:6])
     except Exception as e:
         print('AVISO fixtures.csv:', repr(e)[:150]); return
     fx['F'] = pd.to_datetime(fx.Date, dayfirst=True); fx = fx[fx.F >= hoy].sort_values(['F', 'Time'])
