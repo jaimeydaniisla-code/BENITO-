@@ -1,0 +1,12 @@
+name: prueba_fuentes
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sofascore y Flashscore
+        run: |
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+          for u in "https://api.sofascore.com/api/v1/sport/football/scheduled-events/2026-11-21" "https://www.sofascore.com/football" "https://www.flashscore.es/futbol/espana/laliga/partidos/"; do
+            code=$(curl -s -m 30 -A "$UA" -o /tmp/o.txt -w '%{http_code} %{size_download}' "$u"); echo "== $u -> $code"; head -c 300 /tmp/o.txt | tr '\n' ' '; echo
+          done
