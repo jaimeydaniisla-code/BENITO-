@@ -85,7 +85,7 @@ def seleccion(T, h, a):
 KEY = os.environ.get('APIFOOTBALL_KEY', '').strip()
 ALIAS_API = {'athletic club': 'athletic', 'real betis': 'betis', 'celta vigo': 'celta', 'rayo vallecano': 'rayo',
              'atletico madrid': 'atletico', 'deportivo la coruna': 'deportivo', 'racing santander': 'racing',
-             'deportivo alaves': 'alaves', 'rcd espanyol': 'espanyol', 'ud las palmas': 'las palmas'}
+             'deportivo alaves': 'alaves', 'rcd espanyol': 'espanyol', 'ud las palmas': 'las palmas', 'santander': 'racing', 'atleti': 'atletico', 'dep la coruna': 'deportivo', 'la coruna': 'deportivo', 'sevilla fc': 'sevilla', 'alaves': 'alaves'}
 
 
 def norm(s):
@@ -173,14 +173,19 @@ def aplicar_fdorg(jor, ahora):
         m = idx.get((h, a)) if h and a else None
         if not m:
             sin.append((f['homeTeam'].get('shortName'), f['awayTeam'].get('shortName'))); continue
-        ok += 1
+        ok += 1; m['_fd'] = 1
         ko = dt.datetime.fromisoformat(f['utcDate'].replace('Z', '+00:00')).astimezone(MAD)
         if f.get('status') in ('SCHEDULED', 'TIMED'):
             m['d'], m['t'] = ko.strftime('%Y-%m-%d'), ko.strftime('%H:%M')
         refs = [r.get('name') for r in f.get('referees', []) if r.get('name') and r.get('type', 'REFEREE') == 'REFEREE']
         if refs:
             m['arb'] = refs[0]; con_arb += 1
+    nomatch = [(m['h'], m['a'], m['d']) for j in jor for m in j['ms'] if not m.get('_fd')]
     print(f'football-data.org: {len(ms)} partidos leídos, {ok} casados con la app, {con_arb} con árbitro. Sin casar: {sin[:4]}')
+    print('DIAG nuestros sin casar:', nomatch[:12], '| equipos API:', sorted({f['homeTeam'].get('shortName') for f in ms}))
+    for j in jor:
+        for m in j['ms']:
+            m.pop('_fd', None)
     prox = [f for f in ms if f.get('status') in ('SCHEDULED', 'TIMED')][:1]
     if prox:
         try:
