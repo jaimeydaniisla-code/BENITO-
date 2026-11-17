@@ -16,9 +16,16 @@ usadas = 0
 
 def get(path, **p):
     global usadas
-    usadas += 1
+    import time
     u = 'https://api.oddspapi.io/v4' + path + '?' + urllib.parse.urlencode({'apiKey': KEY, **p})
-    return json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'benitooo'}), timeout=40).read().decode())
+    for intento in range(4):
+        time.sleep(2.5 * (intento + 1))
+        usadas += 1
+        try:
+            return json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'benitooo'}), timeout=40).read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or intento == 3: raise
+            print('  429, reintento', intento + 1)
 
 
 def nz(t):
@@ -91,7 +98,10 @@ def pedir():
         jor = app.get('ligas', {}).get(liga, {}).get('jor', [])
         ms = [m for j in jor for m in j['ms'] if ahora.date().isoformat() <= m['d'] <= (ahora + dt.timedelta(days=DIAS)).date().isoformat()]
         if not ms: print(liga, ': sin partidos en la ventana'); continue
-        fx = get('/fixtures', tournamentId=tid, **{'from': ahora.strftime('%Y-%m-%d'), 'to': (ahora + dt.timedelta(days=DIAS + 1)).strftime('%Y-%m-%d')})
+        try:
+            fx = get('/fixtures', tournamentId=tid, **{'from': ahora.strftime('%Y-%m-%d'), 'to': (ahora + dt.timedelta(days=DIAS + 1)).strftime('%Y-%m-%d')})
+        except Exception as e:
+            print(liga, 'fixtures error', repr(e)[:80]); continue
         fx = fx.get('data', fx) if isinstance(fx, dict) else fx
         n = sin = 0
         for m in ms:
