@@ -65,51 +65,120 @@ def seleccion(T, h, a):
     out.sort(key=lambda s: -s[2]); return out
 
 
+import difflib, unicodedata
+
+
+def nz(t):
+    return unicodedata.normalize('NFKD', str(t)).encode('ascii', 'ignore').decode().lower().replace('.', '').strip()
+
+
+ALIAS = {'sporting gijon': 'sp gijon', 'real sporting': 'sp gijon', 'deportivo la coruna': 'la coruna', 'ad ceuta': 'ceuta', 'cd castellon': 'castellon',
+         'real zaragoza': 'zaragoza', 'real valladolid': 'valladolid', 'cd leganes': 'leganes', 'ud las palmas': 'las palmas', 'ud almeria': 'almeria',
+         'cd mirandes': 'mirandes', 'cadiz cf': 'cadiz', 'real sociedad b': 'sociedad b', 'athletic club b': 'ath bilbao', 'real racing club': 'santander',
+         'racing santander': 'santander', 'racing de santander': 'santander', 'granada cf': 'granada', 'malaga cf': 'malaga', 'ud ibiza': 'ibiza', 'fc andorra': 'andorra',
+         'burgos cf': 'burgos', 'real oviedo': 'oviedo', 'albacete balompie': 'albacete', 'cultural leonesa': 'cultural leonesa', 'eldense': 'eldense', 'huesca': 'huesca'}
+
+
+def fm_get(u):
+    import re
+    req = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'})
+    h = urllib.request.urlopen(req, timeout=40).read().decode('utf-8', 'ignore')
+    return json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
+
+
+def fm_calendario(equipos, hoy):
+    """Calendario de Segunda desde FotMob. Devuelve filas con equipos ya mapeados a los nombres de football-data."""
+    allm = fm_get('https://www.fotmob.com/leagues/140/overview/laliga2')['fixtures']['allMatches']
+    por = {nz(e): e for e in equipos}
+    def mapa(n):
+        k = ALIAS.get(nz(n), nz(n))
+        if k in por: return por[k]
+        b = difflib.get_close_matches(k, list(por), n=1, cutoff=0.6)
+        return por[b[0]] if b else None
+    out, sin = [], set()
+    for f in allm:
+        st = f.get('status', {})
+        if st.get('finished') or st.get('cancelled'): continue
+        ko = dt.datetime.fromisoformat(st['utcTime'].replace('Z', '+00:00')).astimezone(MAD)
+        if pd.Timestamp(ko.date()) < hoy: continue
+        h, a = mapa(f['home']['name']), mapa(f['away']['name'])
+        if not h or not a:
+            sin.add((f['home']['name'], f['away']['name'])); continue
+        out.append({'h': h, 'a': a, 'ko': ko, 'ronda': f.get('round'), 'url': f['pageUrl'].split('#')[0]})
+    if sin: print('AVISO FotMob Segunda sin casar:', sorted(sin)[:6])
+    return sorted(out, key=lambda r: r['ko'])
+
+
+def fm_detalle(f, ahora, horas=120):
+    if f['ko'] > ahora + dt.timedelta(hours=horas): return None, None
+    try:
+        g = fm_get('https://www.fotmob.com' + f['url'])['content']
+    except Exception as e:
+        print('AVISO FotMob partido', f['h'], f['a'], repr(e)[:90]); return None, None
+    ref = (((g.get('matchFacts') or {}).get('infoBox') or {}).get('Referee') or {}).get('text') or None
+    L = g.get('lineup') or {}; ali = None
+    if L.get('homeTeam') and L.get('awayTeam'):
+        baj = lambda t: ', '.join(x['name'].split(' ')[-1] for x in (t.get('unavailable') or [])[:5])
+        fh, fa = L['homeTeam'].get('formation') or '?', L['awayTeam'].get('formation') or '?'
+        ok = fh != '?' and fa != '?' and L['homeTeam'].get('starters') and L['awayTeam'].get('starters')
+        ali = (f"{'confirmadas' if (L.get('lineupType') not in ('predicted', 'lastStarting11', None) and ok) else 'NO oficiales (probables)'}: {fh} / {fa}") if ok else 'sin confirmar'
+        bl, bv = baj(L['homeTeam']), baj(L['awayTeam'])
+        if bl or bv: ali += f" · Bajas: {BONITO.get(f['h'], f['h'])}: {bl or '—'}; {BONITO.get(f['a'], f['a'])}: {bv or '—'}"
+    return ref, ali
+
+
 def main():
     descargar_sp2()
     ahora = dt.datetime.now(MAD); hoy = pd.Timestamp(ahora.date())
     app = json.load(open(DATOS, encoding='utf-8')); lig = app.setdefault('ligas', {})
+    hist0 = pd.read_csv(SP2_FILE, encoding='utf-8-sig').dropna(subset=['FTHG'])
+    equipos = sorted(set(hist0.HomeTeam) | set(hist0.AwayTeam))
     try:
-        fx = pd.read_csv(io.BytesIO(get('https://www.football-data.co.uk/fixtures.csv')), encoding='latin-1')
-        fx.columns = [str(c).replace('\ufeff', '').replace('ï»¿', '').strip() for c in fx.columns]
-        print('fixtures:', len(fx), 'filas; ligas:', sorted(fx.Div.dropna().unique())[:12])
-        fx = fx[fx.Div == 'SP2'].dropna(subset=['HomeTeam', 'AwayTeam']).copy()
-        print('SP2 en fixtures:', len(fx), 'fechas:', sorted(fx.Date.astype(str).unique())[:6])
+        fx = fm_calendario(equipos, hoy)
     except Exception as e:
-        print('AVISO fixtures.csv:', repr(e)[:150]); return
-    fx['F'] = pd.to_datetime(fx.Date, dayfirst=True); fx = fx[fx.F >= hoy].sort_values(['F', 'Time'])
-    hist = pd.read_csv(SP2_FILE, encoding='utf-8-sig').dropna(subset=['FTHG'])
-    jug = max(pd.concat([hist.HomeTeam, hist.AwayTeam]).value_counts().max(), 0)
+        print('AVISO FotMob calendario Segunda:', repr(e)[:150]); return
+    hist = hist0
     ult = pd.to_datetime(hist.Date, dayfirst=True).max()
-    if fx.empty:
-        print('Sin partidos próximos de SP2 en fixtures.csv'); lig['segunda'] = {'nombre': 'Segunda', 'jor': [], 'meta': {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}}
+    meta = {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}
+    if not fx:
+        print('Sin partidos próximos de Segunda en FotMob'); lig['segunda'] = {'nombre': 'Segunda', 'jor': [], 'meta': meta}
     else:
-        # jornadas: grupos de fechas separados por más de 3 días
-        grupos, prev, n = [], None, 0
-        for _, r in fx.iterrows():
-            if prev is None or (r.F - prev).days > 3:
-                n += 1; grupos.append([])
-            grupos[-1].append(r); prev = r.F
-        jor = []
-        for gi, g in enumerate(grupos[:3]):
+        import functools
+        ap.cargar_partidos = functools.lru_cache(maxsize=None)(ap.cargar_partidos)
+        _fit, _c = ap.dc.fit, {}
+        ap.dc.fit = lambda tr, ref, xi, reg: _c.setdefault((len(tr), ref, xi, reg), _fit(tr, ref, xi, reg))
+        _CM, _c2 = ap.CountModel, {}
+
+        class CM(_CM):
+            def fit(self, tr, ref, a, b):
+                k = (len(tr), ref, a, b, repr(sorted(self.__dict__.items())))
+                if k in _c2:
+                    self.__dict__.update(_c2[k]); return self
+                super().fit(tr, ref, a, b); _c2[k] = dict(self.__dict__); return self
+        ap.CountModel = CM
+        rondas = []
+        for r in fx:
+            if r['ronda'] not in rondas: rondas.append(r['ronda'])
+        jor, narb, nali = [], 0, 0
+        for ronda in rondas[:3]:
             ms = []
-            for r in g:
-                t = ''
-                if isinstance(r.get('Time'), str) and ':' in r.Time:
-                    hh, mm = map(int, r.Time.split(':')[:2])
-                    t = dt.datetime(r.F.year, r.F.month, r.F.day, hh, mm, tzinfo=UK).astimezone(MAD).strftime('%H:%M')
-                h, a = BONITO.get(r.HomeTeam, r.HomeTeam), BONITO.get(r.AwayTeam, r.AwayTeam)
+            for r in [x for x in fx if x['ronda'] == ronda]:
+                h, a = BONITO.get(r['h'], r['h']), BONITO.get(r['a'], r['a'])
                 try:
-                    T, pick, info = ap.analizar(r.HomeTeam, r.AwayTeam, hoy)
+                    T, pick, info = ap.analizar(r['h'], r['a'], hoy)
                 except Exception as e:
-                    print('AVISO modelo', r.HomeTeam, r.AwayTeam, repr(e)[:120]); continue
-                ms.append({'h': h, 'a': a, 'd': r.F.strftime('%Y-%m-%d'), 't': t, 'arb': None, 'ali': None,
-                           'g': list(info['lambdas_finales']), 'c': list(info['corners_esp']), 'k': list(info['tarjetas_esp']),
+                    print('AVISO modelo', r['h'], r['a'], repr(e)[:120]); continue
+                arb, ali = fm_detalle(r, ahora)
+                narb += bool(arb); nali += bool(ali)
+                ms.append({'h': h, 'a': a, 'd': r['ko'].strftime('%Y-%m-%d'), 't': r['ko'].strftime('%H:%M'), 'arb': arb, 'ali': ali,
+                           'g': [float(x) for x in info['lambdas_finales']], 'c': [float(x) for x in info['corners_esp']], 'k': [float(x) for x in info['tarjetas_esp']],
                            's': seleccion(T, h, a)})
             if ms:
-                jor.append({'j': jug + 1 + gi, 'ms': ms})
-        lig['segunda'] = {'nombre': 'Segunda', 'jor': jor, 'meta': {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}}
-        print(f'Segunda: {sum(len(j["ms"]) for j in jor)} partidos en {len(jor)} jornadas. Datos hasta {ult.date()}')
+                try: jn = int(ronda)
+                except Exception: jn = len(jor) + 1
+                jor.append({'j': jn, 'ms': ms})
+        lig['segunda'] = {'nombre': 'Segunda', 'jor': jor, 'meta': meta}
+        print(f'Segunda: {sum(len(j["ms"]) for j in jor)} partidos en {len(jor)} jornadas; {narb} con árbitro, {nali} con alineación/bajas. Datos hasta {ult.date()}')
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 
 
