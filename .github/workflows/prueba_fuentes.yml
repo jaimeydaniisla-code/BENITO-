@@ -1,0 +1,28 @@
+name: prueba_fuentes
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: OddsPapi estructura
+        env:
+          K: ${{ secrets.ODDSPAPI_KEY }}
+        run: |
+          python3 - <<'PY'
+          import os, json, urllib.request, urllib.parse
+          K = os.environ.get('K', '').strip(); print('clave presente:', bool(K), 'longitud', len(K))
+          def get(path, **p):
+              u = 'https://api.oddspapi.io/v4' + path + '?' + urllib.parse.urlencode({'apiKey': K, **p})
+              try:
+                  return json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'benitooo'}), timeout=40).read().decode())
+              except urllib.error.HTTPError as e:
+                  return {'HTTP': e.code, 'body': e.read().decode()[:300]}
+          d = get('/odds', tournamentId=8, bookmakers='bwin.es')
+          if isinstance(d, dict) and 'HTTP' in d: print('ERROR', d)
+          else:
+              L = d.get('data', d) if isinstance(d, dict) else d
+              print('tipo', type(d).__name__, 'n', len(L) if hasattr(L, '__len__') else '?')
+              f = L[0] if isinstance(L, list) and L else L
+              print('claves fixture:', list(f)[:20] if isinstance(f, dict) else f)
+              print(json.dumps(f)[:1800])
+          PY
