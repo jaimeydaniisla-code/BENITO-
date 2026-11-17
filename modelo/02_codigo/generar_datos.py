@@ -195,6 +195,57 @@ def aplicar_fdorg(jor, ahora):
             print('AVISO detalle:', repr(e)[:150])
 
 
+# ---------------- FotMob (datos de su propia web, uso ligero): árbitro, alineaciones y bajas ----------------
+def fm_get(u):
+    req = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'})
+    h = urllib.request.urlopen(req, timeout=40).read().decode('utf-8', 'ignore')
+    return json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
+
+
+def aplicar_fotmob(jor, ahora, liga_id=87, slug='laliga', horas=72):
+    try:
+        allm = fm_get(f'https://www.fotmob.com/leagues/{liga_id}/overview/{slug}')['fixtures']['allMatches']
+    except Exception as e:
+        print('AVISO FotMob liga:', repr(e)[:150]); return
+    idx = {}
+    for j in jor:
+        for m in j['ms']:
+            idx[(norm(m['h']), norm(m['a']))] = m
+    ours = {k[0]: k[0] for k in idx} | {k[1]: k[1] for k in idx}
+    nm = narb = nali = 0
+    for f in allm:
+        st = f.get('status', {})
+        if st.get('finished') or st.get('cancelled'):
+            continue
+        h, a = casar(ours, f['home']['name']), casar(ours, f['away']['name'])
+        m = idx.get((h, a)) if h and a else None
+        if not m:
+            continue
+        nm += 1
+        ko = dt.datetime.fromisoformat(st['utcTime'].replace('Z', '+00:00')).astimezone(MAD)
+        if ko > ahora + dt.timedelta(hours=horas):
+            continue
+        try:
+            g = fm_get('https://www.fotmob.com' + f['pageUrl'].split('#')[0])['content']
+        except Exception as e:
+            print('AVISO FotMob partido:', m['h'], m['a'], repr(e)[:100]); continue
+        ref = ((g.get('matchFacts') or {}).get('infoBox') or {}).get('Referee') or {}
+        if ref.get('text'):
+            m['arb'] = ref['text']; narb += 1
+        L = g.get('lineup') or {}
+        if L.get('homeTeam') and L.get('awayTeam'):
+            tipo = L.get('lineupType')
+            baj = lambda t: ', '.join(x['name'].split(' ')[-1] for x in (t.get('unavailable') or [])[:5])
+            fh, fa = L['homeTeam'].get('formation') or '?', L['awayTeam'].get('formation') or '?'
+            etq = 'confirmadas' if tipo not in ('predicted', 'lastStarting11', None) else 'NO oficiales (probables)'
+            txt = f'{etq}: {fh} / {fa}'
+            bl, bv = baj(L['homeTeam']), baj(L['awayTeam'])
+            if bl or bv:
+                txt += f" · Bajas: {m['h']}: {bl or '—'}; {m['a']}: {bv or '—'}"
+            m['ali'] = txt; nali += 1
+    print(f'FotMob: {nm} partidos casados, {narb} con árbitro, {nali} con alineación/bajas (ventana {horas} h)')
+
+
 def main():
     descargar_sp1()
     app = json.load(open(DATOS, encoding='utf-8'))
@@ -207,6 +258,7 @@ def main():
     hoy = pd.Timestamp(ahora.date())
     aplicar_api(jor, ahora)
     aplicar_fdorg(jor, ahora)
+    aplicar_fotmob(jor, ahora)
     n = 0
     for j in jor:
         for m in j['ms']:
