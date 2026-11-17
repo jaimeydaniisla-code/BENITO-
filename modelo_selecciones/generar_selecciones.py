@@ -13,7 +13,7 @@ PMIN, PMAX = 0.42, 0.93
 ES = {'Denmark': 'Dinamarca', 'Norway': 'Noruega', 'Spain': 'España', 'England': 'Inglaterra', 'Germany': 'Alemania', 'Netherlands': 'Países Bajos',
       'France': 'Francia', 'Italy': 'Italia', 'Portugal': 'Portugal', 'Belgium': 'Bélgica', 'Croatia': 'Croacia', 'Turkey': 'Turquía', 'Switzerland': 'Suiza',
       'Austria': 'Austria', 'Poland': 'Polonia', 'Sweden': 'Suecia', 'Scotland': 'Escocia', 'Czech Republic': 'Rep. Checa', 'Brazil': 'Brasil',
-      'Argentina': 'Argentina', 'Uruguay': 'Uruguay', 'Colombia': 'Colombia', 'Mexico': 'México', 'United States': 'EE. UU.', 'Japan': 'Japón', 'South Korea': 'Corea del Sur'}
+      'Argentina': 'Argentina', 'Uruguay': 'Uruguay', 'Colombia': 'Colombia', 'Mexico': 'México', 'United States': 'EE. UU.', 'Japan': 'Japón', 'Hungary': 'Hungría', 'Northern Ireland': 'Irlanda del Norte', 'Ukraine': 'Ucrania', 'Georgia': 'Georgia', 'Israel': 'Israel', 'Bosnia and Herzegovina': 'Bosnia', 'Romania': 'Rumanía', 'Republic of Ireland': 'Irlanda', 'Kosovo': 'Kosovo', 'Wales': 'Gales', 'South Korea': 'Corea del Sur'}
 
 
 def descargar():
