@@ -1,0 +1,171 @@
+"""Robot de la app Benitooo: recalcula las probabilidades con el modelo y escribe datos.json.
+Se ejecuta solo (GitHub Actions). Todo lo opcional falla en silencio: si algo no responde, se mantiene lo anterior.
+  1) descarga el SP1 actual de football-data.co.uk (resultados nuevos)
+  2) recalcula, con datos hasta hoy, los partidos que aún no se han jugado
+  3) si hay clave APIFOOTBALL_KEY: horarios, árbitro designado y alineaciones (API-Football, plan gratis 100/día)
+"""
+import os, sys, json, re, functools, unicodedata, difflib, datetime as dt
+import urllib.request, urllib.parse
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
+os.environ['LALIGA_DATA'] = os.path.join(ROOT, 'modelo', '01_datos', 'historico') + os.sep
+sys.path.insert(0, HERE)
+import pandas as pd
+import analizar_partido as ap
+try:
+    from zoneinfo import ZoneInfo
+    MAD = ZoneInfo('Europe/Madrid')
+except Exception:
+    MAD = dt.timezone(dt.timedelta(hours=1))
+ap._fit_all = functools.lru_cache(maxsize=2)(ap._fit_all)   # el modelo se ajusta una sola vez
+
+SP1_URL = 'https://www.football-data.co.uk/mmz4281/2627/SP1.csv'
+SP1_FILE = os.path.join(ROOT, 'modelo', '01_datos', 'SP1_2026-27.csv')
+DATOS = os.path.join(ROOT, 'datos.json')
+PMIN, PMAX = 0.42, 0.93   # rango de probabilidad que se lista (igual que la app anterior; por encima de 93 % la cuota es ~1,07 y no sirve)
+
+
+def descargar_sp1():
+    try:
+        req = urllib.request.Request(SP1_URL, headers={'User-Agent': 'Mozilla/5.0'})
+        raw = urllib.request.urlopen(req, timeout=60).read()
+        tmp = SP1_FILE + '.tmp'
+        open(tmp, 'wb').write(raw)
+        n_new = len(pd.read_csv(tmp, encoding='utf-8-sig').dropna(subset=['FTHG']))
+        n_old = len(pd.read_csv(SP1_FILE, encoding='utf-8-sig').dropna(subset=['FTHG']))
+        if n_new >= n_old:
+            os.replace(tmp, SP1_FILE); print(f'SP1 descargado: {n_new} partidos (antes {n_old})')
+        else:
+            os.remove(tmp); print('SP1 descargado con menos partidos: se mantiene el anterior')
+    except Exception as e:
+        print('AVISO: no se pudo descargar SP1:', repr(e)[:150])
+
+
+def coma(x):
+    return str(x).replace('.', ',')
+
+
+def seleccion(T, h, a):
+    """Convierte la tabla del modelo en la lista de selecciones de la app: [texto, categoría, prob, fiabilidad]."""
+    out = []
+    fijo = {'1X2: Local': (f'Gana {h}', 'res', 2), '1X2: Visitante': (f'Gana {a}', 'res', 2),
+            'DO: 1X': (f'{h} o empate', 'res', 2), 'DO: X2': (f'Empate o {a}', 'res', 2), 'DO: 12': ('No hay empate', 'res', 2),
+            'DNB: Local': (f'{h} (empate no válido)', 'res', 2), 'DNB: Visitante': (f'{a} (empate no válido)', 'res', 2),
+            'Ambos marcan: Sí': ('Ambos marcan: Sí', 'gol', 1), 'Ambos marcan: No': ('Ambos marcan: No', 'gol', 1),
+            'Hándicap Local -1,5 (gana por 2+)': (f'{h} gana por 2 o más', 'res', 2),
+            'Hándicap Visitante -1,5 (gana por 2+)': (f'{a} gana por 2 o más', 'res', 2),
+            'Hándicap Visitante +1,5': (f'{a} +1,5 (no pierde por 2)', 'res', 2),
+            'Hándicap Local +1,5': (f'{h} +1,5 (no pierde por 2)', 'res', 2),
+            'Local gana sin encajar': (f'{h} gana sin encajar', 'gol', 2), 'Visitante gana sin encajar': (f'{a} gana sin encajar', 'gol', 2),
+            'Más córners: Local': (f'Más córners: {h}', 'cor', 2), 'Más córners: Visitante': (f'Más córners: {a}', 'cor', 2)}
+    cat = {'Goles': 'gol', 'Córners': 'cor', 'Tarjetas': 'tar'}
+    fia_tot = {'Goles': 1, 'Córners': 0, 'Tarjetas': 1}
+    fia_eq = {'Goles': 2, 'Córners': 2, 'Tarjetas': 1}
+    for _, r in T.iterrows():
+        p = float(r.p_final)
+        if p < PMIN or p > PMAX:
+            continue
+        m = r.mercado
+        if m in fijo:
+            t, c, f = fijo[m]
+        else:
+            g = re.match(r'^(Goles|Córners|Tarjetas)( Local| Visitante)?: (Más|Menos) de ([\d.]+)$', m)
+            if not g:
+                continue
+            k, eq, mm, L = g.groups()
+            nom = {' Local': h, ' Visitante': a}.get(eq)
+            t = f'{k}{" " + nom if nom else ""}: {mm.lower()} de {coma(L)}'
+            c, f = cat[k], (fia_eq[k] if nom else fia_tot[k])
+        out.append([t, c, round(p, 3), f])
+    out.sort(key=lambda s: -s[2])
+    return out
+
+
+# ---------------- API-Football (opcional) ----------------
+KEY = os.environ.get('APIFOOTBALL_KEY', '').strip()
+ALIAS_API = {'athletic club': 'athletic', 'real betis': 'betis', 'celta vigo': 'celta', 'rayo vallecano': 'rayo',
+             'atletico madrid': 'atletico', 'deportivo la coruna': 'deportivo', 'racing santander': 'racing',
+             'deportivo alaves': 'alaves', 'rcd espanyol': 'espanyol', 'ud las palmas': 'las palmas'}
+
+
+def norm(s):
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode().lower().strip()
+    return ALIAS_API.get(s, s)
+
+
+def api(path, **params):
+    url = 'https://v3.football.api-sports.io/' + path + '?' + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url, headers={'x-apisports-key': KEY, 'User-Agent': 'benitooo'})
+    j = json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
+    if j.get('errors'):
+        raise RuntimeError(str(j['errors'])[:200])
+    return j.get('response', [])
+
+
+def casar(ours, name):
+    n = norm(name); best = difflib.get_close_matches(n, list(ours), n=1, cutoff=0.6)
+    return ours[best[0]] if best else None
+
+
+def aplicar_api(jor, ahora):
+    if not KEY:
+        print('Sin APIFOOTBALL_KEY: horarios, árbitro y alineaciones se mantienen.'); return
+    try:
+        fx = api('fixtures', league=140, season=2026)
+    except Exception as e:
+        print('AVISO API fixtures:', repr(e)[:200]); return
+    idx = {}
+    for j in jor:
+        for m in j['ms']:
+            idx[(norm(m['h']), norm(m['a']))] = m
+    ours = {k[0]: k[0] for k in idx} | {k[1]: k[1] for k in idx}
+    nlin = 0
+    for f in fx:
+        h = casar(ours, f['teams']['home']['name']); a = casar(ours, f['teams']['away']['name'])
+        m = idx.get((h, a)) if h and a else None
+        if not m:
+            continue
+        ko = dt.datetime.fromisoformat(f['fixture']['date']).astimezone(MAD)
+        m['d'], m['t'] = ko.strftime('%Y-%m-%d'), ko.strftime('%H:%M')
+        ref = (f['fixture'].get('referee') or '').split(',')[0].strip()
+        if ref:
+            m['arb'] = ref
+        ventana = ko - dt.timedelta(minutes=120) <= ahora <= ko + dt.timedelta(minutes=15)
+        if ventana and not m.get('ali'):
+            try:
+                L = api('fixtures/lineups', fixture=f['fixture']['id'])
+                if len(L) == 2 and all(x.get('startXI') for x in L):
+                    fh = L[0].get('formation') or '?'; fa = L[1].get('formation') or '?'
+                    m['ali'] = f'confirmadas: {fh} / {fa}'; nlin += 1
+            except Exception as e:
+                print('AVISO API lineups:', repr(e)[:150])
+    print(f'API-Football: {len(fx)} partidos leídos, {nlin} alineaciones nuevas')
+
+
+def main():
+    descargar_sp1()
+    app = json.load(open(DATOS, encoding='utf-8'))
+    jor = app['jor']
+    ahora = dt.datetime.now(MAD)
+    hoy = pd.Timestamp(ahora.date())
+    aplicar_api(jor, ahora)
+    n = 0
+    for j in jor:
+        for m in j['ms']:
+            if pd.Timestamp(m['d']) < hoy:
+                continue                      # ya jugado: no se recalcula
+            T, pick, info = ap.analizar(m['h'], m['a'], None, hoy)
+            m['s'] = seleccion(T, m['h'], m['a'])
+            m['g'] = [info['lambda_goles'][0], info['lambda_goles'][1]]
+            m['c'] = [info['corners_esperados'][0], info['corners_esperados'][1]]
+            m['k'] = [info['tarjetas_esperadas'][0], info['tarjetas_esperadas'][1]]
+            n += 1
+    ult = pd.read_csv(SP1_FILE, encoding='utf-8-sig').dropna(subset=['FTHG'])
+    ult = pd.to_datetime(ult.Date, dayfirst=True).max()
+    app['meta'] = {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}
+    json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+    print(f'datos.json actualizado: {n} partidos recalculados. Datos hasta {app["meta"]["datos"]}')
+
+
+if __name__ == '__main__':
+    main()
