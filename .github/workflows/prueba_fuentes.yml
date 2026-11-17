@@ -4,9 +4,27 @@ jobs:
   p:
     runs-on: ubuntu-latest
     steps:
-      - name: Probar fuentes
+      - name: FotMob
         run: |
-          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
-          for u in "https://es.besoccer.com/competicion/partidos/primera" "https://www.whoscored.com/Regions/206/Tournaments/4/Spain-LaLiga" "https://www.fotmob.com/api/leagues?id=87" "https://www.fotmob.com/leagues/87/overview/laliga" "https://www.rfef.es/es/noticias/designaciones-arbitrales" "https://www.transfermarkt.es/laliga/startseite/wettbewerb/ES1" "https://www.laliga.com/partidos" "https://www.marca.com/futbol/primera-division/calendario.html" "https://www.flashscore.es/"; do
-            code=$(curl -s -L -m 30 -A "$UA" -o /tmp/o.txt -w '%{http_code} %{size_download}' "$u"); n=$(grep -o -i -E 'árbitro|arbitro|referee' /tmp/o.txt | wc -l); echo "== $u -> $code | menciones arbitro: $n"
-          done
+          python3 - <<'PY'
+          import re, json, urllib.request
+          UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'}
+          def get(u): return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=40).read().decode('utf-8', 'ignore')
+          def nd(h):
+              m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S); return json.loads(m.group(1)) if m else None
+          h = get('https://www.fotmob.com/leagues/87/overview/laliga'); d = nd(h)
+          pp = d['props']['pageProps']; print('claves pageProps:', list(pp)[:12])
+          fx = pp.get('fixtures', {}); print('claves fixtures:', list(fx)[:8] if isinstance(fx, dict) else type(fx))
+          allm = fx.get('allMatches', [])
+          prox = [m for m in allm if not m.get('status', {}).get('finished')][:6]
+          print('total partidos', len(allm), 'no jugados', len([m for m in allm if not m.get('status', {}).get('finished')]))
+          for m in prox: print(m.get('status', {}).get('utcTime'), m['home']['name'], '-', m['away']['name'], m.get('pageUrl'))
+          if prox:
+              u = 'https://www.fotmob.com' + prox[0]['pageUrl']; print('PARTIDO', u)
+              dm = nd(get(u)); g = dm['props']['pageProps']
+              print('claves partido:', list(g)[:12])
+              txt = json.dumps(g)
+              for k in ('referee', 'lineup', 'starters', 'formation', 'unavailable', 'injuries'):
+                  print(k, txt.lower().count(k))
+              ref = re.search(r'"referee":\{[^}]*\}', txt); print('arbitro:', ref.group(0)[:200] if ref else None)
+          PY
