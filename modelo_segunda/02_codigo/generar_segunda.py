@@ -71,6 +71,8 @@ def main():
     app = json.load(open(DATOS, encoding='utf-8')); lig = app.setdefault('ligas', {})
     try:
         fx = pd.read_csv(io.BytesIO(get('https://www.football-data.co.uk/fixtures.csv')), encoding='latin-1')
+        fx.columns = [str(c).replace('\ufeff', '').replace('ï»¿', '').strip() for c in fx.columns]
+        print('fixtures:', len(fx), 'filas; ligas:', sorted(fx.Div.dropna().unique())[:12])
         fx = fx[fx.Div == 'SP2'].dropna(subset=['HomeTeam', 'AwayTeam']).copy()
     except Exception as e:
         print('AVISO fixtures.csv:', repr(e)[:150]); return
