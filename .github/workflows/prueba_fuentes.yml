@@ -1,0 +1,24 @@
+name: prueba_fuentes
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: FotMob dia
+        run: |
+          python3 - <<'PY'
+          import re, json, urllib.request
+          UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'}
+          def get(u): return urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=40).read().decode('utf-8', 'ignore')
+          for fecha in ('20261117', '20261118'):
+              h = get('https://www.fotmob.com/matches?date=' + fecha)
+              pp = json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
+              print('CLAVES', fecha, list(pp)[:10])
+              L = pp.get('fixtures', {}).get('leagues') or pp.get('leagues') or []
+              print('n ligas', len(L))
+              for l in L:
+                  nom = l.get('name', ''); cc = l.get('ccode')
+                  if cc == 'INT' or re.search('Nations|Friend|Qualif|Amistos|Nacion', nom, re.I):
+                      for m in l.get('matches', []):
+                          print(fecha, '|', cc, '|', nom, '|', m['home']['name'], '-', m['away']['name'], '|', m['status'].get('utcTime'), '| fin', m['status'].get('finished'))
+          PY
