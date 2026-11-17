@@ -198,7 +198,11 @@ def aplicar_fdorg(jor, ahora):
 def main():
     descargar_sp1()
     app = json.load(open(DATOS, encoding='utf-8'))
-    jor = app['jor']
+    if 'ligas' not in app:                      # formato antiguo: solo Primera
+        app = {'ligas': {'primera': {'nombre': 'Primera', 'jor': app['jor'], 'meta': app.get('meta', {})}}}
+    app['ligas'].setdefault('selecciones', {'nombre': 'Selecciones', 'jor': [], 'meta': {},
+                                            'aviso': 'Selecciones: todavía no hay modelo ni calendario conectado.'})
+    jor = app['ligas']['primera']['jor']
     ahora = dt.datetime.now(MAD)
     hoy = pd.Timestamp(ahora.date())
     aplicar_api(jor, ahora)
@@ -216,9 +220,9 @@ def main():
             n += 1
     ult = pd.read_csv(SP1_FILE, encoding='utf-8-sig').dropna(subset=['FTHG'])
     ult = pd.to_datetime(ult.Date, dayfirst=True).max()
-    app['meta'] = {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}
+    app['ligas']['primera']['meta'] = {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
-    print(f'datos.json actualizado: {n} partidos recalculados. Datos hasta {app["meta"]["datos"]}')
+    print(f'datos.json actualizado: {n} partidos recalculados. Datos hasta {app["ligas"]["primera"]["meta"]["datos"]}')
 
 
 if __name__ == '__main__':
