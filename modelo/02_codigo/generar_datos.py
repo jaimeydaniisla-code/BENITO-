@@ -142,6 +142,54 @@ def aplicar_api(jor, ahora):
     print(f'API-Football: {len(fx)} partidos leídos, {nlin} alineaciones nuevas')
 
 
+# ---------------- football-data.org (plan gratis): horarios y árbitro ----------------
+FDTOKEN = os.environ.get('FOOTBALLDATA_TOKEN', '').strip()
+
+
+def fdorg(path):
+    req = urllib.request.Request('https://api.football-data.org/v4/' + path,
+                                 headers={'X-Auth-Token': FDTOKEN, 'User-Agent': 'benitooo'})
+    return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
+
+
+def aplicar_fdorg(jor, ahora):
+    if not FDTOKEN:
+        print('Sin FOOTBALLDATA_TOKEN.'); return
+    try:
+        res = fdorg('competitions/PD/matches')
+    except Exception as e:
+        print('AVISO football-data.org:', repr(e)[:200]); return
+    ms = res.get('matches', [])
+    idx = {}
+    for j in jor:
+        for m in j['ms']:
+            idx[(norm(m['h']), norm(m['a']))] = m
+    ours = {k[0]: k[0] for k in idx} | {k[1]: k[1] for k in idx}
+    ok = con_arb = 0; sin = []
+    for f in ms:
+        def n(t):
+            return casar(ours, t.get('shortName') or '') or casar(ours, t.get('name') or '')
+        h, a = n(f['homeTeam']), n(f['awayTeam'])
+        m = idx.get((h, a)) if h and a else None
+        if not m:
+            sin.append((f['homeTeam'].get('shortName'), f['awayTeam'].get('shortName'))); continue
+        ok += 1
+        ko = dt.datetime.fromisoformat(f['utcDate'].replace('Z', '+00:00')).astimezone(MAD)
+        if f.get('status') in ('SCHEDULED', 'TIMED'):
+            m['d'], m['t'] = ko.strftime('%Y-%m-%d'), ko.strftime('%H:%M')
+        refs = [r.get('name') for r in f.get('referees', []) if r.get('name') and r.get('type', 'REFEREE') == 'REFEREE']
+        if refs:
+            m['arb'] = refs[0]; con_arb += 1
+    print(f'football-data.org: {len(ms)} partidos leídos, {ok} casados con la app, {con_arb} con árbitro. Sin casar: {sin[:4]}')
+    prox = [f for f in ms if f.get('status') in ('SCHEDULED', 'TIMED')][:1]
+    if prox:
+        try:
+            d = fdorg(f"matches/{prox[0]['id']}")
+            print('DIAGNÓSTICO detalle partido, claves:', sorted(d.keys()), '| lineups:', bool(d.get('homeTeam', {}).get('lineup')), '| referees:', d.get('referees'))
+        except Exception as e:
+            print('AVISO detalle:', repr(e)[:150])
+
+
 def main():
     descargar_sp1()
     app = json.load(open(DATOS, encoding='utf-8'))
@@ -149,6 +197,7 @@ def main():
     ahora = dt.datetime.now(MAD)
     hoy = pd.Timestamp(ahora.date())
     aplicar_api(jor, ahora)
+    aplicar_fdorg(jor, ahora)
     n = 0
     for j in jor:
         for m in j['ms']:

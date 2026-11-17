@@ -22,6 +22,7 @@ jobs:
       - name: Recalcular datos
         env:
           APIFOOTBALL_KEY: ${{ secrets.APIFOOTBALL_KEY }}
+          FOOTBALLDATA_TOKEN: ${{ secrets.FOOTBALLDATA_TOKEN }}
         run: python modelo/02_codigo/generar_datos.py
       - name: Publicar
         run: |
