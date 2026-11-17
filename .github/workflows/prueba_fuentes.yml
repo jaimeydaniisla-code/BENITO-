@@ -13,8 +13,15 @@ jobs:
           for fecha in ('20261117', '20261118'):
               h = get('https://www.fotmob.com/matches?date=' + fecha)
               pp = json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
-              print('CLAVES', fecha, list(pp)[:10])
-              L = pp.get('fixtures', {}).get('leagues') or pp.get('leagues') or []
+              af = pp['appFallback']; print('AF claves', [(k[:80], type(v).__name__, (list(v)[:6] if isinstance(v, dict) else None)) for k, v in af.items()][:6])
+              def walk(o, d=0):
+                  if isinstance(o, dict):
+                      if 'leagues' in o and isinstance(o['leagues'], list): return o['leagues']
+                      for v in o.values():
+                          r = walk(v, d + 1)
+                          if r: return r
+                  return None
+              L = walk(af) or []
               print('n ligas', len(L))
               for l in L:
                   nom = l.get('name', ''); cc = l.get('ccode')
