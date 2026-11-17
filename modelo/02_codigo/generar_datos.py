@@ -202,7 +202,7 @@ def fm_get(u):
     return json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
 
 
-def aplicar_fotmob(jor, ahora, liga_id=87, slug='laliga', horas=72):
+def aplicar_fotmob(jor, ahora, liga_id=87, slug='laliga', horas=120):
     try:
         allm = fm_get(f'https://www.fotmob.com/leagues/{liga_id}/overview/{slug}')['fixtures']['allMatches']
     except Exception as e:
