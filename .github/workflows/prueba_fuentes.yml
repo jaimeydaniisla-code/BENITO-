@@ -1,0 +1,12 @@
+name: prueba_fuentes
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probar fuentes
+        run: |
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'
+          for u in "https://es.besoccer.com/competicion/partidos/primera" "https://www.whoscored.com/Regions/206/Tournaments/4/Spain-LaLiga" "https://www.fotmob.com/api/leagues?id=87" "https://www.fotmob.com/leagues/87/overview/laliga" "https://www.rfef.es/es/noticias/designaciones-arbitrales" "https://www.transfermarkt.es/laliga/startseite/wettbewerb/ES1" "https://www.laliga.com/partidos" "https://www.marca.com/futbol/primera-division/calendario.html" "https://www.flashscore.es/"; do
+            code=$(curl -s -L -m 30 -A "$UA" -o /tmp/o.txt -w '%{http_code} %{size_download}' "$u"); n=$(grep -o -i -E 'árbitro|arbitro|referee' /tmp/o.txt | wc -l); echo "== $u -> $code | menciones arbitro: $n"
+          done
