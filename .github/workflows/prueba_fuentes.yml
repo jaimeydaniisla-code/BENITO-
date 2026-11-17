@@ -1,0 +1,30 @@
+name: prueba_fuentes
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: OddsPapi catalogo
+        env:
+          K: ${{ secrets.ODDSPAPI_KEY }}
+        run: |
+          python3 - <<'PY'
+          import os, json, urllib.request, urllib.parse
+          K = os.environ['K'].strip()
+          def get(path, **p):
+              u = 'https://api.oddspapi.io/v4' + path + '?' + urllib.parse.urlencode({'apiKey': K, **p})
+              try: return json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'benitooo'}), timeout=40).read().decode())
+              except urllib.error.HTTPError as e: return {'HTTP': e.code, 'body': e.read().decode()[:300]}
+          fx = get('/fixtures', tournamentId=8, **{'from': '2026-11-19', 'to': '2026-11-24'}); L = fx.get('data', fx) if isinstance(fx, dict) else fx
+          fid = L[0]['fixtureId']; d = get('/odds', fixtureId=fid, bookmakers='bwin.es')
+          mk = d['bookmakerOdds']['bwin.es']['markets']; print('mercados bwin:', len(mk))
+          M = get('/markets', sportId=10); ML = M.get('data', M) if isinstance(M, dict) else M
+          print('catalogo tipo', type(ML).__name__, 'n', len(ML)); print(json.dumps(ML[0])[:500] if isinstance(ML, list) else json.dumps(ML)[:500])
+          cat = {str(m.get('marketId')): m for m in ML} if isinstance(ML, list) else {}
+          for mid, v in list(mk.items())[:40]:
+              c = cat.get(mid, {})
+              precios = {oid: [pl['price'] for pl in o['players'].values()][0] for oid, o in v['outcomes'].items()}
+              print(mid, '|', c.get('marketName') or c.get('name'), '|', c.get('marketType'), '|', c.get('handicap'), '|', [(oi.get('outcomeName') or oi.get('name')) for oi in (c.get('outcomes') or [])][:4], '|', precios)
+          P = get('/participants', sportId=10); print('participants', json.dumps(P)[:300])
+          print('equipos fixture:', L[0]['participant1Id'], L[0]['participant2Id'], L[0].get('participant1Name'), L[0].get('participant2Name'))
+          PY
