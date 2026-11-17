@@ -237,8 +237,9 @@ def aplicar_fotmob(jor, ahora, liga_id=87, slug='laliga', horas=120):
             tipo = L.get('lineupType')
             baj = lambda t: ', '.join(x['name'].split(' ')[-1] for x in (t.get('unavailable') or [])[:5])
             fh, fa = L['homeTeam'].get('formation') or '?', L['awayTeam'].get('formation') or '?'
-            etq = 'confirmadas' if tipo not in ('predicted', 'lastStarting11', None) else 'NO oficiales (probables)'
-            txt = f'{etq}: {fh} / {fa}'
+            ok_f = fh != '?' and fa != '?' and L['homeTeam'].get('starters') and L['awayTeam'].get('starters')
+            etq = 'confirmadas' if (tipo not in ('predicted', 'lastStarting11', None) and ok_f) else 'NO oficiales (probables)'
+            txt = f'{etq}: {fh} / {fa}' if ok_f else 'sin confirmar'
             bl, bv = baj(L['homeTeam']), baj(L['awayTeam'])
             if bl or bv:
                 txt += f" · Bajas: {m['h']}: {bl or '—'}; {m['a']}: {bv or '—'}"
