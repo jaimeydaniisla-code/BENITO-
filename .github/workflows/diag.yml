@@ -28,10 +28,12 @@ jobs:
               print('rondas:', sorted({str(f.get('round')) for f in allm})[:20])
               print('equipos:', sorted({f['home']['name'] for f in allm})[:40])
           except Exception as e: print('FOTMOB ERROR', repr(e)[:200])
-          try:
-              d = dt.date.today().isoformat()
-              r = urllib.request.urlopen(urllib.request.Request('http://api.clubelo.com/' + d, headers={'User-Agent': 'benitooo'}), timeout=40).read().decode()
-              L = r.splitlines(); print('CLUBELO', len(L), 'filas'); print('\n'.join(L[:4]))
-              print([x for x in L if 'Madrid' in x or 'Bayern' in x or 'Man City' in x][:6])
-          except Exception as e: print('CLUBELO ERROR', repr(e)[:200])
+          import time
+          for u in ('http://api.clubelo.com/' + (dt.date.today()-dt.timedelta(days=1)).isoformat(), 'https://api.clubelo.com/' + dt.date.today().isoformat(), 'http://api.clubelo.com/RealMadrid'):
+              for k in range(3):
+                  try:
+                      r = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0 (benitooo)'}), timeout=40).read().decode()
+                      L = r.splitlines(); print('CLUBELO OK', u, len(L), 'filas'); print('\n'.join(L[:3])); print([x for x in L if 'Madrid' in x or 'Bayern' in x][:4]); break
+                  except Exception as e:
+                      print('CLUBELO ERROR', u, k, repr(e)[:100]); time.sleep(8)
           PY
