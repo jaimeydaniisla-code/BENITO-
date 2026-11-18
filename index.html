@@ -91,6 +91,9 @@ main{max-width:640px;margin:0 auto;padding:18px 14px 60px}
 .simple .tag{background:var(--grass)}
 .combi .tag{background:var(--hot)}
 .pick{display:flex;gap:12px;align-items:center}
+.oro{background:linear-gradient(135deg,#fff8dc,#ffe08a)!important;border:2px solid #d4a017!important;border-radius:14px;padding:8px;box-shadow:0 0 0 3px rgba(212,160,23,.25),0 0 14px rgba(255,196,0,.55);animation:brillo 2.4s ease-in-out infinite}
+@keyframes brillo{50%{box-shadow:0 0 0 3px rgba(212,160,23,.45),0 0 24px rgba(255,196,0,.9)}}
+.joya{display:inline-block;background:linear-gradient(90deg,#d4a017,#ffd54a,#d4a017);color:#1b1340;font-weight:900;font-size:11px;letter-spacing:.3px;padding:2px 8px;border-radius:8px;margin:3px 0 0 6px;vertical-align:middle}
 .big{font-family:Bungee,Nunito,sans-serif;font-size:38px;line-height:1;color:var(--grass);flex:none}
 .what{flex:1;min-width:0}
 .what b{display:block;font-weight:900;font-size:18px;line-height:1.2}
@@ -428,6 +431,13 @@ function cuando(m) {
   var w = m.t ? f + ' · ' + m.t : 'finde del ' + d.getDate() + '/' + (d.getMonth() + 1);
   return m.lgn ? m.lgn + ' · ' + w : w;
 }
+// 💎 Valor dorado: la cuota real de bwin paga más que la cuota justa de Pinnacle (goles y resultado)
+function oroEv(x) {
+  var D = DATA[x.i] || {};
+  if (x.est || !D.mkp || (x.cat !== 'gol' && x.cat !== 'res') || !(x.o > 1)) return 0;
+  var ev = x.o * x.p - 1; return ev >= 0.02 && ev <= 0.25 ? ev : 0;
+}
+function joya(x) { var ev = oroEv(x); return ev ? '<span class="joya">💎 VALOR +' + Math.round(ev * 100) + ' %</span>' : ''; }
 function chipCuota(x) {
   return '<span class="odd' + (x.est ? ' est' : '') + '">' + num(x.o) + (x.est ? ' <small>estimada</small>' : ' <small>bwin</small>') + '</span>';
 }
@@ -458,11 +468,11 @@ function render() {
   h += '<section class="card simple"><h2><span class="tag">Apuesta simple</span> cuota ' + num(st.min) + ' o más</h2>';
   if (S.length) {
     var x = S[0];
-    h += '<div class="pick"><div class="big">' + pct(x.p) + '</div><div class="what"><b>' + esc(x.lab) + '</b><span>' + esc(partido(x.i)) + ' · ' + cuando(DATA[x.i]) + '</span><span class="fi f' + x.f + '">' + FIAB[x.f] + '</span></div>' + chipCuota(x) + '</div>' + barra(x.p) + gana(x.o) + '<button class="addb" data-addx="s:0">＋ Añadir a mi apuesta</button>';
+    h += '<div class="pick' + (oroEv(x) ? ' oro' : '') + '"><div class="big">' + pct(x.p) + '</div><div class="what"><b>' + esc(x.lab) + '</b>' + joya(x) + '<span>' + esc(partido(x.i)) + ' · ' + cuando(DATA[x.i]) + '</span><span class="fi f' + x.f + '">' + FIAB[x.f] + '</span></div>' + chipCuota(x) + '</div>' + barra(x.p) + gana(x.o) + '<button class="addb" data-addx="s:0">＋ Añadir a mi apuesta</button>';
     if (S.length > 1) {
       h += '<details><summary>Otras 4 opciones</summary><ul class="alts">';
       S.slice(1, 5).forEach(function (y) {
-        h += '<li><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + '<em>' + esc(partido(y.i)) + '</em></span>' + chipCuota(y) + '</li>';
+        h += '<li' + (oroEv(y) ? ' class="oro"' : '') + '><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + joya(y) + '<em>' + esc(partido(y.i)) + '</em></span>' + chipCuota(y) + '</li>';
       });
       h += '</ul></details>';
     }
@@ -495,7 +505,7 @@ function render() {
     var E = especial(all), V = valor(all); st.last.E = E; st.last.V = V;
     h += '<section class="card combi"><h2><span class="tag">Combinada especial</span> cuota 5 a 6 · 2-3 €</h2>';
     if (E) {
-      E.legs.forEach(function (l) { h += '<div class="leg"><b>' + pct(l.p) + '</b><span>' + esc(l.lab) + '<em>' + esc(partido(l.i)) + ' · ' + cuando(DATA[l.i]) + '</em></span>' + chipCuota(l) + '</div>'; });
+      E.legs.forEach(function (l) { h += '<div class="leg' + (oroEv(l) ? ' oro' : '') + '"><b>' + pct(l.p) + '</b><span>' + esc(l.lab) + joya(l) + '<em>' + esc(partido(l.i)) + ' · ' + cuando(DATA[l.i]) + '</em></span>' + chipCuota(l) + '</div>'; });
       var est = E.legs.some(function (l) { return l.est; });
       h += '<div class="tot"><span>Todas a la vez</span><b>' + pct(E.p) + '</b><span class="odd">' + num(E.o) + '</span></div>' + gana(E.o) +
         '<p class="nota">Probabilidad ' + pct(E.p) + ' frente al ' + pct(1 / E.o) + ' que daría una cuota justa de ' + num(E.o) + ': la diferencia es el margen de bwin acumulado en cada pick. Apuesta especial de diversión: por debajo del 50 % no entra en la tabla de stakes, así que solo 2-3 €.' + (est ? ' Hay cuotas estimadas: confirma la cuota real en bwin.' : '') + '</p>' +
@@ -504,17 +514,17 @@ function render() {
     h += '</section><section class="card"><h2><span class="tag">Posible valor</span> cuota bwin real por encima de la justa</h2>';
     if (V.length) {
       V.forEach(function (y, n) {
-        h += '<div class="leg"><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + '<em>' + esc(partido(y.i)) + ' · ' + cuando(DATA[y.i]) + '<br>cuota justa ' + num(1 / y.p) + ' · valor +' + Math.round(y.ev * 100) + ' %' + (y.sus ? ' · ⚠ sospechoso: casi seguro falla el modelo' : '') + '</em></span>' + chipCuota(y) + '</div>';
+        h += '<div class="leg' + (oroEv(y) ? ' oro' : '') + '"><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + joya(y) + '<em>' + esc(partido(y.i)) + ' · ' + cuando(DATA[y.i]) + '<br>cuota justa ' + num(1 / y.p) + ' · valor +' + Math.round(y.ev * 100) + ' %' + (y.sus ? ' · ⚠ sospechoso: casi seguro falla el modelo' : '') + '</em></span>' + chipCuota(y) + '</div>';
       });
     } else h += '<p class="empty">Ahora no hay ningún pick con cuota bwin real por encima de la justa.</p>';
-    h += '<p class="hint">Con las probabilidades ajustadas a bwin casi nunca habrá valor: es lo normal. Si aparece alguno es en córners o en mercados sin ajustar, y cuanto mayor la diferencia, más probable es que se equivoque el modelo.</p></section>';
+    h += '<p class="hint">💎 Dorado = bwin paga más que la cuota justa de Pinnacle (la referencia más fiable). Lo normal es que haya pocos. Más de un 20-25 % de diferencia suele ser un error de datos, no un regalo: comprueba la cuota en bwin.</p></section>';
   }
   document.getElementById('picks').innerHTML = h;
   // partidos
   var m = '';
   DATA.forEach(function (d, i) {
     var sel = d.s.filter(function (s) { return st.cat === 'todo' || s[1] === st.cat; }).slice(0, 12);
-    m += '<article class="match' + (st.open === i ? ' open' : '') + '"><button class="mh" data-open="' + i + '"><span class="teams">' + esc(d.h) + ' <i>–</i> ' + esc(d.a) + '</span><span class="when">' + insignia(d) + cuando(d) + '</span></button>';
+    m += '<article class="match' + (st.open === i ? ' open' : '') + '"><button class="mh" data-open="' + i + '"><span class="teams">' + esc(d.h) + ' <i>–</i> ' + esc(d.a) + (d.s.some(function (q) { var c = cuota(i, q); return oroEv({ i: i, lab: q[0], cat: q[1], p: q[2], o: c.o, est: c.est }); }) ? ' <span class="joya">💎</span>' : '') + '</span><span class="when">' + insignia(d) + cuando(d) + '</span></button>';
     if (st.open === i) {
       var vv = vivo(d) || {};
       m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(vv.arb || d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(vv.ali || d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
@@ -524,7 +534,8 @@ function render() {
       m += stats(d) + '<p class="hint">' + (d.mk ? 'Goles y resultado: probabilidades ' + (d.mkp ? 'de <b>Pinnacle</b> sin margen (la referencia más fiable); la cuota que se muestra es la de bwin' : 'ajustadas a las cuotas ' + (d.mkf ? 'medias del mercado (football-data)' : 'de bwin, sin margen')) + ' (validado: predicen mejor que el modelo propio). Córners y tarjetas: ' + (d.mkc ? 'mitad modelo propio, mitad cuotas bwin.' : 'modelo propio.') : 'Probabilidades del modelo propio (sin cuotas bwin de este partido).') + ' Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
       sel.forEach(function (s) {
         var u = st.odds[key(i, s[0])] || '';
-        m += '<li><b>' + pct(s[2]) + '</b><span>' + esc(s[0]) + '<em>cuota justa ' + num(1 / s[2]) + '</em></span><button class="add' + (enSlip(key(i, s[0])) ? ' on' : '') + '" data-add="' + i + ',' + d.s.indexOf(s) + '" aria-label="Añadir a mi apuesta">＋</button><input inputmode="decimal" placeholder="bwin" aria-label="Cuota de bwin: ' + esc(s[0]) + '" data-k="' + esc(key(i, s[0])) + '" value="' + (u ? num(u) : '') + '"></li>';
+        var cs = cuota(i, s), xs = { i: i, lab: s[0], cat: s[1], p: s[2], o: cs.o, est: cs.est };
+        m += '<li' + (oroEv(xs) ? ' class="oro"' : '') + '><b>' + pct(s[2]) + '</b><span>' + esc(s[0]) + joya(xs) + '<em>cuota justa ' + num(1 / s[2]) + (cs.est ? '' : ' · bwin ' + num(cs.o)) + '</em></span><button class="add' + (enSlip(key(i, s[0])) ? ' on' : '') + '" data-add="' + i + ',' + d.s.indexOf(s) + '" aria-label="Añadir a mi apuesta">＋</button><input inputmode="decimal" placeholder="bwin" aria-label="Cuota de bwin: ' + esc(s[0]) + '" data-k="' + esc(key(i, s[0])) + '" value="' + (u ? num(u) : '') + '"></li>';
       });
       m += '</ul></div>';
     }

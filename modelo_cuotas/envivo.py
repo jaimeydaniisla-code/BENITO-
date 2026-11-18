@@ -100,7 +100,12 @@ def mejor_pick(m):
     c = [x for x in m.get('s') or [] if 0.5 <= x[2] <= 0.92]
     con = [x for x in c if bw.get(x[0], 0) >= 1.25]
     if con:
-        x = max(con, key=lambda x: x[2]); return f"{x[0]} · {round(x[2] * 100)} % · bwin {str(bw[x[0]]).replace('.', ',')}"
+        x = max(con, key=lambda x: x[2]); txt = f"{x[0]} · {round(x[2] * 100)} % · bwin {str(bw[x[0]]).replace('.', ',')}"
+        if m.get('mkp'):
+            val = [y for y in con if y[1] in ('gol', 'res') and 0.02 <= y[2] * bw[y[0]] - 1 <= 0.25]
+            if val:
+                y = max(val, key=lambda y: y[2] * bw[y[0]]); txt += f" · 💎 valor: {y[0]} +{round((y[2] * bw[y[0]] - 1) * 100)} %"
+        return txt
     if c:
         x = max(c, key=lambda x: x[2]); return f"{x[0]} · {round(x[2] * 100)} % (cuota estimada)"
     return 'sin pick claro'
