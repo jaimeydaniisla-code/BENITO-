@@ -10,30 +10,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Pinnacle en el lote de OddsPapi
+      - run: pip install -r requirements.txt
+      - name: Prueba real bwin + Pinnacle (sin guardar)
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
+          CUOTAS_PIN: '1'
+          CUOTAS_DIAS: '4'
         run: |
+          python modelo_cuotas/generar_cuotas.py
           python - <<'PY'
-          import os, json, urllib.request, urllib.parse
-          K = os.environ['ODDSPAPI_KEY']
-          def get(p, **q):
-              q['apiKey'] = K
-              return json.loads(urllib.request.urlopen(urllib.request.Request('https://api.oddspapi.io/v4' + p + '?' + urllib.parse.urlencode(q), headers={'User-Agent': 'benitooo'}), timeout=60).read().decode())
-          def cnt():
-              a = get('/account'); s = json.dumps(a)
-              import re; return re.findall(r'"request_(?:count|limit)":\s*\d+', s)
-          print('ANTES', cnt())
-          import urllib.error
-          for bk in ('bwin.es,pinnacle', 'pinnacle'):
-              try:
-                  r = get('/odds-by-tournaments', tournamentIds='8', bookmaker=bk) if ',' not in bk else get('/odds-by-tournaments', tournamentIds='8', bookmakers=bk)
-                  L = r.get('data', r) if isinstance(r, dict) else r
-                  print(bk, 'partidos', len(L))
-                  for f in L[:2]: print('  ', f.get('participant1Name'), {b: len(v.get('markets', {})) for b, v in f.get('bookmakerOdds', {}).items()})
-                  f = next((f for f in L if 'pinnacle' in f.get('bookmakerOdds', {})), None)
-                  if f: print('  mercados pinnacle:', list(f['bookmakerOdds']['pinnacle']['markets'])[:30])
-              except urllib.error.HTTPError as e:
-                  print(bk, 'ERROR', e.code, e.read().decode()[:400])
-          print('DESPUES', cnt())
+          import json
+          cu = json.load(open('cuotas.json'))
+          con = [k for k, v in cu.items() if v.get('pin')]
+          print('partidos con Pinnacle:', len(con), 'de', len(cu))
+          for k in con[:2]: print(k, json.dumps(cu[k]['pin'], ensure_ascii=False)[:300])
+          d = json.load(open('datos.json'))
+          for lg, L in d['ligas'].items():
+              n = sum(1 for j in L['jor'] for m in j['ms'] if m.get('mkp'))
+              if n: print(lg, 'partidos con probabilidad de Pinnacle:', n)
+          m = next((m for L in d['ligas'].values() for j in L['jor'] for m in j['ms'] if m.get('mkp')), None)
+          if m: print(m['h'], m['a'], 'margenes bwin', m.get('mg'), 'goles esperados', m['g'])
           PY
