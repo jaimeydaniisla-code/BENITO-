@@ -42,6 +42,12 @@ main{max-width:640px;margin:0 auto;padding:18px 14px 60px}
 .tabs{display:flex;gap:6px;margin:0 0 14px;position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0;overflow-x:auto;scrollbar-width:none}
 .tabs button{flex:1;border:3px solid var(--ink);background:#fff;border-radius:16px;padding:12px 8px;min-width:max-content;font-family:Bungee,Nunito,sans-serif;font-size:12.5px;box-shadow:0 4px 0 var(--ink)}
 .tabs button.on{background:var(--violet);color:#fff}
+.stt{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0 4px}
+.stt td,.stt th{padding:5px 6px;border-bottom:1px solid rgba(0,0,0,.12);text-align:center}
+.stt td:first-child{text-align:left;font-weight:700}
+.stt .sec td{font-family:Bungee,Nunito,sans-serif;font-size:11px;background:rgba(0,0,0,.06);text-align:left}
+.rc{display:inline-block;width:18px;height:18px;line-height:18px;border-radius:50%;color:#fff;font-size:11px;font-weight:800;margin:0 1px}
+.rc-G{background:#22a559}.rc-E{background:#8a8a8a}.rc-P{background:#d9453d}
 .tabs button.td{background:var(--mint,#7be0a4)}
 .tabs button.td.on{background:var(--violet)}
 .tabs button.rg{flex:.9;background:var(--sun)}
@@ -359,6 +365,19 @@ function eur(x) { return x.toFixed(2).replace('.', ',') + ' €'; }
 function num(x) { return x.toFixed(2).replace('.', ','); }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 function partido(i) { return DATA[i].h + ' – ' + DATA[i].a; }
+function stats(d) {
+  var s = d.st; if (!s || !s.h || !s.a) return '';
+  var f1 = function (x) { return x.toFixed(1).replace('.', ','); };
+  var par = function (a, i) { return a && a[0] ? f1(a[i]) + ' – ' + f1(a[i + 1]) : '—'; };
+  var rac = function (r) { return r ? r.split('').map(function (c) { return '<span class="rc rc-' + c + '">' + c + '</span>'; }).join('') : '—'; };
+  var fila = function (n, k, i) { return '<tr><td>' + n + '</td><td>' + par(s.h[k], i) + '</td><td>' + par(s.a[k], i) + '</td></tr>'; };
+  var t = '<table class="stt"><tr><th></th><th>' + esc(d.h) + '</th><th>' + esc(d.a) + '</th></tr>' +
+    '<tr><td>Racha (5)</td><td>' + rac(s.h.r) + '</td><td>' + rac(s.a.r) + '</td></tr>' +
+    '<tr class="sec"><td colspan="3">Últimos 6 · a favor – en contra</td></tr>' + fila('Goles', 'u', 1) + fila('Córners', 'u', 3) + fila('Tarjetas', 'u', 5) +
+    '<tr class="sec"><td colspan="3">Local en casa · visitante fuera (últimos 6)</td></tr>' + fila('Goles', 'v', 1) + fila('Córners', 'v', 3) + fila('Tarjetas', 'v', 5) + '</table>';
+  if (s.lg) t += '<p class="hint">Estadísticas reales (no del modelo). Media de la liga por equipo y partido: goles ' + f1(s.lg[0]) + ' · córners ' + f1(s.lg[1]) + ' · tarjetas ' + f1(s.lg[2]) + '.</p>';
+  return t;
+}
 function cuando(m) {
   var d = new Date(m.d + 'T12:00:00');
   var f = DIAS[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1);
@@ -455,7 +474,7 @@ function render() {
     if (st.open === i) {
       m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
       m += '<div class="exp"><span>Goles esperados <b>' + d.g[0] + ' – ' + d.g[1] + '</b></span><span>Córners <b>' + d.c[0] + ' – ' + d.c[1] + '</b></span><span>Tarjetas <b>' + d.k[0] + ' – ' + d.k[1] + '</b></span></div>';
-      m += '<p class="hint">' + (d.mk ? 'Goles y resultado: probabilidades ajustadas a las cuotas de bwin (validado: predicen mejor que el modelo propio). Córners y tarjetas: ' + (d.mkc ? 'mitad modelo propio, mitad cuotas bwin.' : 'modelo propio.') : 'Probabilidades del modelo propio (sin cuotas bwin de este partido).') + ' Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
+      m += stats(d) + '<p class="hint">' + (d.mk ? 'Goles y resultado: probabilidades ajustadas a las cuotas de bwin (validado: predicen mejor que el modelo propio). Córners y tarjetas: ' + (d.mkc ? 'mitad modelo propio, mitad cuotas bwin.' : 'modelo propio.') : 'Probabilidades del modelo propio (sin cuotas bwin de este partido).') + ' Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
       sel.forEach(function (s) {
         var u = st.odds[key(i, s[0])] || '';
         m += '<li><b>' + pct(s[2]) + '</b><span>' + esc(s[0]) + '<em>cuota justa ' + num(1 / s[2]) + '</em></span><button class="add' + (enSlip(key(i, s[0])) ? ' on' : '') + '" data-add="' + i + ',' + d.s.indexOf(s) + '" aria-label="Añadir a mi apuesta">＋</button><input inputmode="decimal" placeholder="bwin" aria-label="Cuota de bwin: ' + esc(s[0]) + '" data-k="' + esc(key(i, s[0])) + '" value="' + (u ? num(u) : '') + '"></li>';
