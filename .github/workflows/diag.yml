@@ -3,7 +3,7 @@ on: workflow_dispatch
 permissions:
   contents: read
 jobs:
-  catalogo:
+  fixtures:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,7 +11,18 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Catalogo de corners y tarjetas
-        env:
-          ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
-        run: python modelo_cuotas/generar_cuotas.py --catalogo
+      - name: Fixtures de football-data
+        run: |
+          curl -sS -A "Mozilla/5.0" -o /tmp/fx.csv https://www.football-data.co.uk/fixtures.csv || true
+          ls -la /tmp/fx.csv; head -c 600 /tmp/fx.csv; echo
+          python - <<'PY'
+          import pandas as pd
+          d = pd.read_csv('/tmp/fx.csv', encoding='utf-8-sig', on_bad_lines='skip')
+          print(d.shape); print(list(d.columns))
+          for dv in ('SP1', 'SP2', 'E0'):
+              s = d[d.Div == dv]
+              print(dv, len(s))
+              if len(s):
+                  cols = [c for c in ('Date','Time','HomeTeam','AwayTeam','B365H','B365D','B365A','B365>2.5','B365<2.5','AvgH','AvgD','AvgA','Avg>2.5','Avg<2.5','BWH','BWD','BWA') if c in s]
+                  print(s[cols].to_string())
+          PY
