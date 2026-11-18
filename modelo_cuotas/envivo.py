@@ -60,7 +60,9 @@ def leer_avisos():
     gid = os.environ.get('GIST_ID', '').strip()
     if not gid: print('Avisos: falta el secreto GIST_ID'); return {}
     print('Avisos: GIST_ID con', len(gid), 'caracteres', '(¡parece una clave ghp_, no el código!)' if gid.startswith('gh') else '')
-    gid = gid.split('/')[-1]
+    m_ = re.search(r'[0-9a-f]{32}', gid)
+    print('Avisos: código de 32 caracteres encontrado dentro del secreto' if m_ else 'Avisos: el secreto no contiene un código válido (32 letras/números 0-9 a-f)', '| caracteres raros:', sorted({c for c in gid if not c.isalnum()}))
+    gid = m_.group(0) if m_ else gid.split('/')[-1]
     for tok in (os.environ.get('GITHUB_TOKEN', ''), ''):
         try:
             h = {'User-Agent': 'benitooo', 'Accept': 'application/vnd.github+json'}
