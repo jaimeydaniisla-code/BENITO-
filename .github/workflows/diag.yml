@@ -1,0 +1,17 @@
+name: diag
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  catalogo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Catalogo de corners y tarjetas
+        env:
+          ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
+        run: python modelo_cuotas/generar_cuotas.py --catalogo

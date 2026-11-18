@@ -89,6 +89,15 @@ def etiquetas(cat, mk, H, A):
     return out
 
 
+def catalogo():
+    """Diagnóstico: lista los mercados de córners/tarjetas de bwin que hay en el catálogo (1 petición)."""
+    r = get('/markets', sportId=10); r = r.get('data', r) if isinstance(r, dict) else r
+    for m in r:
+        n = (m.get('marketName') or '') + ' ' + (m.get('marketType') or '')
+        if any(w in n.lower() for w in ('corner', 'card', 'booking')) and m.get('period') == 'fulltime':
+            print(m.get('marketId'), '|', m.get('marketName'), '|', m.get('marketType'), '| hc', m.get('handicap'), '|', [o.get('outcomeName') for o in m.get('outcomes', [])])
+
+
 def pedir():
     if not KEY:
         print('Sin ODDSPAPI_KEY'); return
@@ -147,5 +156,6 @@ def aplicar():
 
 
 if __name__ == '__main__':
+    if '--catalogo' in sys.argv: catalogo(); sys.exit(0)
     if '--aplicar-solo' not in sys.argv: pedir()
     aplicar()
