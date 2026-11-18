@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icono-192.png">
+<link rel="apple-touch-icon" href="foto-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1b1340">
@@ -781,7 +781,7 @@ function avisosActivar() {
 function avisosAccion(a, btn) {
   if (a === 'on') return avisosActivar();
   if (a === 'off') { navigator.serviceWorker.ready.then(function (r) { return r.pushManager.getSubscription(); }).then(function (s) { if (s) s.unsubscribe(); }).catch(function () {}); avisoGuardar({ off: 1, sub: null }); st.avMsg = 'Avisos desactivados.'; render(); return; }
-  if (a === 'prueba') { navigator.serviceWorker.ready.then(function (r) { r.showNotification('⚽ Prueba de Benitooo', { body: 'Así te llegará: «En 1 hora empieza Andorra – Leganés · alineaciones confirmadas · mejor pick…»', icon: 'icono-192.png' }); }); return; }
+  if (a === 'prueba') { navigator.serviceWorker.ready.then(function (r) { r.showNotification('⚽ Prueba de Benitooo', { body: 'Así te llegará: «En 1 hora empieza Andorra – Leganés · alineaciones confirmadas · mejor pick…»', icon: 'foto-192.png' }); }); return; }
   if (a === 'gid') { try { navigator.clipboard.writeText(st.sync.gid).then(function () { btn.textContent = 'Copiado ✓'; }); } catch (e) { btn.textContent = st.sync.gid; } }
 }
 function syncCard() {
