@@ -3,27 +3,25 @@ on: workflow_dispatch
 permissions:
   contents: read
 jobs:
-  fixtures:
+  fotmob:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - name: Fixtures de football-data
+      - name: Estructura de fixtures de FotMob
         run: |
-          curl -sS -L -D /tmp/h.txt -A "Mozilla/5.0" -o /tmp/fx.csv -w "http %{http_code} bytes %{size_download}\n" https://www.football-data.co.uk/fixtures.csv || true
-          head -12 /tmp/h.txt; ls -la /tmp/fx.csv; head -c 500 /tmp/fx.csv; echo
-          test -s /tmp/fx.csv || exit 0
           python - <<'PY'
-          import pandas as pd
-          d = pd.read_csv('/tmp/fx.csv', encoding='utf-8-sig', on_bad_lines='skip')
-          print(d.shape); print(list(d.columns))
-          for dv in ('SP1', 'SP2', 'E0'):
-              s = d[d.Div == dv]
-              print(dv, len(s))
-              if len(s):
-                  cols = [c for c in ('Date','Time','HomeTeam','AwayTeam','B365H','B365D','B365A','B365>2.5','B365<2.5','AvgH','AvgD','AvgA','Avg>2.5','Avg<2.5','BWH','BWD','BWA') if c in s]
-                  print(s[cols].to_string())
+          import urllib.request, re, json
+          def get(u):
+              h = urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36'}), timeout=40).read().decode('utf-8', 'ignore')
+              return json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
+          for lid, slug in ((140, 'laliga2'), (87, 'laliga'), (47, 'premier-league')):
+              allm = get(f'https://www.fotmob.com/leagues/{lid}/overview/{slug}')['fixtures']['allMatches']
+              fin = [f for f in allm if f['status'].get('finished')]
+              nxt = [f for f in allm if not f['status'].get('finished')]
+              print(lid, len(allm), 'terminados', len(fin))
+              print(' ULTIMO TERMINADO:', json.dumps(fin[-1], ensure_ascii=False)[:900] if fin else None)
+              print(' PROXIMO:', json.dumps(nxt[0], ensure_ascii=False)[:700] if nxt else None)
           PY
