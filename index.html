@@ -115,6 +115,7 @@ em{display:block;font-style:normal;color:var(--mute);font-size:12.5px;font-weigh
 .empty{color:var(--mute);font-weight:700;margin:0}
 h3.sec{font-family:Bungee,Nunito,sans-serif;font-weight:400;font-size:19px;color:var(--violet);margin:22px 0 10px}
 .match{background:#fff;border-radius:18px;margin-bottom:10px;border:2px solid var(--ink);overflow:hidden}
+.live{display:block;font-weight:800;color:#d62828;font-size:13px}.live.fin{color:var(--ink)}
 .mh{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;background:none;padding:14px;text-align:left}
 .teams{font-weight:900;font-size:16.5px}
 .teams i{color:var(--hot);font-style:normal}
@@ -239,6 +240,19 @@ function jActual() {
   return JOR.length - 1;
 }
 
+var EV = { p: {} };
+function cargarVivo() {
+  return fetch('envivo.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
+    if (!d || !d.p || JSON.stringify(d) === EV.raw) return; var raw = JSON.stringify(d); EV = d; EV.raw = raw; EV.hay = Object.keys(d.p).some(function (q) { return d.p[q].e === 'j'; });
+    var n = autoResolver(); render(); return n;
+  }).catch(function () {});
+}
+function vivo(d) { return EV.p[(d.lg || st.liga) + '|' + d.d + '|' + d.h + '|' + d.a] || null; }
+function insignia(d) {
+  var v = vivo(d); if (!v || !v.e) return '';
+  var g = String(v.sc || '').replace(/\s/g, '').replace('-', '–');
+  return v.e === 'j' ? '<span class="live">● ' + esc(g) + ' · ' + esc(v.min || 'en juego') + '</span>' : '<span class="live fin">FIN ' + esc(g) + '</span>';
+}
 function cargarDatos(manual) {
   var btn = document.getElementById('refresh');
   if (btn) btn.textContent = '↻ ...';
@@ -471,9 +485,10 @@ function render() {
   var m = '';
   DATA.forEach(function (d, i) {
     var sel = d.s.filter(function (s) { return st.cat === 'todo' || s[1] === st.cat; }).slice(0, 12);
-    m += '<article class="match' + (st.open === i ? ' open' : '') + '"><button class="mh" data-open="' + i + '"><span class="teams">' + esc(d.h) + ' <i>–</i> ' + esc(d.a) + '</span><span class="when">' + cuando(d) + '</span></button>';
+    m += '<article class="match' + (st.open === i ? ' open' : '') + '"><button class="mh" data-open="' + i + '"><span class="teams">' + esc(d.h) + ' <i>–</i> ' + esc(d.a) + '</span><span class="when">' + insignia(d) + cuando(d) + '</span></button>';
     if (st.open === i) {
-      m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
+      var vv = vivo(d) || {};
+      m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(vv.arb || d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(vv.ali || d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
       m += '<div class="exp"><span>Goles esperados <b>' + d.g[0] + ' – ' + d.g[1] + '</b></span><span>Córners <b>' + d.c[0] + ' – ' + d.c[1] + '</b></span><span>Tarjetas <b>' + d.k[0] + ' – ' + d.k[1] + '</b></span></div>';
       m += stats(d) + '<p class="hint">' + (d.mk ? 'Goles y resultado: probabilidades ajustadas a las cuotas ' + (d.mkf ? 'medias del mercado (football-data)' : 'de bwin') + ' (validado: predicen mejor que el modelo propio). Córners y tarjetas: ' + (d.mkc ? 'mitad modelo propio, mitad cuotas bwin.' : 'modelo propio.') : 'Probabilidades del modelo propio (sin cuotas bwin de este partido).') + ' Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
       sel.forEach(function (s) {
@@ -568,6 +583,7 @@ function renderRegistro() {
 function evalLeg(lab, H, A, r) {
   var hg = r[3], ag = r[4], hc = r[5], ac = r[6], hk = r[7], ak = r[8], m;
   var num = function (s) { return parseFloat(String(s).replace(',', '.')); };
+  if (/^(Córners|Tarjetas|Más córners)/.test(lab) && hc === undefined) return null;   // resultado provisional del directo: aún sin córners/tarjetas
   if (lab === 'Ambos marcan: Sí') return hg > 0 && ag > 0;
   if (lab === 'Ambos marcan: No') return !(hg > 0 && ag > 0);
   m = lab.match(/^(Goles|Córners|Tarjetas)(?: (.+))?: (más|menos) de (\d+,\d)$/);
@@ -598,6 +614,10 @@ function resultadoDe(partido, id) {
   var d0 = new Date(id), iso = d0.getFullYear() + '-' + ('0' + (d0.getMonth() + 1)).slice(-2) + '-' + ('0' + d0.getDate()).slice(-2), best = null;
   Object.keys(LIGAS).forEach(function (k) {
     (LIGAS[k].res || []).forEach(function (r) { if (r[1] === par[0] && r[2] === par[1] && r[0] >= iso && (!best || r[0] < best[0])) best = r; });
+  });
+  if (!best || best[0] > iso) Object.keys(EV.p || {}).forEach(function (q) {   // marcador final del directo (FotMob) hasta que llegue el CSV completo
+    var e = EV.p[q], z = q.split('|'), g = String(e.sc || '').match(/^(\d+)\s*-\s*(\d+)$/);
+    if (e.e === 'f' && g && z[2] === par[0] && z[3] === par[1] && z[1] >= iso && (!best || z[1] < best[0])) best = [z[1], z[2], z[3], +g[1], +g[2]];
   });
   return best;
 }
@@ -702,8 +722,9 @@ function init() {
   setLiga('todos', false);
   document.getElementById('jsel').addEventListener('change', function (e) { setJ(+e.target.value); render(); });
   render();
-  cargarDatos(false);
+  cargarDatos(false).then(cargarVivo);
   setInterval(function () { if (!document.hidden) cargarDatos(false); }, 600000);
+  setInterval(function () { if (!document.hidden) cargarVivo(); }, 60000);
   if (st.sync) syncNow(false);
   setInterval(function () { if (!document.hidden) syncNow(false); }, 60000);
   document.addEventListener('click', function (e) {
