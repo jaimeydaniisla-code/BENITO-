@@ -2,7 +2,11 @@
 Guarda cuotas.json y aplica 'bw' a datos.json. Uso: python generar_cuotas.py [--aplicar-solo]"""
 import os, sys, json, difflib, unicodedata, datetime as dt, urllib.request, urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-import mercado
+try:
+    import mercado
+except Exception as e:  # sin numpy/scipy solo se pierden los ajustes, no las cuotas
+    mercado = None
+    print('sin ajuste al mercado:', e)
 ROOT = os.path.abspath(os.path.join(HERE, '..'))
 DATOS, CUOTAS = os.path.join(ROOT, 'datos.json'), os.path.join(ROOT, 'cuotas.json')
 KEY = os.environ.get('ODDSPAPI_KEY', '').strip()
@@ -159,8 +163,8 @@ def aplicar():
                 if v:
                     m['bw'] = v['bw']; m['bwact'] = v['act']; k += 1
                     try:
-                        if mercado.ajustar(m): aj += 1
-                        mercado.mezclar_conteos(m)
+                        if mercado and mercado.ajustar(m): aj += 1
+                        if mercado: mercado.mezclar_conteos(m)
                     except Exception as e:
                         print('ajuste al mercado falló en', m['h'], m['a'], e)
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
