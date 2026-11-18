@@ -264,6 +264,7 @@ function cargarDatos(manual) {
     if (!L) throw new Error('vacío');
     Object.keys(L).forEach(function (k) { LIGAS[k] = L[k]; });
     setLiga(st.liga, true);
+    capturarCierre();
     autoResolver();
     render();
   }).catch(function () {
@@ -524,7 +525,8 @@ function toast(t) {
 function addLeg(x) {
   var k = key(x.i, x.lab);
   if (enSlip(k)) { st.slip = st.slip.filter(function (l) { return l.k !== k; }); return; }
-  st.slip.push({ k: k, lab: x.lab, partido: partido(x.i), p: x.p, o: x.o, cat: x.cat, liga: (DATA[x.i] && DATA[x.i].lg) || st.liga, est: !!x.est });
+  var D0 = DATA[x.i] || {}, lg = D0.lg || st.liga;
+  st.slip.push({ k: k, lab: x.lab, partido: partido(x.i), p: x.p, o: x.o, cat: x.cat, liga: lg, est: !!x.est, mk: lg + '|' + D0.d + '|' + D0.h + '|' + D0.a, ko: D0.d + 'T' + (D0.t || '23:59') });
 }
 function renderSlip() {
   var el = document.getElementById('slip');
@@ -538,7 +540,7 @@ function renderSlip() {
   });
   h += '<div class="tt"><span>Probabilidad <b>' + pct(P) + '</b></span><span>Cuota <b>' + num(Oe) + '</b></span></div>';
   h += '<div class="tt"><span>Tu cuota real en bwin:</span><input id="slipo" inputmode="decimal" placeholder="' + num(O) + '" value="' + (st.slipo > 1 ? num(st.slipo) : '') + '"></div>';
-  h += gana(Oe);
+  h += gana(Oe) + stakeTabla(P);
   if (rep) h += '<p class="nota">Hay dos selecciones del mismo partido: la probabilidad conjunta es aproximada (no son independientes).</p>';
   h += '<div class="bt"><button class="no" data-slip="clear">Vaciar</button><button class="ok" data-slip="save">Apuntar apuesta</button></div>';
   el.innerHTML = h; el.hidden = false;
@@ -548,9 +550,51 @@ function slipSave() {
   var P = 1, O = 1; st.slip.forEach(function (l) { P *= l.p; O *= l.o; });
   var Oe = st.slipo > 1 ? st.slipo : O, d = new Date(), r = regAll();
   r.push({ id: d.getTime(), f: d.getDate() + '/' + (d.getMonth() + 1), liga: st.slip[0].liga,
-    cat: st.slip.length > 1 ? 'combi' : st.slip[0].cat, legs: st.slip.map(function (l) { return { lab: l.lab, partido: l.partido, p: l.p, o: l.o }; }),
+    cat: st.slip.length > 1 ? 'combi' : st.slip[0].cat, legs: st.slip.map(function (l) { return { lab: l.lab, partido: l.partido, p: l.p, o: l.o, est: l.est ? 1 : 0, mk: l.mk, ko: l.ko }; }), real: st.slipo > 1 ? 1 : 0,
     p: P, o: Oe, stake: st.stake, res: null, u: d.getTime() });
   regSave(r); st.slip = []; st.slipo = 0; toast('Apuesta apuntada ✓'); render();
+}
+// ---------- Gestión de banca: tabla de stakes del proyecto (1 stake = 1 % del bankroll) ----------
+function banca() { return st.odds.__bank > 0 ? st.odds.__bank : 0; }
+function bancaActual() { var b = banca(); if (!b) return 0; regLoad().forEach(function (x) { if (x.res === 'G') b += x.stake * (x.o - 1); else if (x.res === 'P') b -= x.stake; }); return b; }
+function nStake(p) { return p < 0.5 ? 0 : p < 0.6 ? 1 : p < 0.7 ? 2 : p < 0.8 ? 3 : p < 0.9 ? 4 : 5; }
+function stakeTabla(P) {
+  var n = nStake(P), b = bancaActual();
+  if (!n) return '<p class="nota">Tabla de stakes: con ' + pct(P) + ' de probabilidad <b>no entra</b> (menos del 50 %). Si la jugáis, que sea de diversión y mínima.</p>';
+  return '<p class="nota">Tabla de stakes: <b>stake ' + n + '</b> = ' + n + ' % de la banca' + (b ? ' → <b>' + eur(b * n / 100) + '</b> con ' + eur(b) : ' (pon tu banca en Registro para verlo en €)') + '. La probabilidad viene del mercado/modelo: no es una garantía.</p>';
+}
+// ---------- Cuota de cierre (CLV): última cuota bwin guardada antes del inicio de cada partido ----------
+function fechaBw(s, anio) { var z = String(s || '').match(/^(\d+)\/(\d+) (\d+):(\d+)/); return z ? new Date(anio, +z[2] - 1, +z[1], +z[3], +z[4]) : null; }
+function capturarCierre() {
+  var r = regAll(), cambio = false, ahora = new Date();
+  r.forEach(function (x) {
+    if (x.del || !x.legs) return;
+    x.legs.forEach(function (l) {
+      if (!l.mk || !l.ko) return;
+      var z = l.mk.split('|'), L = LIGAS[z[0]], ko = new Date(l.ko + ':00'); if (!L || isNaN(ko)) return;
+      var m = null; (L.jor || []).forEach(function (J) { (J.ms || []).forEach(function (q) { if (q.d === z[1] && q.h === z[2] && q.a === z[3]) m = q; }); });
+      if (!m || !m.bw || !(m.bw[l.lab] > 1)) return;
+      var t = fechaBw(m.bwact, ko.getFullYear()); if (!t || t > ko) return;       // solo cuotas tomadas antes del inicio
+      if (l.oc !== m.bw[l.lab] || l.oct !== m.bwact) { l.oc = m.bw[l.lab]; l.oct = m.bwact; l.och = Math.round((ko - t) / 36e5); cambio = true; x.u = Date.now(); }
+    });
+  });
+  if (cambio) regSave(r);
+}
+function clv(x) {   // cuota tomada / cuota de cierre - 1 (solo si todas las selecciones tienen cierre y la cuota tomada es real de bwin)
+  if (!x.legs || !x.legs.length) return null;
+  var oc = 1, ok = true; x.legs.forEach(function (l) { if (l.oc > 1 && l.och <= 24) oc *= l.oc; else ok = false; });
+  if (!ok) return null;
+  var real = x.real || x.legs.every(function (l) { return !l.est; });
+  return real ? x.o / oc - 1 : null;
+}
+function grafica(vl) {
+  var acc = 0, pts = [0]; vl.slice().sort(function (a, b) { return a.id - b.id; }).forEach(function (x) { acc += x.res === 'G' ? x.stake * (x.o - 1) : x.res === 'P' ? -x.stake : 0; pts.push(acc); });
+  if (pts.length < 3) return '';
+  var W = 320, H = 90, mn = Math.min.apply(null, pts), mx = Math.max.apply(null, pts); if (mx === mn) mx = mn + 1;
+  var xy = function (v, i) { return (i * W / (pts.length - 1)).toFixed(1) + ',' + (H - 6 - (v - mn) * (H - 12) / (mx - mn)).toFixed(1); };
+  var y0 = (H - 6 - (0 - mn) * (H - 12) / (mx - mn)).toFixed(1);
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;margin:6px 0"><line x1="0" x2="' + W + '" y1="' + y0 + '" y2="' + y0 + '" stroke="#999" stroke-dasharray="4 4"/>' +
+    '<polyline fill="none" stroke="' + (acc >= 0 ? '#1a7f37' : '#d62828') + '" stroke-width="3" points="' + pts.map(xy).join(' ') + '"/></svg><p class="hint">Evolución del balance (€), apuesta a apuesta.</p>';
 }
 var CATN = { gol: 'Goles', cor: 'Córners', tar: 'Tarjetas', res: 'Resultado', combi: 'Combinadas' };
 function renderRegistro() {
@@ -567,14 +611,41 @@ function renderRegistro() {
     Object.keys(por).forEach(function (k) {
       var o = por[k]; h += '<div class="rrow"><b>' + k + '</b> · ' + o.g + '/' + o.n + ' acertadas · <span class="' + (o.b >= 0 ? 'pos' : 'neg') + '">' + (o.b >= 0 ? '+' : '') + eur(o.b) + '</span></div>';
     });
+    var invertido = 0; vl.forEach(function (x) { invertido += x.res === 'N' ? 0 : x.stake; });
+    h += '<div class="rrow"><b>Rentabilidad</b> · ' + (invertido ? (bal >= 0 ? '+' : '') + String(Math.round(1000 * bal / invertido) / 10).replace('.', ',') + ' % sobre ' + eur(invertido) + ' apostados' : '—') + '</div>';
+    h += grafica(vl);
+    var pl = {}, NL = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' };
+    vl.forEach(function (x) { var k = NL[x.liga] || x.liga || '—', o = pl[k] = pl[k] || { n: 0, g: 0, b: 0, s: 0 }; o.n++; o.s += x.stake; if (x.res === 'G') { o.g++; o.b += x.stake * (x.o - 1); } else o.b -= x.stake; });
+    h += '<p class="hint" style="margin:8px 0 2px"><b>Por liga</b></p>';
+    Object.keys(pl).forEach(function (k) { var o = pl[k]; h += '<div class="rrow"><b>' + k + '</b> · ' + o.g + '/' + o.n + ' · <span class="' + (o.b >= 0 ? 'pos' : 'neg') + '">' + (o.b >= 0 ? '+' : '') + eur(o.b) + ' (' + Math.round(100 * o.b / o.s) + ' %)</span></div>'; });
     if (vl.length < 30) h += '<p class="hint">Con menos de 30 apuestas resueltas los porcentajes aún dicen poco.</p>';
   } else h += '<p class="empty">Aún no hay apuestas resueltas. Añade selecciones con el botón ＋ y pulsa «Apuntar apuesta».</p>';
+  h += '</section>';
+  // banca
+  var b = banca(), pend = 0; r.forEach(function (x) { if (!x.res) pend += x.stake; });
+  h += '<section class="card"><h2><span class="tag">Banca</span> 1 stake = 1 %</h2><div class="tt"><span>Banca inicial (€):</span><input id="banca" inputmode="decimal" placeholder="p. ej. 100" value="' + (b ? num(b) : '') + '"></div>';
+  if (b) {
+    var actual = b + bal;
+    h += '<div class="rsum"><div>Banca actual<b class="' + (actual >= b ? 'pos' : 'neg') + '">' + eur(actual) + '</b></div><div>En juego ahora<b>' + eur(pend) + '</b></div>' +
+      '<div>Stake 1 (1 %)<b>' + eur(actual / 100) + '</b></div><div>Stake 3 (3 %)<b>' + eur(actual * 3 / 100) + '</b></div></div>';
+    if (pend > actual * 0.1) h += '<p class="nota">⚠ Tenéis más del 10 % de la banca en juego a la vez.</p>';
+  }
+  h += '<p class="hint">Tabla: menos del 50 % no apostar · 50-59 % stake 1 · 60-69 % stake 2 · 70-79 % stake 3 · 80-89 % stake 4 · 90 %+ stake 5. Se comparte con tu compañero.</p></section>';
+  // CLV
+  var cl = r.map(clv).filter(function (v) { return v !== null; });
+  h += '<section class="card"><h2><span class="tag">¿Le ganamos al mercado?</span> cuota de cierre</h2>';
+  if (cl.length) {
+    var med = cl.reduce(function (a, v) { return a + v; }, 0) / cl.length, mej = cl.filter(function (v) { return v > 0.005; }).length;
+    h += '<div class="rsum"><div>Apuestas medidas<b>' + cl.length + '</b></div><div>Mejor que el cierre<b>' + Math.round(100 * mej / cl.length) + ' %</b></div>' +
+      '<div style="grid-column:1/3">Diferencia media con la cuota de cierre<b class="' + (med >= 0 ? 'pos' : 'neg') + '">' + (med >= 0 ? '+' : '') + String(Math.round(1000 * med) / 10).replace('.', ',') + ' %</b></div></div>';
+    h += '<p class="hint">' + (cl.length < 50 ? 'Aún pocas apuestas (' + cl.length + '): hace falta llegar a unas 50 para fiarse. ' : '') + 'Si de media cogéis cuotas más altas que las de cierre, hay valor real; si no, ganar o perder es sobre todo suerte. Solo cuenta las apuestas con cuota bwin real y cierre tomado como mucho 24 h antes del partido.</p>';
+  } else h += '<p class="empty">Aún no hay apuestas con cuota de cierre. Se mide sola: el robot guarda la última cuota bwin antes de cada partido y la app la compara con la vuestra.</p>';
   h += '</section>';
   if (r.length) {
     h += '<section class="card"><h2><span class="tag">Apuestas</span> toca para marcar el resultado</h2>';
     r.slice().reverse().forEach(function (x) {
       h += '<div class="rrow"><b>' + x.legs.map(function (l) { return esc(l.lab); }).join(' + ') + '</b><em>' + x.legs.map(function (l) { return esc(l.partido); }).join(' · ') + '</em>' +
-        '<em>' + x.f + ' · cuota ' + num(x.o) + ' · ' + eur(x.stake) + ' · modelo ' + pct(x.p) + (x.res ? ' · <b class="' + (x.res === 'G' ? 'pos' : x.res === 'P' ? 'neg' : '') + '">' + ({ G: 'GANADA', P: 'PERDIDA', N: 'NULA' })[x.res] + '</b>' + (x.auto ? ' <small>(automático)</small>' : '') : ' · pendiente') + '</em>' +
+        '<em>' + x.f + ' · cuota ' + num(x.o) + ' · ' + eur(x.stake) + ' · modelo ' + pct(x.p) + (clv(x) !== null ? ' · cierre ' + (clv(x) >= 0 ? '+' : '') + String(Math.round(1000 * clv(x)) / 10).replace('.', ',') + ' %' : '') + (x.res ? ' · <b class="' + (x.res === 'G' ? 'pos' : x.res === 'P' ? 'neg' : '') + '">' + ({ G: 'GANADA', P: 'PERDIDA', N: 'NULA' })[x.res] + '</b>' + (x.auto ? ' <small>(automático)</small>' : '') : ' · pendiente') + '</em>' +
         '<div class="rb"><button class="g" data-res="' + x.id + ',G">Ganada</button><button class="p" data-res="' + x.id + ',P">Perdida</button><button data-res="' + x.id + ',N">Nula</button><button data-res="' + x.id + ',D">🗑</button></div></div>';
     });
     h += '<button class="addb" data-csv="1">Copiar registro (CSV)</button></section>';
@@ -770,6 +841,10 @@ function init() {
   });
   document.getElementById('slip').addEventListener('change', function (e) {
     if (e.target.id === 'slipo') { var v = parse(e.target.value); st.slipo = v > 1 ? v : 0; renderSlip(); }
+  });
+  document.getElementById('picks').addEventListener('change', function (e) {
+    if (e.target.id !== 'banca') return;
+    var vb = parse(e.target.value); st.odds.__bank = vb > 0 ? vb : 0; st.oddsU.__bank = Date.now(); save(); syncSoon(); render();
   });
   document.getElementById('matches').addEventListener('change', function (e) {
     var k = e.target.dataset.k; if (!k) return;
