@@ -13,8 +13,9 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Fixtures de football-data
         run: |
-          curl -sS -A "Mozilla/5.0" -o /tmp/fx.csv https://www.football-data.co.uk/fixtures.csv || true
-          ls -la /tmp/fx.csv; head -c 600 /tmp/fx.csv; echo
+          curl -sS -L -D /tmp/h.txt -A "Mozilla/5.0" -o /tmp/fx.csv -w "http %{http_code} bytes %{size_download}\n" https://www.football-data.co.uk/fixtures.csv || true
+          head -12 /tmp/h.txt; ls -la /tmp/fx.csv; head -c 500 /tmp/fx.csv; echo
+          test -s /tmp/fx.csv || exit 0
           python - <<'PY'
           import pandas as pd
           d = pd.read_csv('/tmp/fx.csv', encoding='utf-8-sig', on_bad_lines='skip')
