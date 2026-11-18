@@ -24,14 +24,16 @@ jobs:
               a = get('/account'); s = json.dumps(a)
               import re; return re.findall(r'"request_(?:count|limit)":\s*\d+', s)
           print('ANTES', cnt())
-          r = get('/odds-by-tournaments', tournamentIds='8', bookmakers='bwin.es,pinnacle')
-          L = r.get('data', r) if isinstance(r, dict) else r
-          print('partidos', len(L))
-          for f in L[:3]:
-              bo = f.get('bookmakerOdds', {})
-              print(f.get('participant1Name'), '-', f.get('participant2Name'), {b: len(v.get('markets', {})) for b, v in bo.items()})
-          f = next((f for f in L if 'pinnacle' in f.get('bookmakerOdds', {})), None)
-          if f:
-              mk = f['bookmakerOdds']['pinnacle']['markets']; print('mercados pinnacle ej.:', list(mk)[:40])
+          import urllib.error
+          for bk in ('bwin.es,pinnacle', 'pinnacle'):
+              try:
+                  r = get('/odds-by-tournaments', tournamentIds='8', bookmaker=bk) if ',' not in bk else get('/odds-by-tournaments', tournamentIds='8', bookmakers=bk)
+                  L = r.get('data', r) if isinstance(r, dict) else r
+                  print(bk, 'partidos', len(L))
+                  for f in L[:2]: print('  ', f.get('participant1Name'), {b: len(v.get('markets', {})) for b, v in f.get('bookmakerOdds', {}).items()})
+                  f = next((f for f in L if 'pinnacle' in f.get('bookmakerOdds', {})), None)
+                  if f: print('  mercados pinnacle:', list(f['bookmakerOdds']['pinnacle']['markets'])[:30])
+              except urllib.error.HTTPError as e:
+                  print(bk, 'ERROR', e.code, e.read().decode()[:400])
           print('DESPUES', cnt())
           PY
