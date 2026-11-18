@@ -248,6 +248,26 @@ function jActual() {
 }
 
 var EV = { p: {} };
+var REND = null;
+function cargarRend() {
+  return fetch('rendimiento.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { REND = d; if (st.liga === 'registro') render(); }).catch(function () {});
+}
+function rendCard() {
+  var h = '<section class="card"><h2><span class="tag">Rendimiento</span> picks de la app, apostéis o no</h2>';
+  if (!REND || !REND.partidos) return h + '<p class="empty">Aún sin datos. Desde ahora el robot apunta solo lo que propone la app ~45 min antes de cada partido y aquí verás cuánto acierta de verdad.</p></section>';
+  var P = function (v) { return v == null ? '—' : Math.round(v * 100) + ' %'; };
+  var R = function (o) { return o.roi == null ? '' : ' · <span class="' + (o.roi >= 0 ? 'pos' : 'neg') + '">' + (o.roi >= 0 ? '+' : '') + Math.round(o.roi * 100) + ' % a cuota bwin</span>'; };
+  var fila = function (n, o) { return '<div class="rrow"><b>' + n + '</b> · ' + o.n + ' picks · acierta ' + P(o.acierto) + ' (esperado ' + P(o.p_media) + ')' + R(o) + '</div>'; };
+  h += '<p class="hint">' + REND.partidos + ' partidos medidos' + (REND.pendientes ? ' · ' + REND.pendientes + ' pendientes de resultado' : '') + ' · act. ' + esc(REND.act) + '</p>';
+  if (REND.top && REND.top.n) h += fila('Pick del aviso', REND.top);
+  h += '<p class="hint" style="margin:8px 0 2px"><b>¿Acierta lo que dice? (por probabilidad)</b></p>';
+  Object.keys(REND.franja || {}).forEach(function (k) { h += fila(k, REND.franja[k]); });
+  h += '<p class="hint" style="margin:8px 0 2px"><b>Por mercado</b></p>';
+  Object.keys(REND.cat || {}).forEach(function (k) { h += fila(CATN[k] || k, REND.cat[k]); });
+  var nT = 0; Object.keys(REND.cat || {}).forEach(function (k) { nT += REND.cat[k].n; });
+  h += '<p class="hint">' + (nT < 200 ? 'Muestra pequeña (' + nT + ' picks): orientativo, aún no fiable. ' : '') + 'Si «acierta» queda por debajo de «esperado» en una franja, el modelo se pasa de optimista ahí. El % a cuota bwin es lo que habría dado apostar 1 € a cada pick con cuota real.</p>';
+  return h + '</section>';
+}
 function cargarVivo() {
   return fetch('envivo.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
     if (!d || !d.p || JSON.stringify(d) === EV.raw) return; var raw = JSON.stringify(d); EV = d; EV.raw = raw; EV.hay = Object.keys(d.p).some(function (q) { return d.p[q].e === 'j'; });
@@ -604,7 +624,7 @@ function grafica(vl) {
 }
 var CATN = { gol: 'Goles', cor: 'Córners', tar: 'Tarjetas', res: 'Resultado', combi: 'Combinadas' };
 function renderRegistro() {
-  var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + avisosCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
+  var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + avisosCard() + rendCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
   var ok = res.filter(function (x) { return x.res === 'G'; }).length, vl = res.filter(function (x) { return x.res !== 'N'; }),
     vok = vl.filter(function (x) { return x.res === 'G'; }).length, stk = 0, bal = 0, esp = 0;
   vl.forEach(function (x) { stk += x.stake; bal += x.res === 'G' ? x.stake * (x.o - 1) : -x.stake; esp += x.p; });
@@ -862,7 +882,7 @@ function init() {
   setLiga('todos', false);
   document.getElementById('jsel').addEventListener('change', function (e) { setJ(+e.target.value); render(); });
   render();
-  cargarDatos(false).then(cargarVivo);
+  cargarDatos(false).then(cargarVivo).then(cargarRend);
   if (pushSoportado()) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data === 'refrescar') cargarDatos(false).then(cargarVivo); }); }
   setInterval(function () { if (!document.hidden) cargarDatos(false); }, 600000);
   setInterval(function () { if (!document.hidden) cargarVivo(); }, 60000);

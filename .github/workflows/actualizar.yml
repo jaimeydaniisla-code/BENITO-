@@ -38,9 +38,11 @@ jobs:
         run: python modelo_cuotas/fixtures_fd.py
       - name: Aplicar cuotas bwin guardadas
         run: python modelo_cuotas/generar_cuotas.py --aplicar-solo
+      - name: Rendimiento real de los picks
+        run: python modelo_cuotas/rendimiento.py
       - name: Publicar
         run: |
           git config user.name "robot-benitooo"
           git config user.email "actions@users.noreply.github.com"
-          ([ -f modelo_champions/elo.json ] && git add modelo_champions/elo.json || true); git add datos.json modelo/01_datos/SP1_2026-27.csv modelo_segunda/01_datos/SP2_5.csv modelo_premier/01_datos/E0_2026-27.csv modelo_selecciones/resultados_selecciones.csv
-          git diff --cached --quiet || (git commit -m "Actualización automática" && git pull -q --rebase origin main && git push)
+          ([ -f modelo_champions/elo.json ] && git add modelo_champions/elo.json || true); for f in rendimiento.json modelo_cuotas/picks_resueltos.json; do [ -f $f ] && git add $f; done; git add datos.json modelo/01_datos/SP1_2026-27.csv modelo_segunda/01_datos/SP2_5.csv modelo_premier/01_datos/E0_2026-27.csv modelo_selecciones/resultados_selecciones.csv
+          git diff --cached --quiet || (git commit -m "Actualización automática" && git pull -q --rebase -X theirs origin main && git push)

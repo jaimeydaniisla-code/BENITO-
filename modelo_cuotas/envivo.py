@@ -1,11 +1,12 @@
 """Directo y alineaciones: robot ligero (cada ~10 min). Solo trabaja si hay partidos de la app cerca de su hora (de 100 min antes a 3 h después).
 Lee FotMob (marcador, minuto, alineaciones, árbitro) y escribe envivo.json, un fichero pequeño aparte de datos.json.
 No usa claves ni el cupo de OddsPapi."""
-import os, re, json, unicodedata, difflib, datetime as dt, urllib.request
+import os, sys, re, json, unicodedata, difflib, datetime as dt, urllib.request
 try:
     from zoneinfo import ZoneInfo; MAD = ZoneInfo('Europe/Madrid')
 except Exception:
     MAD = dt.timezone(dt.timedelta(hours=1))
+HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 DATOS, SALIDA = os.path.join(ROOT, 'datos.json'), os.path.join(ROOT, 'envivo.json')
 LIGAS = {'primera': (87, 'laliga'), 'segunda': (140, 'laliga2'), 'premier': (47, 'premier-league'), 'champions': (42, 'champions-league')}
@@ -105,6 +106,39 @@ def mejor_pick(m):
     return 'sin pick claro'
 
 
+def cuotas_previas(L):
+    """~45 min antes: 1 petición (lote) a OddsPapi con las cuotas bwin de los partidos de esa hora, ya con alineaciones.
+    Se ajustan sus probabilidades al mercado y se guardan en datos.json / cuotas.json."""
+    if not os.environ.get('ODDSPAPI_KEY'): print('Cuotas previas: sin ODDSPAPI_KEY'); return
+    sys.path.insert(0, HERE)
+    try:
+        import generar_cuotas as G, mercado
+    except Exception as e:
+        print('Cuotas previas: no disponibles', repr(e)[:80]); return
+    G.HORAS, G.DIAS = 1.3, 1
+    G.LIGAS_PEDIR = sorted({x[0] for x in L if x[0] in G.TORNEOS})
+    if not G.LIGAS_PEDIR: return
+    try: G.pedir()
+    except Exception as e: print('Cuotas previas: fallo al pedir', repr(e)[:100]); return
+    cu = json.load(open(G.CUOTAS, encoding='utf-8'))
+    for liga, m, q in L:
+        v = cu.get(q)
+        if v:
+            m['bw'], m['bwact'] = v['bw'], v['act']
+            try: mercado.ajustar(m)
+            except Exception as e: print('  ajuste falló', m['h'], m['a'], e)
+
+
+def apuntar_picks(liga, m, hora):
+    """Registro automático de lo que propone la app (se apueste o no) para medir el modelo con datos reales."""
+    bw = m.get('bw') or {}
+    ps = [[x[0], x[1], x[2], bw.get(x[0])] for x in (m.get('s') or []) if x[2] >= 0.5]
+    if not ps: return
+    with open(os.path.join(HERE, 'picks_log.jsonl'), 'a', encoding='utf-8') as f:
+        f.write(json.dumps({'t': hora, 'liga': liga, 'd': m['d'], 'h': m['h'], 'a': m['a'], 'mk': 1 if m.get('mk') else 0, 'top': mejor_pick(m).split(' · ')[0], 'ps': ps},
+                           ensure_ascii=False, separators=(',', ':')) + '\n')
+
+
 def main():
     ahora = dt.datetime.now(MAD)
     app = json.load(open(DATOS, encoding='utf-8'))
@@ -160,18 +194,22 @@ def main():
     for liga, lst in cerca.items():
         for m, ko in lst:
             q = f"{liga}|{m['d']}|{m['h']}|{m['a']}"; mins = (ko - ahora).total_seconds() / 60
-            if 35 <= mins <= 75 and q not in av: grupos.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q))
+            if 30 <= mins <= 55 and q not in av: grupos.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q))
     if grupos:
+        cuotas_previas([x for L in grupos.values() for x in L])
+        json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+        for hora, L in grupos.items():
+            for liga, m, q in L: apuntar_picks(liga, m, ahora.isoformat(timespec='minutes'))
         subs = leer_avisos()
         for hora, L in sorted(grupos.items()):
             t = hora[-5:]
             if len(L) == 1:
                 liga, m, q = L[0]; ali = (p.get(q) or {}).get('ali') or 'alineaciones aún sin publicar'
-                tit = f"⚽ En 1 h ({t}): {m['h']} – {m['a']}"
+                tit = f"⚽ Empieza a las {t}: {m['h']} – {m['a']}"
                 cuerpo = f"{ali.split(' · ')[0][:70]}\nMejor pick: {mejor_pick(m)}\nRevisa bajas y la cuota real en bwin antes de apostar."
             else:
                 L.sort(key=lambda x: ['primera', 'champions', 'premier', 'segunda'].index(x[0]) if x[0] in ('primera', 'champions', 'premier', 'segunda') else 9)
-                tit = f"⚽ En 1 h ({t}): {L[0][1]['h']} – {L[0][1]['a']} y {len(L) - 1} más"
+                tit = f"⚽ Empieza a las {t}: {L[0][1]['h']} – {L[0][1]['a']} y {len(L) - 1} más"
                 cuerpo = '\n'.join(f"{m['h']} – {m['a']}: {mejor_pick(m)}" for _, m, _ in L[:5]) + '\nAbre la app: alineaciones ya cargadas.'
             n = enviar(subs, tit, cuerpo, 'k' + hora, [x[0] for x in L]) if subs else 0
             print('Aviso', hora, len(L), 'partidos ->', n, 'móviles')

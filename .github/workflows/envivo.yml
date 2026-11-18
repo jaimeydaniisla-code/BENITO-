@@ -23,10 +23,11 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - run: pip install pywebpush
-      - name: Directo y avisos (FotMob, sin cupo de OddsPapi)
+      - run: pip install pywebpush -r requirements.txt
+      - name: Directo, cuotas previas (1 petición por hora de inicio) y avisos
         env:
           GIST_ID: ${{ secrets.GIST_ID }}
+          ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRUEBA_AVISO: ${{ github.event.inputs.prueba == 'si' && '1' || '' }}
         run: python modelo_cuotas/envivo.py
@@ -34,5 +35,20 @@ jobs:
         run: |
           git config user.name "robot-benitooo"
           git config user.email "actions@users.noreply.github.com"
-          [ -f envivo.json ] && git add envivo.json || true
-          git diff --cached --quiet || (git commit -m "Directo" && git pull -q --rebase origin main && git push)
+          F="envivo.json datos.json cuotas.json modelo_cuotas/picks_log.jsonl modelo_cuotas/peticiones.json modelo_cuotas/historico_cuotas.jsonl modelo_cuotas/catalogo_mercados.json"
+          for f in $F; do [ -f "$f" ] && git add "$f"; done
+          git diff --cached --quiet && exit 0
+          git commit -qm "Directo"
+          for i in 1 2 3; do
+            git pull -q --rebase origin main && git push -q && exit 0
+            git rebase --abort 2>/dev/null || true
+            mkdir -p /tmp/s; for f in $F; do [ -f "$f" ] && cp "$f" /tmp/s/$(basename $f); done
+            git fetch -q origin main && git reset -q --hard origin/main
+            for f in $F; do [ -f /tmp/s/$(basename $f) ] && cp /tmp/s/$(basename $f) "$f"; done
+            git checkout -q origin/main -- datos.json && python modelo_cuotas/aplicar_previas.py
+            for f in $F; do [ -f "$f" ] && git add "$f"; done
+            git diff --cached --quiet && exit 0
+            git commit -qm "Directo"
+            sleep 5
+          done
+          exit 1
