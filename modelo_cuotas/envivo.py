@@ -59,6 +59,8 @@ def leer_avisos():
     """Suscripciones de los móviles, guardadas por la app en el Gist secreto compartido (secreto GIST_ID)."""
     gid = os.environ.get('GIST_ID', '').strip()
     if not gid: print('Avisos: falta el secreto GIST_ID'); return {}
+    print('Avisos: GIST_ID con', len(gid), 'caracteres', '(¡parece una clave ghp_, no el código!)' if gid.startswith('gh') else '')
+    gid = gid.split('/')[-1]
     for tok in (os.environ.get('GITHUB_TOKEN', ''), ''):
         try:
             h = {'User-Agent': 'benitooo', 'Accept': 'application/vnd.github+json'}
