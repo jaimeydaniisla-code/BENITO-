@@ -181,7 +181,7 @@ var LIGAS = { todos: { nombre: 'TODOS', jor: [], meta: {} },
 var CATS = { todo: 'Todo', res: 'Resultado', gol: 'Goles', cor: 'Córners', tar: 'Tarjetas' };
 var FIAB = ['fiabilidad baja', 'fiabilidad baja-media', 'fiabilidad media'];
 var DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-var st = { stake: 3, min: 1.5, cat: 'todo', odds: {}, open: -1, j: 0, liga: 'todos', slip: [], slipo: 0, oddsU: {}, sync: null, syncMsg: '', last: { S: [], C: [] } };
+var st = { stake: 3, min: 1.5, cat: 'todo', odds: {}, open: -1, j: 0, liga: 'todos', slip: [], slipo: 0, oddsU: {}, sync: null, syncMsg: '', last: { S: [], C: [], V: [], E: null } };
 var DATA = JOR[0].ms;
 var DIASTODOS = 7, PRUD = [0.7, 0.85, 1];
 function armarTodos() {
@@ -313,6 +313,44 @@ function combinadas(all) {
   });
   return out;
 }
+function especial(all) {
+  var by = {};
+  all.forEach(function (x) {
+    if (x.p < 0.65 || x.o < 1.05 || x.o > 2.2 || (x.cat === 'cor' && x.f === 0)) return;
+    (by[x.i] = by[x.i] || []).push(x);
+  });
+  var ms = Object.keys(by).map(function (i) {
+    var L = by[i].sort(function (a, b) { return b.p - a.p; }), r = [], n = [0, 0, 0];
+    L.forEach(function (x) { var q = x.o < 1.2 ? 0 : x.o < 1.4 ? 1 : 2; if (n[q] < 2) { n[q]++; r.push(x); } });
+    return r;
+  });
+  var LMAX = Math.log(6.3), states = { '0|0': { lp: 0, lo: 0, l: [] } };
+  ms.forEach(function (opts) {
+    var nw = {}; Object.keys(states).forEach(function (k) { nw[k] = states[k]; });
+    Object.keys(states).forEach(function (k) {
+      var s0 = states[k];
+      if (s0.l.length >= 7) return;
+      opts.forEach(function (x) {
+        var lo = s0.lo + Math.log(x.o); if (lo > LMAX) return;
+        var b = Math.round(lo * 100) + '|' + (s0.l.length + 1), lp = s0.lp + Math.log(x.p), c = nw[b];
+        if (!c || lp > c.lp) nw[b] = { lp: lp, lo: lo, l: s0.l.concat([x]) };
+      });
+    });
+    states = nw;
+  });
+  var best = null;
+  Object.keys(states).forEach(function (k) {
+    var q = states[k], o = Math.exp(q.lo), p = Math.exp(q.lp);
+    if (q.l.length < 4 || o < 5 || o > 6 || p < 0.1) return;
+    if (!best || p > best.p) best = { legs: q.l, p: p, o: Math.round(o * 100) / 100 };
+  });
+  return best;
+}
+function valor(all) {
+  return all.filter(function (x) { return !x.est && x.p >= 0.55 && x.o * x.p >= 1.03; }).map(function (x) {
+    x.ev = x.o * x.p - 1; x.sus = x.ev > 0.2; return x;
+  }).sort(function (a, b) { return (a.sus - b.sus) || (b.ev - a.ev); }).slice(0, 5);
+}
 function pct(p) { return Math.round(p * 100) + ' %'; }
 function eur(x) { return x.toFixed(2).replace('.', ',') + ' €'; }
 function num(x) { return x.toFixed(2).replace('.', ','); }
@@ -349,7 +387,7 @@ function render() {
     document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = ''; return;
   }
   var all = todas(), S = simples(all), C = combinadas(all), h = '';
-  st.last = { S: S, C: C };
+  st.last = { S: S, C: C, V: [], E: null };
   // simple
   h += '<section class="card simple"><h2><span class="tag">Apuesta simple</span> cuota ' + num(st.min) + ' o más</h2>';
   if (S.length) {
@@ -388,6 +426,22 @@ function render() {
              : '<div class="leg"><span><b>' + nom[g] + '</b><em>sin partidos en los próximos ' + DIASTODOS + ' días o sin pick con esa cuota</em></span></div>';
     });
     h += '<p class="hint">Orden con descuento por fiabilidad: córners totales y goles/tarjetas valen menos que el resultado. Los porcentajes mostrados son los reales del modelo.</p></section>';
+    var E = especial(all), V = valor(all); st.last.E = E; st.last.V = V;
+    h += '<section class="card combi"><h2><span class="tag">Combinada especial</span> cuota 5 a 6 · 2-3 €</h2>';
+    if (E) {
+      E.legs.forEach(function (l) { h += '<div class="leg"><b>' + pct(l.p) + '</b><span>' + esc(l.lab) + '<em>' + esc(partido(l.i)) + ' · ' + cuando(DATA[l.i]) + '</em></span>' + chipCuota(l) + '</div>'; });
+      var est = E.legs.some(function (l) { return l.est; });
+      h += '<div class="tot"><span>Todas a la vez</span><b>' + pct(E.p) + '</b><span class="odd">' + num(E.o) + '</span></div>' + gana(E.o) +
+        '<p class="nota">El modelo dice ' + pct(E.p) + '; la cuota de bwin equivale a ≈' + pct(1 / E.o) + '. Si hay mucha diferencia, desconfía del modelo. Apuesta especial de diversión: por debajo del 50 % no entra en la tabla de stakes, así que solo 2-3 €.' + (est ? ' Hay cuotas estimadas: confirma la cuota real en bwin.' : '') + '</p>' +
+        '<button class="addb" data-addx="e:0">＋ Añadir todas a mi apuesta</button>';
+    } else h += '<p class="empty">Hoy no hay combinada especial: no hay 4 a 7 picks (cada uno al 65 % o más) que lleguen a cuota 5-6 con un 10 % conjunto.</p>';
+    h += '</section><section class="card"><h2><span class="tag">Posible valor</span> cuota bwin real por encima de la justa</h2>';
+    if (V.length) {
+      V.forEach(function (y, n) {
+        h += '<div class="leg"><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + '<em>' + esc(partido(y.i)) + ' · ' + cuando(DATA[y.i]) + '<br>cuota justa ' + num(1 / y.p) + ' · valor +' + Math.round(y.ev * 100) + ' %' + (y.sus ? ' · ⚠ sospechoso: casi seguro falla el modelo' : '') + '</em></span>' + chipCuota(y) + '</div>';
+      });
+    } else h += '<p class="empty">Ahora no hay ningún pick con cuota bwin real por encima de la justa.</p>';
+    h += '<p class="hint">Si bwin paga más de lo que el modelo cree justo, puede haber valor. Pero el modelo aún no bate al mercado: cuanto mayor la diferencia, más probable es que se equivoque el modelo.</p></section>';
   }
   document.getElementById('picks').innerHTML = h;
   // partidos
@@ -588,7 +642,7 @@ function init() {
       else if (t.dataset.sync === 'salir') { st.sync = null; st.syncMsg = ''; try { localStorage.removeItem(SYNCK); } catch (x) {} render(); }
     }
     else if (t.dataset.add) { var ia = t.dataset.add.split(','), ii = +ia[0], ss = DATA[ii].s[+ia[1]]; var cc = cuota(ii, ss); addLeg({ i: ii, lab: ss[0], cat: ss[1], p: ss[2], o: cc.o, est: cc.est }); render(); }
-    else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 's' ? st.last.S[+pr[1]] : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' ? [q] : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
+    else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 's' ? st.last.S[+pr[1]] : pr[0] === 'v' ? st.last.V[+pr[1]] : pr[0] === 'e' ? st.last.E : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' || pr[0] === 'v' ? [q] : pr[0] === 'e' ? q.legs : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
     else if (t.dataset.rm !== undefined) { st.slip.splice(+t.dataset.rm, 1); render(); }
     else if (t.dataset.slip === 'clear') { st.slip = []; st.slipo = 0; render(); }
     else if (t.dataset.slip === 'save') { slipSave(); }
