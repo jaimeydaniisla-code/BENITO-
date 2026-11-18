@@ -41,7 +41,12 @@ def objetivos(m):
     """(pH, pD, pA, pOver2.5) sin margen a partir de las cuotas bwin del partido, o None si faltan."""
     bw, H, A = m.get('bw') or {}, m['h'], m['a']
     k1, k2, k3 = f'{H} o empate', f'Empate o {A}', 'No hay empate'
-    if not all(bw.get(k, 0) > 1 for k in (k1, k2, k3)): return None
+    if not all(bw.get(k, 0) > 1 for k in (k1, k2, k3)):
+        fd = m.get('fd')  # respaldo gratuito: 1X2 y más/menos 2,5 de football-data
+        if not fd: return None
+        p3 = devig_pot(fd[:3]); m['mkf'] = 1
+        return p3[0], p3[1], p3[2], devig_pot(fd[3:5])[0], 2.5
+    m.pop('mkf', None)
     linea = None  # línea de goles totales con las dos caras cotizadas (2,5 es la validada; si falta, 3,5 o 1,5)
     for L in (2.5, 3.5, 1.5):
         ko, ku = f'Goles: más de {c(L)}', f'Goles: menos de {c(L)}'

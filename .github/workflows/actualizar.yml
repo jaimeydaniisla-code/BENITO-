@@ -32,6 +32,8 @@ jobs:
         run: python modelo_selecciones/generar_selecciones.py
       - name: Estadísticas reales de cada equipo
         run: python modelo_cuotas/forma.py
+      - name: Cuotas gratuitas de football-data (respaldo)
+        run: python modelo_cuotas/fixtures_fd.py
       - name: Aplicar cuotas bwin guardadas
         run: python modelo_cuotas/generar_cuotas.py --aplicar-solo
       - name: Publicar

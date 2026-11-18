@@ -176,19 +176,19 @@ def pedir():
 
 
 def aplicar():
-    if not os.path.exists(CUOTAS): return
-    cu = json.load(open(CUOTAS, encoding='utf-8')); app = json.load(open(DATOS, encoding='utf-8')); k = 0; aj = 0
+    cu = json.load(open(CUOTAS, encoding='utf-8')) if os.path.exists(CUOTAS) else {}
+    app = json.load(open(DATOS, encoding='utf-8')); k = aj = 0
     for liga, L in app.get('ligas', {}).items():
         for j in L['jor']:
             for m in j['ms']:
                 v = cu.get(f"{liga}|{m['d']}|{m['h']}|{m['a']}")
                 if v:
                     m['bw'] = v['bw']; m['bwact'] = v['act']; k += 1
-                    try:
-                        if mercado and mercado.ajustar(m): aj += 1
-                        if mercado: mercado.mezclar_conteos(m)
-                    except Exception as e:
-                        print('ajuste al mercado falló en', m['h'], m['a'], e)
+                try:
+                    if mercado and mercado.ajustar(m): aj += 1
+                    if mercado and m.get('bw'): mercado.mezclar_conteos(m)
+                except Exception as e:
+                    print('ajuste al mercado falló en', m['h'], m['a'], e)
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print('cuotas bwin aplicadas a', k, 'partidos;', aj, 'con probabilidades ajustadas al mercado')
 
