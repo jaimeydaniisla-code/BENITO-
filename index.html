@@ -184,6 +184,7 @@ var LIGAS = { todos: { nombre: 'TODOS', jor: [], meta: {} },
   primera: { nombre: 'Primera', jor: JOR, meta: META },
   segunda: { nombre: 'Segunda', jor: [], meta: {} },
   premier: { nombre: 'Premier', jor: [], meta: {} },
+  champions: { nombre: 'Champions', jor: [], meta: {} },
   selecciones: { nombre: 'Selecciones', jor: [], meta: {}, aviso: 'Selecciones: todavía no hay modelo ni calendario conectado.' } };
 var CATS = { todo: 'Todo', res: 'Resultado', gol: 'Goles', cor: 'Córners', tar: 'Tarjetas' };
 var FIAB = ['fiabilidad baja', 'fiabilidad baja-media', 'fiabilidad media'];
@@ -194,7 +195,7 @@ var DIASTODOS = 7, PRUD = [0.7, 0.85, 1];
 function armarTodos() {
   var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
   var lim = new Date(hoy.getTime() + DIASTODOS * 86400000), ms = [], dt = [];
-  ['primera', 'segunda', 'premier', 'selecciones'].forEach(function (k) {
+  ['primera', 'segunda', 'premier', 'champions', 'selecciones'].forEach(function (k) {
     var L = LIGAS[k]; if (!L) return;
     if (L.meta && L.meta.datos) dt.push(L.nombre + ' ' + L.meta.datos.slice(0, 5));
     (L.jor || []).forEach(function (J) {
@@ -454,7 +455,7 @@ function render() {
   } else h += '<p class="empty">No hay dos selecciones seguras que lleguen a esa cuota en este filtro.</p>';
   h += '</section>';
   if (st.liga === 'todos') {
-    var nom = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', selecciones: 'Selecciones' }, bl = {};
+    var nom = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' }, bl = {};
     S.forEach(function (x) { var g = DATA[x.i].lg; if (!bl[g]) bl[g] = x; });
     h += '<section class="card"><h2><span class="tag">Mejor de cada liga</span> cuota ' + num(st.min) + ' o más</h2>';
     Object.keys(nom).forEach(function (g) {
@@ -489,7 +490,8 @@ function render() {
     if (st.open === i) {
       var vv = vivo(d) || {};
       m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(vv.arb || d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(vv.ali || d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
-      m += '<div class="exp"><span>Goles esperados <b>' + d.g[0] + ' – ' + d.g[1] + '</b></span><span>Córners <b>' + d.c[0] + ' – ' + d.c[1] + '</b></span><span>Tarjetas <b>' + d.k[0] + ' – ' + d.k[1] + '</b></span></div>';
+      var ex = function (t, v) { return v && v[0] != null && v[1] != null ? '<span>' + t + ' <b>' + v[0] + ' – ' + v[1] + '</b></span>' : ''; };
+      m += '<div class="exp">' + (ex('Goles esperados', d.g) + ex('Córners', d.c) + ex('Tarjetas', d.k) || '<span>Sin goles esperados: aún no hay cuotas ni ratings</span>') + '</div>';
       m += stats(d) + '<p class="hint">' + (d.mk ? 'Goles y resultado: probabilidades ajustadas a las cuotas ' + (d.mkf ? 'medias del mercado (football-data)' : 'de bwin') + ' (validado: predicen mejor que el modelo propio). Córners y tarjetas: ' + (d.mkc ? 'mitad modelo propio, mitad cuotas bwin.' : 'modelo propio.') : 'Probabilidades del modelo propio (sin cuotas bwin de este partido).') + ' Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
       sel.forEach(function (s) {
         var u = st.odds[key(i, s[0])] || '';

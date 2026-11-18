@@ -97,7 +97,8 @@ def ajustar(m, pmin=0.42, pmax=0.93):
     """Sustituye en el partido m las probabilidades de goles y resultado por las del mercado. Devuelve True si lo ha hecho."""
     obj = objetivos(m)
     if obj is None: return False
-    lam, err = ajustar_lambdas(obj, m.get('g') or [1.4, 1.1])
+    g0 = m.get('g') if (m.get('g') and None not in m['g']) else [1.4, 1.1]
+    lam, err = ajustar_lambdas(obj, g0)
     if err > 0.03: return False  # el mercado no encaja en la matriz: mejor no tocar
     M = matrix(lam[0], lam[1])
     fi = {}

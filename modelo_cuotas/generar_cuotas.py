@@ -14,8 +14,9 @@ try:
     from zoneinfo import ZoneInfo; MAD = ZoneInfo('Europe/Madrid')
 except Exception:
     MAD = dt.timezone.utc
-TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
+TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17, 'champions': 7}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
+LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera,segunda,premier').split(',') if x.strip() in TORNEOS]   # Champions solo con su propio robot (cupo)
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
 HORAS = float(os.environ.get('CUOTAS_HORAS', '0') or 0)       # >0: solo partidos que empiezan dentro de N horas (cuota casi de cierre)
 HIST = os.path.join(HERE, 'historico_cuotas.jsonl')            # una línea por partido y consulta (apertura, evolución y cierre)
@@ -130,10 +131,19 @@ def pedir():
         print(f'Límite mensual de peticiones alcanzado ({gastado}/{LIMITE_MES}): no se piden cuotas'); return
     global MAXPET
     MAXPET = min(MAXPET, LIMITE_MES - gastado)
+    def ventana(liga):
+        jor = app.get('ligas', {}).get(liga, {}).get('jor', [])
+        ms = [m for j in jor for m in j['ms'] if ahora.date().isoformat() <= m['d'] <= (ahora + dt.timedelta(days=DIAS)).date().isoformat()]
+        if HORAS > 0:
+            ms = [m for m in ms if ahora <= dt.datetime.fromisoformat(m['d'] + 'T' + (m.get('t') or '23:59')).replace(tzinfo=MAD) <= ahora + dt.timedelta(hours=HORAS)]
+        return ms
+    if not any(ventana(l) for l in LIGAS_PEDIR):
+        print('Sin partidos en la ventana: no se gasta ninguna petición'); return
     cat = {m['marketId']: m for m in (lambda r: r.get('data', r) if isinstance(r, dict) else r)(get('/markets', sportId=10))}
     try: cu = json.load(open(CUOTAS, encoding='utf-8'))
     except Exception: cu = {}
-    for liga, tid in TORNEOS.items():
+    for liga in LIGAS_PEDIR:
+        tid = TORNEOS[liga]
         jor = app.get('ligas', {}).get(liga, {}).get('jor', [])
         ms = [m for j in jor for m in j['ms'] if ahora.date().isoformat() <= m['d'] <= (ahora + dt.timedelta(days=DIAS)).date().isoformat()]
         if HORAS > 0:

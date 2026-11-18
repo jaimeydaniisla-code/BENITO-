@@ -8,7 +8,7 @@ except Exception:
     MAD = dt.timezone(dt.timedelta(hours=1))
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 DATOS, SALIDA = os.path.join(ROOT, 'datos.json'), os.path.join(ROOT, 'envivo.json')
-LIGAS = {'primera': (87, 'laliga'), 'segunda': (140, 'laliga2'), 'premier': (47, 'premier-league')}
+LIGAS = {'primera': (87, 'laliga'), 'segunda': (140, 'laliga2'), 'premier': (47, 'premier-league'), 'champions': (42, 'champions-league')}
 ANTES, DESPUES = 100, 180   # minutos antes y después de la hora de inicio en los que se vigila un partido
 ALIAS = {'athletic club': 'athletic', 'athletic': 'ath bilbao', 'real betis': 'betis', 'celta vigo': 'celta', 'rayo vallecano': 'vallecano', 'rayo': 'vallecano',
          'atletico madrid': 'ath madrid', 'atletico': 'ath madrid', 'deportivo la coruna': 'la coruna', 'deportivo': 'la coruna', 'racing santander': 'santander', 'racing': 'santander',
@@ -16,6 +16,7 @@ ALIAS = {'athletic club': 'athletic', 'athletic': 'ath bilbao', 'real betis': 'b
          'real sociedad b': 'sociedad b', 'sporting gijon': 'sp gijon', 'real sporting': 'sp gijon', 'sporting': 'sp gijon', 'ad ceuta': 'ceuta', 'cd castellon': 'castellon',
          'real valladolid': 'valladolid', 'cd leganes': 'leganes', 'ud almeria': 'almeria', 'cadiz cf': 'cadiz', 'athletic club b': 'ath bilbao b', 'real racing club': 'santander',
          'granada cf': 'granada', 'malaga cf': 'malaga', 'fc andorra': 'andorra', 'burgos cf': 'burgos', 'real oviedo': 'oviedo', 'albacete balompie': 'albacete',
+         'bayern munchen': 'bayern', 'paris saint germain': 'paris sg', 'borussia dortmund': 'dortmund', 'psv eindhoven': 'psv', 'rb leipzig': 'leipzig',
          'celta fortuna': 'celta b', 'manchester united': 'man united', 'manchester city': 'man city', 'newcastle united': 'newcastle', 'tottenham hotspur': 'tottenham',
          'nottingham forest': "nott'm forest", 'wolverhampton wanderers': 'wolves', 'brighton & hove albion': 'brighton', 'west ham united': 'west ham', 'leeds united': 'leeds',
          'hull city': 'hull', 'ipswich town': 'ipswich', 'leicester city': 'leicester', 'coventry city': 'coventry', 'afc bournemouth': 'bournemouth'}
