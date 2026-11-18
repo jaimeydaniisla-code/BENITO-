@@ -16,7 +16,7 @@ except Exception:
     MAD = dt.timezone.utc
 TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17, 'champions': 7}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
-LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera,segunda,premier').split(',') if x.strip() in TORNEOS]   # Champions solo con su propio robot (cupo)
+LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera').split(',') if x.strip() in TORNEOS]   # por defecto solo Primera (cupo); Segunda y Premier usan las cuotas gratis de football-data; Champions tiene su robot
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
 HORAS = float(os.environ.get('CUOTAS_HORAS', '0') or 0)       # >0: solo partidos que empiezan dentro de N horas (cuota casi de cierre)
 HIST = os.path.join(HERE, 'historico_cuotas.jsonl')            # una línea por partido y consulta (apertura, evolución y cierre)
@@ -139,7 +139,11 @@ def pedir():
         return ms
     if not any(ventana(l) for l in LIGAS_PEDIR):
         print('Sin partidos en la ventana: no se gasta ninguna petición'); return
-    cat = {m['marketId']: m for m in (lambda r: r.get('data', r) if isinstance(r, dict) else r)(get('/markets', sportId=10))}
+    CATF = os.path.join(HERE, 'catalogo_mercados.json')   # el catálogo de mercados casi no cambia: se pide una sola vez y se guarda
+    try: cat = {int(k): v for k, v in json.load(open(CATF, encoding='utf-8')).items()}
+    except Exception:
+        cat = {m['marketId']: m for m in (lambda r: r.get('data', r) if isinstance(r, dict) else r)(get('/markets', sportId=10))}
+        json.dump(cat, open(CATF, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     try: cu = json.load(open(CUOTAS, encoding='utf-8'))
     except Exception: cu = {}
     for liga in LIGAS_PEDIR:
