@@ -24,5 +24,5 @@ jobs:
         run: |
           git config user.name "robot-benitooo"
           git config user.email "actions@users.noreply.github.com"
-          git add envivo.json
+          [ -f envivo.json ] && git add envivo.json || true
           git diff --cached --quiet || (git commit -m "Directo" && git pull -q --rebase origin main && git push)
