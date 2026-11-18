@@ -1,2 +1,3 @@
 __pycache__/
 *.pyc
+modelo/03_experimentos/*.pkl

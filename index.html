@@ -281,13 +281,16 @@ function todas() {
   });
   return out;
 }
+// Peso de prudencia: goles/resultado con cuotas bwin (validado) = 1; córners/tarjetas (modelo propio sin validar) = 0,8; resto según fiabilidad.
+function wgt(x) { var m = DATA[x.i] || {}; if (x.cat === 'cor' || x.cat === 'tar') return 0.8; return m.mk ? 1 : PRUD[x.f]; }
+function rkf(x) { return 0.5 + (x.p - 0.5) * wgt(x); }
 function simples(all) {
-  var rk = function (x) { return st.liga === 'todos' ? 0.5 + (x.p - 0.5) * PRUD[x.f] : x.p; };
+  var rk = rkf;
   return all.filter(function (x) { return x.o >= st.min; }).sort(function (a, b) { return rk(b) - rk(a) || b.f - a.f; });
 }
 function combinadas(all) {
-  var legs = all.filter(function (x) { return x.p >= 0.68 && x.o >= 1.08 && x.o < st.min; })
-    .sort(function (a, b) { return (st.liga === 'todos' ? b.p * PRUD[b.f] - a.p * PRUD[a.f] : b.p - a.p); });
+  var legs = all.filter(function (x) { return x.p >= 0.68 && x.o >= 1.08 && x.o < st.min && x.cat !== 'cor' && x.cat !== 'tar'; })
+    .sort(function (a, b) { return rkf(b) - rkf(a); });
   var best = {};
   legs.forEach(function (x) {
     var k = x.i + x.cat;
@@ -316,7 +319,7 @@ function combinadas(all) {
 function especial(all) {
   var by = {};
   all.forEach(function (x) {
-    if (x.p < 0.65 || x.o < 1.05 || x.o > 2.2 || (x.cat === 'cor' && x.f === 0)) return;
+    if (x.p < 0.65 || x.o < 1.05 || x.o > 2.2 || x.cat === 'cor' || x.cat === 'tar') return;
     (by[x.i] = by[x.i] || []).push(x);
   });
   var ms = Object.keys(by).map(function (i) {
@@ -425,14 +428,14 @@ function render() {
       h += y ? '<div class="leg"><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + '<em>' + esc(partido(y.i)) + ' · ' + cuando(DATA[y.i]) + '</em></span>' + chipCuota(y) + '</div>'
              : '<div class="leg"><span><b>' + nom[g] + '</b><em>sin partidos en los próximos ' + DIASTODOS + ' días o sin pick con esa cuota</em></span></div>';
     });
-    h += '<p class="hint">Orden con descuento por fiabilidad: córners totales y goles/tarjetas valen menos que el resultado. Los porcentajes mostrados son los reales del modelo.</p></section>';
+    h += '<p class="hint">Orden con descuento por fiabilidad: córners y tarjetas (modelo propio sin validar) valen menos que goles y resultado ajustados a bwin. Los porcentajes mostrados son los reales.</p></section>';
     var E = especial(all), V = valor(all); st.last.E = E; st.last.V = V;
     h += '<section class="card combi"><h2><span class="tag">Combinada especial</span> cuota 5 a 6 · 2-3 €</h2>';
     if (E) {
       E.legs.forEach(function (l) { h += '<div class="leg"><b>' + pct(l.p) + '</b><span>' + esc(l.lab) + '<em>' + esc(partido(l.i)) + ' · ' + cuando(DATA[l.i]) + '</em></span>' + chipCuota(l) + '</div>'; });
       var est = E.legs.some(function (l) { return l.est; });
       h += '<div class="tot"><span>Todas a la vez</span><b>' + pct(E.p) + '</b><span class="odd">' + num(E.o) + '</span></div>' + gana(E.o) +
-        '<p class="nota">El modelo dice ' + pct(E.p) + '; la cuota de bwin equivale a ≈' + pct(1 / E.o) + '. Si hay mucha diferencia, desconfía del modelo. Apuesta especial de diversión: por debajo del 50 % no entra en la tabla de stakes, así que solo 2-3 €.' + (est ? ' Hay cuotas estimadas: confirma la cuota real en bwin.' : '') + '</p>' +
+        '<p class="nota">Probabilidad ' + pct(E.p) + ' frente al ' + pct(1 / E.o) + ' que daría una cuota justa de ' + num(E.o) + ': la diferencia es el margen de bwin acumulado en cada pick. Apuesta especial de diversión: por debajo del 50 % no entra en la tabla de stakes, así que solo 2-3 €.' + (est ? ' Hay cuotas estimadas: confirma la cuota real en bwin.' : '') + '</p>' +
         '<button class="addb" data-addx="e:0">＋ Añadir todas a mi apuesta</button>';
     } else h += '<p class="empty">Hoy no hay combinada especial: no hay 4 a 7 picks (cada uno al 65 % o más) que lleguen a cuota 5-6 con un 10 % conjunto.</p>';
     h += '</section><section class="card"><h2><span class="tag">Posible valor</span> cuota bwin real por encima de la justa</h2>';
@@ -441,7 +444,7 @@ function render() {
         h += '<div class="leg"><b>' + pct(y.p) + '</b><span>' + esc(y.lab) + '<em>' + esc(partido(y.i)) + ' · ' + cuando(DATA[y.i]) + '<br>cuota justa ' + num(1 / y.p) + ' · valor +' + Math.round(y.ev * 100) + ' %' + (y.sus ? ' · ⚠ sospechoso: casi seguro falla el modelo' : '') + '</em></span>' + chipCuota(y) + '</div>';
       });
     } else h += '<p class="empty">Ahora no hay ningún pick con cuota bwin real por encima de la justa.</p>';
-    h += '<p class="hint">Si bwin paga más de lo que el modelo cree justo, puede haber valor. Pero el modelo aún no bate al mercado: cuanto mayor la diferencia, más probable es que se equivoque el modelo.</p></section>';
+    h += '<p class="hint">Con las probabilidades ajustadas a bwin casi nunca habrá valor: es lo normal. Si aparece alguno es en córners o en mercados sin ajustar, y cuanto mayor la diferencia, más probable es que se equivoque el modelo.</p></section>';
   }
   document.getElementById('picks').innerHTML = h;
   // partidos
@@ -452,7 +455,7 @@ function render() {
     if (st.open === i) {
       m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
       m += '<div class="exp"><span>Goles esperados <b>' + d.g[0] + ' – ' + d.g[1] + '</b></span><span>Córners <b>' + d.c[0] + ' – ' + d.c[1] + '</b></span><span>Tarjetas <b>' + d.k[0] + ' – ' + d.k[1] + '</b></span></div>';
-      m += '<p class="hint">Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
+      m += '<p class="hint">' + (d.mk ? 'Goles y resultado: probabilidades ajustadas a las cuotas de bwin (validado: predicen mejor que el modelo propio). Córners y tarjetas: modelo propio.' : 'Probabilidades del modelo propio (sin cuotas bwin de este partido).') + ' Escribe la cuota real de bwin y los picks de arriba se recalculan.</p><ul class="sels">';
       sel.forEach(function (s) {
         var u = st.odds[key(i, s[0])] || '';
         m += '<li><b>' + pct(s[2]) + '</b><span>' + esc(s[0]) + '<em>cuota justa ' + num(1 / s[2]) + '</em></span><button class="add' + (enSlip(key(i, s[0])) ? ' on' : '') + '" data-add="' + i + ',' + d.s.indexOf(s) + '" aria-label="Añadir a mi apuesta">＋</button><input inputmode="decimal" placeholder="bwin" aria-label="Cuota de bwin: ' + esc(s[0]) + '" data-k="' + esc(key(i, s[0])) + '" value="' + (u ? num(u) : '') + '"></li>';
