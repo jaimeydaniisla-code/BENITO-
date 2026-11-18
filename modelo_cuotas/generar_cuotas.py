@@ -74,6 +74,17 @@ def etiquetas(cat, mk, H, A):
             eq = H if t.endswith('1') else A
             if 'Over' in pr: out[f'Goles {eq}: más de {c(hc)}'] = pr['Over']
             if 'Under' in pr: out[f'Goles {eq}: menos de {c(hc)}'] = pr['Under']
+        elif t in ('totals-corners', 'totals-bookings') and abs(hc % 1 - 0.5) < 1e-9:
+            nm = 'Córners' if 'corners' in t else 'Tarjetas'
+            if 'Over' in pr: out[f'{nm}: más de {c(hc)}'] = pr['Over']
+            if 'Under' in pr: out[f'{nm}: menos de {c(hc)}'] = pr['Under']
+        elif t in ('teamtotals-corners-team1', 'teamtotals-corners-team2', 'teamtotals-bookings-team1', 'teamtotals-bookings-team2') and abs(hc % 1 - 0.5) < 1e-9:
+            nm = 'Córners' if 'corners' in t else 'Tarjetas'; eq = H if t.endswith('1') else A
+            if 'Over' in pr: out[f'{nm} {eq}: más de {c(hc)}'] = pr['Over']
+            if 'Under' in pr: out[f'{nm} {eq}: menos de {c(hc)}'] = pr['Under']
+        elif t == '1x2-corners':
+            if '1' in pr: out[f'Más córners: {H}'] = pr['1']
+            if '2' in pr: out[f'Más córners: {A}'] = pr['2']
         elif t == 'bothteamsscore':
             if 'Yes' in pr: out['Ambos marcan: Sí'] = pr['Yes']
             if 'No' in pr: out['Ambos marcan: No'] = pr['No']
@@ -149,6 +160,7 @@ def aplicar():
                     m['bw'] = v['bw']; m['bwact'] = v['act']; k += 1
                     try:
                         if mercado.ajustar(m): aj += 1
+                        mercado.mezclar_conteos(m)
                     except Exception as e:
                         print('ajuste al mercado falló en', m['h'], m['a'], e)
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))

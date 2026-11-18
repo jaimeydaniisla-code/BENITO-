@@ -103,3 +103,19 @@ def ajustar(m, pmin=0.42, pmax=0.93):
     m['g'] = [round(float(lam[0]), 1), round(float(lam[1]), 1)]
     m['mk'] = 1
     return True
+
+
+def mezclar_conteos(m, w=0.5):
+    """Córners y tarjetas: donde bwin cotiza las dos caras de la línea, probabilidad = mitad modelo propio (calibrado en
+    backtest, sin cuotas históricas para compararlo con el mercado) + mitad mercado sin margen. Devuelve nº de selecciones tocadas."""
+    bw, n = m.get('bw') or {}, 0
+    for s in m['s']:
+        if s[1] not in ('cor', 'tar'): continue
+        mo = re.match(r'^(.*): (más|menos) de (\d+,5)$', s[0])
+        if not mo: continue
+        otro = f"{mo.group(1)}: {'menos' if mo.group(2) == 'más' else 'más'} de {mo.group(3)}"
+        if not (bw.get(s[0], 0) > 1 and bw.get(otro, 0) > 1): continue
+        pm = devig_pot([bw[s[0]], bw[otro]])[0]
+        s[2] = round(float(w * pm + (1 - w) * s[2]), 3); n += 1
+    if n: m['s'].sort(key=lambda x: -x[2]); m['mkc'] = 1
+    return n
