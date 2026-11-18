@@ -249,6 +249,7 @@ function cargarDatos(manual) {
     if (!L) throw new Error('vacío');
     Object.keys(L).forEach(function (k) { LIGAS[k] = L[k]; });
     setLiga(st.liga, true);
+    autoResolver();
     render();
   }).catch(function () {
     if (manual) document.getElementById('dlg').hidden = false;
@@ -556,15 +557,68 @@ function renderRegistro() {
     h += '<section class="card"><h2><span class="tag">Apuestas</span> toca para marcar el resultado</h2>';
     r.slice().reverse().forEach(function (x) {
       h += '<div class="rrow"><b>' + x.legs.map(function (l) { return esc(l.lab); }).join(' + ') + '</b><em>' + x.legs.map(function (l) { return esc(l.partido); }).join(' · ') + '</em>' +
-        '<em>' + x.f + ' · cuota ' + num(x.o) + ' · ' + eur(x.stake) + ' · modelo ' + pct(x.p) + (x.res ? ' · <b class="' + (x.res === 'G' ? 'pos' : x.res === 'P' ? 'neg' : '') + '">' + ({ G: 'GANADA', P: 'PERDIDA', N: 'NULA' })[x.res] + '</b>' : ' · pendiente') + '</em>' +
+        '<em>' + x.f + ' · cuota ' + num(x.o) + ' · ' + eur(x.stake) + ' · modelo ' + pct(x.p) + (x.res ? ' · <b class="' + (x.res === 'G' ? 'pos' : x.res === 'P' ? 'neg' : '') + '">' + ({ G: 'GANADA', P: 'PERDIDA', N: 'NULA' })[x.res] + '</b>' + (x.auto ? ' <small>(automático)</small>' : '') : ' · pendiente') + '</em>' +
         '<div class="rb"><button class="g" data-res="' + x.id + ',G">Ganada</button><button class="p" data-res="' + x.id + ',P">Perdida</button><button data-res="' + x.id + ',N">Nula</button><button data-res="' + x.id + ',D">🗑</button></div></div>';
     });
     h += '<button class="addb" data-csv="1">Copiar registro (CSV)</button></section>';
   }
   document.getElementById('picks').innerHTML = h; document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = '';
 }
+// ---------- Resultado automático de las apuestas (con los resultados reales de football-data) ----------
+function evalLeg(lab, H, A, r) {
+  var hg = r[3], ag = r[4], hc = r[5], ac = r[6], hk = r[7], ak = r[8], m;
+  var num = function (s) { return parseFloat(String(s).replace(',', '.')); };
+  if (lab === 'Ambos marcan: Sí') return hg > 0 && ag > 0;
+  if (lab === 'Ambos marcan: No') return !(hg > 0 && ag > 0);
+  m = lab.match(/^(Goles|Córners|Tarjetas)(?: (.+))?: (más|menos) de (\d+,\d)$/);
+  if (m) {
+    var p = m[1] === 'Goles' ? [hg, ag] : m[1] === 'Córners' ? [hc, ac] : [hk, ak], v;
+    if (!m[2]) v = p[0] + p[1]; else if (m[2] === H) v = p[0]; else if (m[2] === A) v = p[1]; else return null;
+    return m[3] === 'más' ? v > num(m[4]) : v < num(m[4]);
+  }
+  m = lab.match(/^Más córners: (.+)$/);
+  if (m) return m[1] === H ? hc > ac : m[1] === A ? ac > hc : null;
+  if (lab === H + ' o empate') return hg >= ag;
+  if (lab === 'Empate o ' + A) return ag >= hg;
+  if (lab === 'No hay empate') return hg !== ag;
+  if (lab === 'Gana ' + H) return hg > ag;
+  if (lab === 'Gana ' + A) return ag > hg;
+  if (lab === H + ' (empate no válido)') return hg === ag ? 'N' : hg > ag;
+  if (lab === A + ' (empate no válido)') return hg === ag ? 'N' : ag > hg;
+  if (lab === H + ' +1,5 (no pierde por 2)') return hg - ag >= -1;
+  if (lab === A + ' +1,5 (no pierde por 2)') return ag - hg >= -1;
+  if (lab === H + ' gana por 2 o más') return hg - ag >= 2;
+  if (lab === A + ' gana por 2 o más') return ag - hg >= 2;
+  if (lab === H + ' gana sin encajar') return hg > 0 && ag === 0;
+  if (lab === A + ' gana sin encajar') return ag > 0 && hg === 0;
+  return null;
+}
+function resultadoDe(partido, id) {
+  var par = partido.split(' – '); if (par.length !== 2) return null;
+  var d0 = new Date(id), iso = d0.getFullYear() + '-' + ('0' + (d0.getMonth() + 1)).slice(-2) + '-' + ('0' + d0.getDate()).slice(-2), best = null;
+  Object.keys(LIGAS).forEach(function (k) {
+    (LIGAS[k].res || []).forEach(function (r) { if (r[1] === par[0] && r[2] === par[1] && r[0] >= iso && (!best || r[0] < best[0])) best = r; });
+  });
+  return best;
+}
+function autoResolver() {
+  var r = regAll(), n = 0;
+  r.forEach(function (x) {
+    if (x.res || x.del || x.man || !x.legs) return;
+    var vs = x.legs.map(function (l) {
+      var rs = resultadoDe(l.partido, x.id); if (!rs) return null;
+      var par = l.partido.split(' – '); return evalLeg(l.lab, par[0], par[1], rs);
+    });
+    var res = null;
+    if (vs.some(function (v) { return v === false; })) res = 'P';
+    else if (vs.every(function (v) { return v === true || v === 'N'; })) res = vs.some(function (v) { return v === true; }) ? 'G' : 'N';
+    if (res) { x.res = res; x.auto = 1; x.u = Date.now(); n++; }
+  });
+  if (n) { regSave(r); toast(n + (n === 1 ? ' apuesta resuelta' : ' apuestas resueltas') + ' automáticamente'); }
+  return n;
+}
 function regRes(id, v) {
-  var r = regAll().map(function (x) { if (x.id === id) { if (v === 'D') x.del = true; else x.res = x.res === v ? null : v; x.u = Date.now(); } return x; });
+  var r = regAll().map(function (x) { if (x.id === id) { if (v === 'D') x.del = true; else { x.res = x.res === v ? null : v; x.man = 1; x.auto = 0; } x.u = Date.now(); } return x; });
   regSave(r); render();
 }
 function regCsv(btn) {

@@ -54,7 +54,7 @@ def main():
     for liga, pats in FILES.items():
         L = app.get('ligas', {}).get(liga)
         if not L: continue
-        x = filas(cargar(pats)); equipos = set(x.t)
+        D = cargar(pats); x = filas(D); equipos = set(x.t)
         reciente = x.tail(380 * 2)  # media de liga: ~ última temporada
         lg = [round(float(reciente[c].mean()), 1) for c in ('gf', 'cf', 'tf')]
         for J in L['jor']:
@@ -68,6 +68,16 @@ def main():
                 tot += 1
                 if 'h' in st and 'a' in st: m['st'] = st
                 else: sin += 1; print('  sin estadísticas:', liga, m['h'], m['a'])
+        # resultados reales de los últimos 30 días (con los nombres de la app) para marcar solas las apuestas del registro
+        c2a = {}
+        for J in L['jor']:
+            for m in J['ms']:
+                for n in (m['h'], m['a']):
+                    e = buscar(n, equipos)
+                    if e: c2a[e] = n
+        rec = D[D.Date >= pd.Timestamp.now().normalize() - pd.Timedelta(days=30)]
+        L['res'] = [[r.Date.strftime('%Y-%m-%d'), c2a[r.HomeTeam], c2a[r.AwayTeam], int(r.FTHG), int(r.FTAG), int(r.HC), int(r.AC), int(r.HK), int(r.AK)]
+                    for r in rec.itertuples() if r.HomeTeam in c2a and r.AwayTeam in c2a]
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print('estadísticas añadidas a', tot - sin, 'de', tot, 'partidos')
 
