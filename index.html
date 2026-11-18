@@ -750,7 +750,7 @@ function avisosCard() {
   h += '<p class="hint">' + (a ? '✅ Avisos activados en este móvil.' : 'Avisos desactivados en este móvil.') + ' Te llega «En 1 hora empieza…» con la alineación y el mejor pick. Cada uno activa los suyos.</p>';
   h += '<div class="quick" style="flex-wrap:wrap">' + Object.keys(LIGAS_AV).map(function (k) { return '<label style="display:inline-flex;gap:4px;align-items:center;margin-right:10px"><input type="checkbox" data-avliga="' + k + '"' + (lig.indexOf(k) >= 0 ? ' checked' : '') + '>' + LIGAS_AV[k] + '</label>'; }).join('') + '</div>';
   h += '<div class="rb" style="display:flex;gap:8px;flex-wrap:wrap">' + (a ? '<button class="addb" data-av="prueba">Probar aquí</button><button class="addb" style="background:var(--line);color:var(--ink)" data-av="off">Desactivar</button>' : '<button class="addb" data-av="on">🔔 Activar avisos</button>') + '</div>';
-  if (st.sync.gid) h += '<p class="hint" style="margin-top:10px"><b>Paso único (solo uno de los dos):</b> guarda este código en GitHub como secreto <b>GIST_ID</b> para que el robot encuentre vuestros avisos. <br>Código: <b style="user-select:all;word-break:break-all">' + esc(st.sync.gid) + '</b><br><button class="addb" data-av="gid">Copiar código</button> <a target="_blank" rel="noopener" href="https://github.com/jaimeydaniisla-code/BENITO-/settings/secrets/actions/new">Abrir GitHub (Name: GIST_ID)</a></p>';
+  if (st.sync.gid) h += '<p class="hint" style="margin-top:10px"><b>Paso único (solo uno de los dos):</b> guarda este código en GitHub como secreto <b>GIST_ID</b> para que el robot encuentre vuestros avisos. <br>Código (32 caracteres, sin «ghp_»):<input id="gidtxt" readonly value="' + esc(st.sync.gid) + '" style="width:100%;font-family:monospace;font-size:14px;padding:8px;border:2px solid var(--ink);border-radius:10px;margin:6px 0"><br><button class="addb" data-av="gid">Copiar código</button> <a target="_blank" rel="noopener" href="https://github.com/jaimeydaniisla-code/BENITO-/settings/secrets/actions/new">Abrir GitHub (Name: GIST_ID)</a></p>';
   return h + '<p class="hint">' + esc(st.avMsg || '') + '</p></section>';
 }
 function avisoGuardar(campos) {
@@ -782,7 +782,13 @@ function avisosAccion(a, btn) {
   if (a === 'on') return avisosActivar();
   if (a === 'off') { navigator.serviceWorker.ready.then(function (r) { return r.pushManager.getSubscription(); }).then(function (s) { if (s) s.unsubscribe(); }).catch(function () {}); avisoGuardar({ off: 1, sub: null }); st.avMsg = 'Avisos desactivados.'; render(); return; }
   if (a === 'prueba') { navigator.serviceWorker.ready.then(function (r) { r.showNotification('⚽ Prueba de Benitooo', { body: 'Así te llegará: «En 1 hora empieza Andorra – Leganés · alineaciones confirmadas · mejor pick…»', icon: 'foto-192.png' }); }); return; }
-  if (a === 'gid') { try { navigator.clipboard.writeText(st.sync.gid).then(function () { btn.textContent = 'Copiado ✓'; }); } catch (e) { btn.textContent = st.sync.gid; } }
+  if (a === 'gid') {
+    var inp = document.getElementById('gidtxt'), ok = false;
+    try { inp.removeAttribute('readonly'); inp.focus(); inp.setSelectionRange(0, 999); ok = document.execCommand('copy'); inp.setAttribute('readonly', ''); inp.blur(); } catch (e) {}
+    if (ok) btn.textContent = 'Copiado ✓';
+    else if (navigator.clipboard) navigator.clipboard.writeText(st.sync.gid).then(function () { btn.textContent = 'Copiado ✓'; }, function () { btn.textContent = 'Mantén pulsado el código y copia'; });
+    else btn.textContent = 'Mantén pulsado el código y copia';
+  }
 }
 function syncCard() {
   if (!st.sync) {
