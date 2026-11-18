@@ -17,6 +17,11 @@ except Exception:
 TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
+HORAS = float(os.environ.get('CUOTAS_HORAS', '0') or 0)       # >0: solo partidos que empiezan dentro de N horas (cuota casi de cierre)
+HIST = os.path.join(HERE, 'historico_cuotas.jsonl')            # una línea por partido y consulta (apertura, evolución y cierre)
+CONT = os.path.join(HERE, 'peticiones.json')                   # peticiones usadas por mes (plan gratuito de OddsPapi: 250/mes)
+LIMITE_MES = int(os.environ.get('CUOTAS_LIMITE_MES', '235'))
+BASE_MES = {'2026-11': 100}                                    # estimación de lo gastado antes de llevar la cuenta
 usadas = 0
 
 
@@ -117,12 +122,24 @@ def pedir():
     if not KEY:
         print('Sin ODDSPAPI_KEY'); return
     app = json.load(open(DATOS, encoding='utf-8')); ahora = dt.datetime.now(MAD)
+    mes = ahora.strftime('%Y-%m')
+    try: cont = json.load(open(CONT))
+    except Exception: cont = {}
+    gastado = cont.get(mes, BASE_MES.get(mes, 0))
+    if gastado >= LIMITE_MES:
+        print(f'Límite mensual de peticiones alcanzado ({gastado}/{LIMITE_MES}): no se piden cuotas'); return
+    global MAXPET
+    MAXPET = min(MAXPET, LIMITE_MES - gastado)
     cat = {m['marketId']: m for m in (lambda r: r.get('data', r) if isinstance(r, dict) else r)(get('/markets', sportId=10))}
     try: cu = json.load(open(CUOTAS, encoding='utf-8'))
     except Exception: cu = {}
     for liga, tid in TORNEOS.items():
         jor = app.get('ligas', {}).get(liga, {}).get('jor', [])
         ms = [m for j in jor for m in j['ms'] if ahora.date().isoformat() <= m['d'] <= (ahora + dt.timedelta(days=DIAS)).date().isoformat()]
+        if HORAS > 0:
+            def ko(m):
+                return dt.datetime.fromisoformat(m['d'] + 'T' + (m.get('t') or '23:59')).replace(tzinfo=MAD)
+            ms = [m for m in ms if ahora <= ko(m) <= ahora + dt.timedelta(hours=HORAS)]
         if not ms: print(liga, ': sin partidos en la ventana'); continue
         try:
             fx = get('/fixtures', tournamentId=tid, **{'from': ahora.strftime('%Y-%m-%d'), 'to': (ahora + dt.timedelta(days=DIAS + 1)).strftime('%Y-%m-%d')})
@@ -148,9 +165,14 @@ def pedir():
             et = etiquetas(cat, mk, m['h'], m['a'])
             if et:
                 cu[f"{liga}|{m['d']}|{m['h']}|{m['a']}"] = {'act': ahora.strftime('%d/%m %H:%M'), 'bw': et}; n += 1
+                with open(HIST, 'a', encoding='utf-8') as fh:
+                    fh.write(json.dumps({'t': ahora.isoformat(timespec='minutes'), 'liga': liga, 'd': m['d'], 'hora': m.get('t'), 'h': m['h'], 'a': m['a'], 'bw': et},
+                                        ensure_ascii=False, separators=(',', ':')) + '\n')
         print(f'{liga}: {n} partidos con cuotas, {sin} sin casar')
     json.dump(cu, open(CUOTAS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print('peticiones usadas en esta pasada:', usadas)
+    cont[mes] = gastado + usadas; json.dump(cont, open(CONT, 'w'))
+    print(f'peticiones del mes (estimadas): {cont[mes]}/{LIMITE_MES}')
 
 
 def aplicar():

@@ -2,7 +2,8 @@ name: cuotas
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 * * 5'     # viernes 09:00 (invierno): cuotas del fin de semana
+    - cron: '0 8 * * 5'     # viernes 09:00 (invierno): cuotas del fin de semana (apertura, 4 días)
+    - cron: '0 12 * * 6,0'  # sábado y domingo 13:00: cuotas casi de cierre de los partidos de las próximas 10 h
 permissions:
   contents: write
 concurrency:
@@ -20,9 +21,12 @@ jobs:
       - name: Pedir cuotas de bwin
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
+          CUOTAS_DIAS: ${{ github.event.schedule == '0 12 * * 6,0' && '1' || '4' }}
+          CUOTAS_HORAS: ${{ github.event.schedule == '0 12 * * 6,0' && '10' || '0' }}
+          CUOTAS_MAXPET: ${{ github.event.schedule == '0 12 * * 6,0' && '20' || '40' }}
         run: python modelo_cuotas/generar_cuotas.py
       - name: Guardar
         run: |
           git config user.name "robot"; git config user.email "robot@users.noreply.github.com"
-          git add cuotas.json datos.json
+          git add cuotas.json datos.json modelo_cuotas/historico_cuotas.jsonl modelo_cuotas/peticiones.json
           git diff --staged --quiet || (git commit -m "Cuotas bwin" && git pull -q --rebase origin main && git push)
