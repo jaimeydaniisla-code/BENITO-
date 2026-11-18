@@ -177,7 +177,7 @@ var LIGAS = { primera: { nombre: 'Primera', jor: JOR, meta: META },
 var CATS = { todo: 'Todo', res: 'Resultado', gol: 'Goles', cor: 'Córners', tar: 'Tarjetas' };
 var FIAB = ['fiabilidad baja', 'fiabilidad baja-media', 'fiabilidad media'];
 var DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-var st = { stake: 3, min: 1.5, cat: 'todo', odds: {}, open: -1, j: 0, liga: 'primera', slip: [], slipo: 0, last: { S: [], C: [] } };
+var st = { stake: 3, min: 1.5, cat: 'todo', odds: {}, open: -1, j: 0, liga: 'primera', slip: [], slipo: 0, oddsU: {}, sync: null, syncMsg: '', last: { S: [], C: [] } };
 var DATA = JOR[0].ms;
 function setJ(n) { st.j = Math.max(0, Math.min(JOR.length - 1, n)); DATA = (JOR[st.j] || { ms: [] }).ms; st.open = -1; }
 function opciones() {
@@ -227,11 +227,12 @@ function load() {
     if (s.stake > 0) st.stake = s.stake;
     if (s.min >= 1.01) st.min = s.min;
     if (s.odds) st.odds = s.odds;
+    if (s.oddsU) st.oddsU = s.oddsU;
   } catch (e) {}
 }
 function save() {
   try {
-    localStorage.setItem('benitooo_v1', JSON.stringify({ stake: st.stake, min: st.min, odds: st.odds }));
+    localStorage.setItem('benitooo_v1', JSON.stringify({ stake: st.stake, min: st.min, odds: st.odds, oddsU: st.oddsU }));
   } catch (e) {}
 }
 function key(i, lab) { return (st.liga === 'primera' ? '' : st.liga + '|') + (JOR[st.j] ? JOR[st.j].j : 0) + '|' + i + '|' + lab; }
@@ -378,8 +379,9 @@ function render() {
 
 // ---------- Mi apuesta (cupón) y registro ----------
 var REGK = 'benitooo_reg';
-function regLoad() { try { return JSON.parse(localStorage.getItem(REGK)) || []; } catch (e) { return []; } }
-function regSave(r) { try { localStorage.setItem(REGK, JSON.stringify(r)); } catch (e) {} }
+function regAll() { try { return JSON.parse(localStorage.getItem(REGK)) || []; } catch (e) { return []; } }
+function regLoad() { return regAll().filter(function (x) { return !x.del; }); }
+function regSave(r) { try { localStorage.setItem(REGK, JSON.stringify(r)); } catch (e) {} syncSoon(); }
 function enSlip(k) { return st.slip.some(function (l) { return l.k === k; }); }
 function toast(t) {
   var el = document.getElementById('toast'); el.textContent = t; el.hidden = false;
@@ -410,15 +412,15 @@ function renderSlip() {
 function slipSave() {
   if (!st.slip.length) return;
   var P = 1, O = 1; st.slip.forEach(function (l) { P *= l.p; O *= l.o; });
-  var Oe = st.slipo > 1 ? st.slipo : O, d = new Date(), r = regLoad();
+  var Oe = st.slipo > 1 ? st.slipo : O, d = new Date(), r = regAll();
   r.push({ id: d.getTime(), f: d.getDate() + '/' + (d.getMonth() + 1), liga: st.slip[0].liga,
     cat: st.slip.length > 1 ? 'combi' : st.slip[0].cat, legs: st.slip.map(function (l) { return { lab: l.lab, partido: l.partido, p: l.p, o: l.o }; }),
-    p: P, o: Oe, stake: st.stake, res: null });
+    p: P, o: Oe, stake: st.stake, res: null, u: d.getTime() });
   regSave(r); st.slip = []; st.slipo = 0; toast('Apuesta apuntada ✓'); render();
 }
 var CATN = { gol: 'Goles', cor: 'Córners', tar: 'Tarjetas', res: 'Resultado', combi: 'Combinadas' };
 function renderRegistro() {
-  var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = '<section class="card"><h2><span class="tag">Mi registro</span> se guarda en este móvil</h2>';
+  var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
   var ok = res.filter(function (x) { return x.res === 'G'; }).length, vl = res.filter(function (x) { return x.res !== 'N'; }),
     vok = vl.filter(function (x) { return x.res === 'G'; }).length, stk = 0, bal = 0, esp = 0;
   vl.forEach(function (x) { stk += x.stake; bal += x.res === 'G' ? x.stake * (x.o - 1) : -x.stake; esp += x.p; });
@@ -446,7 +448,7 @@ function renderRegistro() {
   document.getElementById('picks').innerHTML = h; document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = '';
 }
 function regRes(id, v) {
-  var r = regLoad(); r = v === 'D' ? r.filter(function (x) { return x.id !== id; }) : r.map(function (x) { if (x.id === id) x.res = x.res === v ? null : v; return x; });
+  var r = regAll().map(function (x) { if (x.id === id) { if (v === 'D') x.del = true; else x.res = x.res === v ? null : v; x.u = Date.now(); } return x; });
   regSave(r); render();
 }
 function regCsv(btn) {
@@ -455,6 +457,70 @@ function regCsv(btn) {
   }).join('\n');
   try { navigator.clipboard.writeText(t).then(function () { btn.textContent = 'Copiado ✓'; }); } catch (e) { btn.textContent = 'No se pudo copiar'; }
 }
+
+
+// ---------- Compartir con el compañero (Gist secreto de GitHub) ----------
+var SYNCK = 'benitooo_sync', GFILE = 'registro.json', GDESC = 'benitooo-registro';
+try { st.sync = JSON.parse(localStorage.getItem(SYNCK)); } catch (e) { st.sync = null; }
+function syncCard() {
+  if (!st.sync) {
+    return '<section class="card"><h2><span class="tag">Compartir</span> con tu compañero</h2><p class="hint">Para que los dos veáis las mismas apuestas y cuotas: crea una clave en GitHub (solo permiso «gist»), pégala aquí y haced lo mismo los dos con la <b>misma clave</b>.</p>' +
+      '<a class="addb" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://github.com/settings/tokens/new?scopes=gist&description=benitooo-sync&default_expires_at=none">1) Crear la clave en GitHub</a>' +
+      '<input id="synctok" placeholder="2) Pega aquí la clave (ghp_…)" style="width:100%;margin-top:8px;padding:10px;border:2px solid var(--ink);border-radius:12px;font-size:15px">' +
+      '<button class="addb" data-sync="conectar">3) Conectar</button><p class="hint">' + esc(st.syncMsg) + '</p></section>';
+  }
+  return '<section class="card"><h2><span class="tag">Compartido ✓</span> ' + esc(st.syncMsg || '') + '</h2><div class="rb" style="display:flex;gap:8px"><button class="addb" data-sync="ahora">↻ Sincronizar ahora</button><button class="addb" style="background:var(--line);color:var(--ink)" data-sync="salir">Desconectar</button></div></section>';
+}
+function gh(url, opt) {
+  opt = opt || {}; opt.headers = { 'Authorization': 'Bearer ' + st.sync.tok, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+  return fetch(url, opt).then(function (r) { if (!r.ok) throw new Error('GitHub ' + r.status); return r.json(); });
+}
+function docLocal() {
+  var o = {}; Object.keys(st.oddsU).forEach(function (k) { o[k] = [st.odds[k] || 0, st.oddsU[k]]; });
+  return { reg: regAll(), odds: o };
+}
+function mergeRemote(R) {
+  var m = {}; regAll().forEach(function (x) { m[x.id] = x; });
+  (R.reg || []).forEach(function (x) { var l = m[x.id]; if (!l || (x.u || 0) > (l.u || 0)) m[x.id] = x; });
+  var all = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return a.id - b.id; });
+  try { localStorage.setItem(REGK, JSON.stringify(all)); } catch (e) {}
+  Object.keys(R.odds || {}).forEach(function (k) { var v = R.odds[k]; if ((v[1] || 0) > (st.oddsU[k] || 0)) { st.odds[k] = v[0]; st.oddsU[k] = v[1]; } });
+  save0();
+}
+function save0() { try { localStorage.setItem('benitooo_v1', JSON.stringify({ stake: st.stake, min: st.min, odds: st.odds, oddsU: st.oddsU })); } catch (e) {} }
+function gistData(g) {
+  var f = g.files && g.files[GFILE]; if (!f) return Promise.resolve({});
+  if (!f.truncated) { try { return Promise.resolve(JSON.parse(f.content)); } catch (e) { return Promise.resolve({}); } }
+  return fetch(f.raw_url).then(function (r) { return r.json(); });
+}
+function syncNow(manual) {
+  if (!st.sync || syncNow.busy) return Promise.resolve();
+  syncNow.busy = true;
+  var p = st.sync.gid ? gh('https://api.github.com/gists/' + st.sync.gid) : gh('https://api.github.com/gists?per_page=100').then(function (L) {
+    var g = L.filter(function (x) { return x.description === GDESC; })[0];
+    if (g) { st.sync.gid = g.id; return gh('https://api.github.com/gists/' + g.id); }
+    return gh('https://api.github.com/gists', { method: 'POST', body: JSON.stringify({ description: GDESC, public: false, files: (function () { var o = {}; o[GFILE] = { content: JSON.stringify(docLocal()) }; return o; })() }) })
+      .then(function (g2) { st.sync.gid = g2.id; return g2; });
+  });
+  return p.then(function (g) {
+    localStorage.setItem(SYNCK, JSON.stringify(st.sync));
+    return gistData(g).then(function (R) {
+      mergeRemote(R);
+      var D = docLocal(), igual = JSON.stringify(D) === JSON.stringify({ reg: R.reg || [], odds: R.odds || {} });
+      if (igual) return;
+      var o = {}; o[GFILE] = { content: JSON.stringify(D) };
+      return gh('https://api.github.com/gists/' + st.sync.gid, { method: 'PATCH', body: JSON.stringify({ files: o }) });
+    });
+  }).then(function () {
+    var d = new Date(); st.syncMsg = 'Última sincronización ' + d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2);
+    if (!document.activeElement || document.activeElement.tagName !== 'INPUT') render();
+  }).catch(function (e) {
+    st.syncMsg = 'No se pudo sincronizar (' + (e.message || 'error') + '). Revisa la clave o la conexión.';
+    if (String(e.message).indexOf('401') >= 0) { st.sync = null; localStorage.removeItem(SYNCK); }
+    if (manual || st.liga === 'registro') render();
+  }).then(function () { syncNow.busy = false; });
+}
+function syncSoon() { if (!st.sync) return; clearTimeout(syncSoon.t); syncSoon.t = setTimeout(function () { syncNow(false); }, 1500); }
 
 function parse(v) { var x = parseFloat(String(v).replace(',', '.')); return isFinite(x) ? x : 0; }
 
@@ -468,10 +534,20 @@ function init() {
   render();
   cargarDatos(false);
   setInterval(function () { if (!document.hidden) cargarDatos(false); }, 600000);
+  if (st.sync) syncNow(false);
+  setInterval(function () { if (!document.hidden) syncNow(false); }, 60000);
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
+    var t = e.target.closest('[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
     if (!t) return;
-    if (t.dataset.add) { var ia = t.dataset.add.split(','), ii = +ia[0], ss = DATA[ii].s[+ia[1]]; var cc = cuota(ii, ss); addLeg({ i: ii, lab: ss[0], cat: ss[1], p: ss[2], o: cc.o, est: cc.est }); render(); }
+    if (t.dataset.sync) {
+      if (t.dataset.sync === 'conectar') {
+        var tk = (document.getElementById('synctok').value || '').trim();
+        if (tk.length < 20) { st.syncMsg = 'Pega la clave completa.'; render(); return; }
+        st.sync = { tok: tk, gid: null }; st.syncMsg = 'Conectando…'; render(); syncNow(true);
+      } else if (t.dataset.sync === 'ahora') { st.syncMsg = 'Sincronizando…'; render(); syncNow(true); }
+      else if (t.dataset.sync === 'salir') { st.sync = null; st.syncMsg = ''; try { localStorage.removeItem(SYNCK); } catch (x) {} render(); }
+    }
+    else if (t.dataset.add) { var ia = t.dataset.add.split(','), ii = +ia[0], ss = DATA[ii].s[+ia[1]]; var cc = cuota(ii, ss); addLeg({ i: ii, lab: ss[0], cat: ss[1], p: ss[2], o: cc.o, est: cc.est }); render(); }
     else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 's' ? st.last.S[+pr[1]] : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' ? [q] : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
     else if (t.dataset.rm !== undefined) { st.slip.splice(+t.dataset.rm, 1); render(); }
     else if (t.dataset.slip === 'clear') { st.slip = []; st.slipo = 0; render(); }
@@ -505,8 +581,8 @@ function init() {
   document.getElementById('matches').addEventListener('change', function (e) {
     var k = e.target.dataset.k; if (!k) return;
     var v = parse(e.target.value);
-    if (v >= 1.01) st.odds[k] = v; else delete st.odds[k];
-    save(); render();
+    st.odds[k] = v >= 1.01 ? v : 0; st.oddsU[k] = Date.now();
+    save(); syncSoon(); render();
   });
 }
 if (typeof document !== 'undefined') init();
