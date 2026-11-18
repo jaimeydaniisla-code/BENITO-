@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icono-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1b1340">
 <title>Benitooo¡¡¡ — Primera División</title>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -598,7 +603,7 @@ function grafica(vl) {
 }
 var CATN = { gol: 'Goles', cor: 'Córners', tar: 'Tarjetas', res: 'Resultado', combi: 'Combinadas' };
 function renderRegistro() {
-  var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
+  var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + avisosCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
   var ok = res.filter(function (x) { return x.res === 'G'; }).length, vl = res.filter(function (x) { return x.res !== 'N'; }),
     vok = vl.filter(function (x) { return x.res === 'G'; }).length, stk = 0, bal = 0, esp = 0;
   vl.forEach(function (x) { stk += x.stake; bal += x.res === 'G' ? x.stake * (x.o - 1) : -x.stake; esp += x.p; });
@@ -725,6 +730,60 @@ function regCsv(btn) {
 // ---------- Compartir con el compañero (Gist secreto de GitHub) ----------
 var SYNCK = 'benitooo_sync', GFILE = 'registro.json', GDESC = 'benitooo-registro';
 try { st.sync = JSON.parse(localStorage.getItem(SYNCK)); } catch (e) { st.sync = null; }
+// ---------- Avisos en el móvil (Web Push). El robot avisa ~1 h antes de cada partido con alineación y mejor pick ----------
+var PUSHK = 'benitooo_push', DEVK = 'benitooo_dev', LIGAS_AV = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions' };
+function pushAll() { try { return JSON.parse(localStorage.getItem(PUSHK)) || {}; } catch (e) { return {}; } }
+function pushSave(P) { try { localStorage.setItem(PUSHK, JSON.stringify(P)); } catch (e) {} }
+function devId() { var d = localStorage.getItem(DEVK); if (!d) { d = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); localStorage.setItem(DEVK, d); } return d; }
+function b64u(buf) { var s = '', b = new Uint8Array(buf); for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function deb64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var s = atob(t), b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
+function pushSoportado() { return typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof window !== 'undefined' && 'PushManager' in window && 'Notification' in window; }
+function miAviso() { var e = pushAll()[devId()]; return e && !e.off ? e : null; }
+function avisosCard() {
+  var h = '<section class="card"><h2><span class="tag">Avisos</span> 1 h antes de cada partido</h2>';
+  if (!pushSoportado()) {
+    var ios = /iPhone|iPad/.test(navigator.userAgent || '');
+    return h + '<p class="hint">' + (ios ? 'En iPhone: abre esta página en <b>Safari</b> → botón Compartir → <b>Añadir a pantalla de inicio</b>, y entra desde ese icono. Ahí aparecerá el botón de avisos (iOS 16.4 o más).' : 'Este navegador no admite avisos. Usa Chrome en Android o instala la app en la pantalla de inicio.') + '</p></section>';
+  }
+  if (!st.sync) return h + '<p class="hint">Primero conecta «Compartir» (arriba): los avisos se guardan ahí para que el robot sepa a qué móviles avisar.</p></section>';
+  var a = miAviso(), lig = (a && a.ligas) || Object.keys(LIGAS_AV);
+  h += '<p class="hint">' + (a ? '✅ Avisos activados en este móvil.' : 'Avisos desactivados en este móvil.') + ' Te llega «En 1 hora empieza…» con la alineación y el mejor pick. Cada uno activa los suyos.</p>';
+  h += '<div class="quick" style="flex-wrap:wrap">' + Object.keys(LIGAS_AV).map(function (k) { return '<label style="display:inline-flex;gap:4px;align-items:center;margin-right:10px"><input type="checkbox" data-avliga="' + k + '"' + (lig.indexOf(k) >= 0 ? ' checked' : '') + '>' + LIGAS_AV[k] + '</label>'; }).join('') + '</div>';
+  h += '<div class="rb" style="display:flex;gap:8px;flex-wrap:wrap">' + (a ? '<button class="addb" data-av="prueba">Probar aquí</button><button class="addb" style="background:var(--line);color:var(--ink)" data-av="off">Desactivar</button>' : '<button class="addb" data-av="on">🔔 Activar avisos</button>') + '</div>';
+  if (st.sync.gid) h += '<p class="hint" style="margin-top:10px"><b>Paso único (solo uno de los dos):</b> guarda este código en GitHub como secreto <b>GIST_ID</b> para que el robot encuentre vuestros avisos. <button class="addb" data-av="gid">Copiar código</button> <a target="_blank" rel="noopener" href="https://github.com/jaimeydaniisla-code/BENITO-/settings/secrets/actions/new">Abrir GitHub (Name: GIST_ID)</a></p>';
+  return h + '<p class="hint">' + esc(st.avMsg || '') + '</p></section>';
+}
+function avisoGuardar(campos) {
+  var P = pushAll(), k = devId(), e = P[k] || {}; Object.keys(campos).forEach(function (q) { e[q] = campos[q]; }); e.u = Date.now(); P[k] = e; pushSave(P); syncSoon();
+}
+function avisosActivar() {
+  st.avMsg = 'Activando…'; render();
+  var reg;
+  return Notification.requestPermission().then(function (perm) {
+    if (perm !== 'granted') throw new Error('no has dado permiso para notificaciones');
+    return navigator.serviceWorker.register('sw.js');
+  }).then(function (r) { reg = r; return navigator.serviceWorker.ready; }).then(function () {
+    var mio = pushAll()[devId()] || {};
+    if (mio.d && mio.pub) return { d: mio.d, pub: mio.pub };
+    return crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']).then(function (kp) {
+      return Promise.all([crypto.subtle.exportKey('raw', kp.publicKey), crypto.subtle.exportKey('jwk', kp.privateKey)]).then(function (x) { return { pub: b64u(x[0]), d: x[1].d }; });
+    });
+  }).then(function (K) {
+    return reg.pushManager.getSubscription().then(function (old) { return old ? old.unsubscribe() : null; }).then(function () {
+      return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: deb64u(K.pub) });
+    }).then(function (sub) {
+      var lig = []; document.querySelectorAll('[data-avliga]').forEach(function (c) { if (c.checked) lig.push(c.dataset.avliga); });
+      avisoGuardar({ sub: sub.toJSON(), pub: K.pub, d: K.d, ligas: lig.length ? lig : Object.keys(LIGAS_AV), off: 0, nom: /iPhone/.test(navigator.userAgent) ? 'iPhone' : /Android/.test(navigator.userAgent) ? 'Android' : 'otro' });
+      st.avMsg = 'Listo. Pulsa «Probar aquí» para ver cómo llegan.'; render();
+    });
+  }).catch(function (e) { st.avMsg = 'No se pudo activar: ' + (e.message || e); render(); });
+}
+function avisosAccion(a, btn) {
+  if (a === 'on') return avisosActivar();
+  if (a === 'off') { navigator.serviceWorker.ready.then(function (r) { return r.pushManager.getSubscription(); }).then(function (s) { if (s) s.unsubscribe(); }).catch(function () {}); avisoGuardar({ off: 1, sub: null }); st.avMsg = 'Avisos desactivados.'; render(); return; }
+  if (a === 'prueba') { navigator.serviceWorker.ready.then(function (r) { r.showNotification('⚽ Prueba de Benitooo', { body: 'Así te llegará: «En 1 hora empieza Andorra – Leganés · alineaciones confirmadas · mejor pick…»', icon: 'icono-192.png' }); }); return; }
+  if (a === 'gid') { try { navigator.clipboard.writeText(st.sync.gid).then(function () { btn.textContent = 'Copiado ✓'; }); } catch (e) { btn.textContent = st.sync.gid; } }
+}
 function syncCard() {
   if (!st.sync) {
     return '<section class="card"><h2><span class="tag">Compartir</span> con tu compañero</h2><p class="hint">Para que los dos veáis las mismas apuestas y cuotas: crea una clave en GitHub (solo permiso «gist»), pégala aquí y haced lo mismo los dos con la <b>misma clave</b>.</p>' +
@@ -740,7 +799,7 @@ function gh(url, opt) {
 }
 function docLocal() {
   var o = {}; Object.keys(st.oddsU).forEach(function (k) { o[k] = [st.odds[k] || 0, st.oddsU[k]]; });
-  return { reg: regAll(), odds: o };
+  return { reg: regAll(), odds: o, push: pushAll() };
 }
 function mergeRemote(R) {
   var m = {}; regAll().forEach(function (x) { m[x.id] = x; });
@@ -748,6 +807,7 @@ function mergeRemote(R) {
   var all = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return a.id - b.id; });
   try { localStorage.setItem(REGK, JSON.stringify(all)); } catch (e) {}
   Object.keys(R.odds || {}).forEach(function (k) { var v = R.odds[k]; if ((v[1] || 0) > (st.oddsU[k] || 0)) { st.odds[k] = v[0]; st.oddsU[k] = v[1]; } });
+  var P = pushAll(); Object.keys(R.push || {}).forEach(function (k) { var v = R.push[k]; if (!P[k] || (v.u || 0) > (P[k].u || 0)) P[k] = v; }); pushSave(P);
   save0();
 }
 function save0() { try { localStorage.setItem('benitooo_v1', JSON.stringify({ stake: st.stake, min: st.min, odds: st.odds, oddsU: st.oddsU })); } catch (e) {} }
@@ -769,7 +829,7 @@ function syncNow(manual) {
     localStorage.setItem(SYNCK, JSON.stringify(st.sync));
     return gistData(g).then(function (R) {
       mergeRemote(R);
-      var D = docLocal(), igual = JSON.stringify(D) === JSON.stringify({ reg: R.reg || [], odds: R.odds || {} });
+      var D = docLocal(), igual = JSON.stringify(D) === JSON.stringify({ reg: R.reg || [], odds: R.odds || {}, push: R.push || {} });
       if (igual) return;
       var o = {}; o[GFILE] = { content: JSON.stringify(D) };
       return gh('https://api.github.com/gists/' + st.sync.gid, { method: 'PATCH', body: JSON.stringify({ files: o }) });
@@ -796,13 +856,15 @@ function init() {
   document.getElementById('jsel').addEventListener('change', function (e) { setJ(+e.target.value); render(); });
   render();
   cargarDatos(false).then(cargarVivo);
+  if (pushSoportado()) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data === 'refrescar') cargarDatos(false).then(cargarVivo); }); }
   setInterval(function () { if (!document.hidden) cargarDatos(false); }, 600000);
   setInterval(function () { if (!document.hidden) cargarVivo(); }, 60000);
   if (st.sync) syncNow(false);
   setInterval(function () { if (!document.hidden) syncNow(false); }, 60000);
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
+    var t = e.target.closest('[data-av],[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
     if (!t) return;
+    if (t.dataset.av) { avisosAccion(t.dataset.av, t); return; }
     if (t.dataset.sync) {
       if (t.dataset.sync === 'conectar') {
         var tk = (document.getElementById('synctok').value || '').trim();
@@ -843,6 +905,7 @@ function init() {
     if (e.target.id === 'slipo') { var v = parse(e.target.value); st.slipo = v > 1 ? v : 0; renderSlip(); }
   });
   document.getElementById('picks').addEventListener('change', function (e) {
+    if (e.target.dataset.avliga) { var lg = []; document.querySelectorAll('[data-avliga]').forEach(function (c) { if (c.checked) lg.push(c.dataset.avliga); }); avisoGuardar({ ligas: lg }); return; }
     if (e.target.id !== 'banca') return;
     var vb = parse(e.target.value); st.odds.__bank = vb > 0 ? vb : 0; st.oddsU.__bank = Date.now(); save(); syncSoon(); render();
   });

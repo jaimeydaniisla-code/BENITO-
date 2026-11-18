@@ -4,6 +4,10 @@ on:
     - cron: '*/10 10-22 * * 5,6,0'   # vie/sáb/dom, cada 10 min (UTC 10-22 = 11-23 h Madrid aprox.)
     - cron: '*/15 16-22 * * 1-4'     # entre semana por la tarde-noche (noches de Champions y Europa)
   workflow_dispatch:
+    inputs:
+      prueba:
+        description: 'Mandar un aviso de prueba a los móviles (si/no)'
+        default: 'no'
 permissions:
   contents: write
 concurrency:
@@ -18,7 +22,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Directo (FotMob, sin claves ni cupo de OddsPapi)
+          cache: pip
+      - run: pip install pywebpush
+      - name: Directo y avisos (FotMob, sin cupo de OddsPapi)
+        env:
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRUEBA_AVISO: ${{ github.event.inputs.prueba == 'si' && '1' || '' }}
         run: python modelo_cuotas/envivo.py
       - name: Publicar
         run: |

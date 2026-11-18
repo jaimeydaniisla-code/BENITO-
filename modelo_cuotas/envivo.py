@@ -55,6 +55,52 @@ def alineacion(g, H, A):
     return txt
 
 
+def leer_avisos():
+    """Suscripciones de los móviles, guardadas por la app en el Gist secreto compartido (secreto GIST_ID)."""
+    gid = os.environ.get('GIST_ID', '').strip()
+    if not gid: print('Avisos: falta el secreto GIST_ID'); return {}
+    for tok in (os.environ.get('GITHUB_TOKEN', ''), ''):
+        try:
+            h = {'User-Agent': 'benitooo', 'Accept': 'application/vnd.github+json'}
+            if tok: h['Authorization'] = 'Bearer ' + tok
+            g = json.loads(urllib.request.urlopen(urllib.request.Request('https://api.github.com/gists/' + gid, headers=h), timeout=30).read().decode())
+            f = (g.get('files') or {}).get('registro.json') or {}
+            txt = f.get('content') if not f.get('truncated') else urllib.request.urlopen(f['raw_url'], timeout=30).read().decode()
+            return (json.loads(txt or '{}').get('push') or {})
+        except Exception as e:
+            print('Avisos: no se pudo leer el Gist', 'con token' if tok else 'sin token', repr(e)[:80])
+    return {}
+
+
+def enviar(subs, titulo, cuerpo, tag, ligas=None):
+    try:
+        from pywebpush import webpush, WebPushException
+    except Exception as e:
+        print('Avisos: falta pywebpush', e); return 0
+    n = 0
+    for k, v in subs.items():
+        if v.get('off') or not v.get('sub') or not v.get('d'): continue
+        if ligas and not set(ligas) & set(v.get('ligas') or LIGAS): continue
+        try:
+            webpush(subscription_info=v['sub'], data=json.dumps({'title': titulo, 'body': cuerpo, 'tag': tag, 'url': './'}, ensure_ascii=False),
+                    vapid_private_key=v['d'], vapid_claims={'sub': 'mailto:benitooo@users.noreply.github.com'}, ttl=3600)
+            n += 1
+        except Exception as e:
+            print('  aviso fallido para', k, v.get('nom'), repr(e)[:120])
+    return n
+
+
+def mejor_pick(m):
+    bw = m.get('bw') or {}
+    c = [x for x in m.get('s') or [] if 0.5 <= x[2] <= 0.92]
+    con = [x for x in c if bw.get(x[0], 0) >= 1.25]
+    if con:
+        x = max(con, key=lambda x: x[2]); return f"{x[0]} · {round(x[2] * 100)} % · bwin {str(bw[x[0]]).replace('.', ',')}"
+    if c:
+        x = max(c, key=lambda x: x[2]); return f"{x[0]} · {round(x[2] * 100)} % (cuota estimada)"
+    return 'sin pick claro'
+
+
 def main():
     ahora = dt.datetime.now(MAD)
     app = json.load(open(DATOS, encoding='utf-8'))
@@ -68,6 +114,8 @@ def main():
                     ko = dt.datetime.fromisoformat(m['d'] + 'T' + m['t']).replace(tzinfo=MAD)
                     if ko - dt.timedelta(minutes=ANTES) <= ahora <= ko + dt.timedelta(minutes=DESPUES):
                         cerca.setdefault(liga, []).append((m, ko))
+    if os.environ.get('PRUEBA_AVISO'):
+        print('Prueba de aviso enviada a', enviar(leer_avisos(), '⚽ Prueba de Benitooo', 'Si ves esto, los avisos funcionan. Te llegarán ~1 h antes de cada partido.', 'prueba'), 'móviles')
     if not cerca:
         print('Sin partidos cerca de su hora: nada que hacer'); return
     ayer = (ahora.date() - dt.timedelta(days=1)).isoformat()
@@ -102,8 +150,30 @@ def main():
                 except Exception as ex:
                     print('  AVISO partido:', m['h'], m['a'], repr(ex)[:80])
             if e: p.setdefault(f"{liga}|{m['d']}|{m['h']}|{m['a']}", {}).update(e)
-    nuevo = {'p': p}
-    if nuevo == {'p': previo.get('p', {})}:
+    # Avisos ~1 h antes (se agrupan los partidos que empiezan a la misma hora)
+    av = [k for k in previo.get('av', []) if k.split('|')[1] >= ayer]
+    grupos = {}
+    for liga, lst in cerca.items():
+        for m, ko in lst:
+            q = f"{liga}|{m['d']}|{m['h']}|{m['a']}"; mins = (ko - ahora).total_seconds() / 60
+            if 35 <= mins <= 75 and q not in av: grupos.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q))
+    if grupos:
+        subs = leer_avisos()
+        for hora, L in sorted(grupos.items()):
+            t = hora[-5:]
+            if len(L) == 1:
+                liga, m, q = L[0]; ali = (p.get(q) or {}).get('ali') or 'alineaciones aún sin publicar'
+                tit = f"⚽ En 1 h ({t}): {m['h']} – {m['a']}"
+                cuerpo = f"{ali.split(' · ')[0][:70]}\nMejor pick: {mejor_pick(m)}\nRevisa bajas y la cuota real en bwin antes de apostar."
+            else:
+                L.sort(key=lambda x: ['primera', 'champions', 'premier', 'segunda'].index(x[0]) if x[0] in ('primera', 'champions', 'premier', 'segunda') else 9)
+                tit = f"⚽ En 1 h ({t}): {L[0][1]['h']} – {L[0][1]['a']} y {len(L) - 1} más"
+                cuerpo = '\n'.join(f"{m['h']} – {m['a']}: {mejor_pick(m)}" for _, m, _ in L[:5]) + '\nAbre la app: alineaciones ya cargadas.'
+            n = enviar(subs, tit, cuerpo, 'k' + hora, [x[0] for x in L]) if subs else 0
+            print('Aviso', hora, len(L), 'partidos ->', n, 'móviles')
+            av += [x[2] for x in L]
+    nuevo = {'p': p, 'av': av}
+    if nuevo == {'p': previo.get('p', {}), 'av': previo.get('av', [])}:
         print('Sin cambios'); return
     nuevo['act'] = ahora.strftime('%d/%m %H:%M')
     json.dump(nuevo, open(SALIDA, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
