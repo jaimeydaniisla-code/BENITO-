@@ -52,6 +52,24 @@ def margenes(m):
     return {k: v for k, v in out.items() if v is not None}
 
 
+def justas(m):
+    """Probabilidad justa (sin margen) de cada selección según Pinnacle, emparejando sus dos caras (o las tres del 1X2)."""
+    pn, H, A, out = m.get('pin') or {}, m['h'], m['a'], {}
+    ks = (f'Gana {H}', 'Empate', f'Gana {A}')
+    if all(pn.get(k, 0) > 1 for k in ks):
+        pH, pD, pA = devig_pot([pn[k] for k in ks])
+        out.update({ks[0]: pH, 'Empate': pD, ks[2]: pA, f'{H} o empate': pH + pD, f'Empate o {A}': pD + pA, 'No hay empate': pH + pA,
+                    f'{H} (empate no válido)': pH / (pH + pA), f'{A} (empate no válido)': pA / (pH + pA)})
+    for k, v in pn.items():
+        if ': más de ' in k:
+            k2 = k.replace(': más de ', ': menos de ')
+            if pn.get(k2, 0) > 1 and v > 1:
+                p1, p2 = devig_pot([v, pn[k2]]); out[k] = p1; out[k2] = p2
+    if pn.get('Ambos marcan: Sí', 0) > 1 and pn.get('Ambos marcan: No', 0) > 1:
+        p1, p2 = devig_pot([pn['Ambos marcan: Sí'], pn['Ambos marcan: No']]); out['Ambos marcan: Sí'] = p1; out['Ambos marcan: No'] = p2
+    return {k: round(float(v), 4) for k, v in out.items()}
+
+
 def objetivos_pin(m):
     """(pH, pD, pA, pOver, línea) sin margen a partir de Pinnacle (referencia más fiable), o None."""
     pn, H, A = m.get('pin') or {}, m['h'], m['a']
@@ -67,8 +85,11 @@ def objetivos_pin(m):
 
 def objetivos(m):
     """(pH, pD, pA, pOver2.5) sin margen: de Pinnacle si está; si no, de las cuotas bwin del partido; o None si faltan."""
-    m.pop('mkp', None)
+    m.pop('mkp', None); m.pop('pj', None)
     if m.get('bw'): m['mg'] = margenes(m)
+    if m.get('pin'):
+        pj = justas(m)
+        if pj: m['pj'] = pj
     op = objetivos_pin(m)
     if op: m['mkp'] = 1; m.pop('mkf', None); return op
     bw, H, A = m.get('bw') or {}, m['h'], m['a']
