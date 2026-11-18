@@ -16,7 +16,7 @@ except Exception:
     MAD = dt.timezone.utc
 TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17, 'champions': 7}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
-LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera').split(',') if x.strip() in TORNEOS]   # por defecto solo Primera (cupo); Segunda y Premier usan las cuotas gratis de football-data; Champions tiene su robot
+LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera,segunda,premier,champions').split(',') if x.strip() in TORNEOS]   # con el lote de OddsPapi (1 petición) caben todas las ligas
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
 HORAS = float(os.environ.get('CUOTAS_HORAS', '0') or 0)       # >0: solo partidos que empiezan dentro de N horas (cuota casi de cierre)
 HIST = os.path.join(HERE, 'historico_cuotas.jsonl')            # una línea por partido y consulta (apertura, evolución y cierre)
@@ -119,6 +119,28 @@ def catalogo():
             print(m.get('marketId'), '|', m.get('marketName'), '|', m.get('marketType'), '| hc', m.get('handicap'), '|', [o.get('outcomeName') for o in m.get('outcomes', [])])
 
 
+def cuenta():
+    """Contador real de OddsPapi (/v4/account es gratis). Devuelve (usadas, limite) o None."""
+    try:
+        u = 'https://api.oddspapi.io/v4/account?' + urllib.parse.urlencode({'apiKey': KEY})
+        r = json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'benitooo'}), timeout=30).read().decode())
+        def busca(o, k):
+            if isinstance(o, dict):
+                if k in o and isinstance(o[k], (int, float)): return o[k]
+                for v in o.values():
+                    x = busca(v, k)
+                    if x is not None: return x
+            elif isinstance(o, list):
+                for v in o:
+                    x = busca(v, k)
+                    if x is not None: return x
+        u_, l_ = busca(r, 'request_count'), busca(r, 'request_limit')
+        print('Contador real OddsPapi:', u_, '/', l_)
+        return (int(u_), int(l_)) if u_ is not None and l_ is not None else None
+    except Exception as e:
+        print('AVISO contador real no disponible:', repr(e)[:80]); return None
+
+
 def pedir():
     if not KEY:
         print('Sin ODDSPAPI_KEY'); return
@@ -126,18 +148,21 @@ def pedir():
     mes = ahora.strftime('%Y-%m')
     try: cont = json.load(open(CONT))
     except Exception: cont = {}
-    gastado = cont.get(mes, BASE_MES.get(mes, 0))
-    if gastado >= LIMITE_MES:
-        print(f'Límite mensual de peticiones alcanzado ({gastado}/{LIMITE_MES}): no se piden cuotas'); return
+    gastado = cont.get(mes, BASE_MES.get(mes, 0)); limite = LIMITE_MES
+    real = cuenta()
+    if real: gastado, limite = real[0], min(LIMITE_MES, real[1] - 15)     # se deja un margen de 15 por si acaso
+    if gastado >= limite:
+        print(f'Límite mensual de peticiones alcanzado ({gastado}/{limite}): no se piden cuotas'); return
     global MAXPET
-    MAXPET = min(MAXPET, LIMITE_MES - gastado)
+    MAXPET = min(MAXPET, limite - gastado)
+    def ko(m): return dt.datetime.fromisoformat(m['d'] + 'T' + (m.get('t') or '23:59')).replace(tzinfo=MAD)
     def ventana(liga):
         jor = app.get('ligas', {}).get(liga, {}).get('jor', [])
         ms = [m for j in jor for m in j['ms'] if ahora.date().isoformat() <= m['d'] <= (ahora + dt.timedelta(days=DIAS)).date().isoformat()]
-        if HORAS > 0:
-            ms = [m for m in ms if ahora <= dt.datetime.fromisoformat(m['d'] + 'T' + (m.get('t') or '23:59')).replace(tzinfo=MAD) <= ahora + dt.timedelta(hours=HORAS)]
+        if HORAS > 0: ms = [m for m in ms if ahora <= ko(m) <= ahora + dt.timedelta(hours=HORAS)]
         return ms
-    if not any(ventana(l) for l in LIGAS_PEDIR):
+    ligas = [l for l in LIGAS_PEDIR if ventana(l)]
+    if not ligas:
         print('Sin partidos en la ventana: no se gasta ninguna petición'); return
     CATF = os.path.join(HERE, 'catalogo_mercados.json')   # el catálogo de mercados casi no cambia: se pide una sola vez y se guarda
     try: cat = {int(k): v for k, v in json.load(open(CATF, encoding='utf-8')).items()}
@@ -146,34 +171,40 @@ def pedir():
         json.dump(cat, open(CATF, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     try: cu = json.load(open(CUOTAS, encoding='utf-8'))
     except Exception: cu = {}
-    for liga in LIGAS_PEDIR:
-        tid = TORNEOS[liga]
-        jor = app.get('ligas', {}).get(liga, {}).get('jor', [])
-        ms = [m for j in jor for m in j['ms'] if ahora.date().isoformat() <= m['d'] <= (ahora + dt.timedelta(days=DIAS)).date().isoformat()]
-        if HORAS > 0:
-            def ko(m):
-                return dt.datetime.fromisoformat(m['d'] + 'T' + (m.get('t') or '23:59')).replace(tzinfo=MAD)
-            ms = [m for m in ms if ahora <= ko(m) <= ahora + dt.timedelta(hours=HORAS)]
-        if not ms: print(liga, ': sin partidos en la ventana'); continue
-        try:
-            fx = get('/fixtures', tournamentId=tid, **{'from': ahora.strftime('%Y-%m-%d'), 'to': (ahora + dt.timedelta(days=DIAS + 1)).strftime('%Y-%m-%d')})
-        except Exception as e:
-            print(liga, 'fixtures error', repr(e)[:80]); continue
-        fx = fx.get('data', fx) if isinstance(fx, dict) else fx
+    # 1) Lote: UNA petición con las cuotas de bwin de todos los partidos próximos de las ligas pedidas
+    lote = None
+    try:
+        r = get('/odds-by-tournaments', tournamentIds=','.join(str(TORNEOS[l]) for l in ligas), bookmakers='bwin.es')
+        lote = r.get('data', r) if isinstance(r, dict) else r
+        if not isinstance(lote, list) or not lote: raise ValueError('respuesta vacía o inesperada')
+        print('Lote OddsPapi:', len(lote), 'partidos en total')
+    except Exception as e:
+        print('AVISO lote no disponible, se usa la vía partido a partido solo para', ligas[0], '->', repr(e)[:100]); lote = None; ligas = ligas[:1]
+    for liga in ligas:
+        tid = TORNEOS[liga]; ms = ventana(liga)
+        if lote is not None:
+            fx = [f for f in lote if f.get('tournamentId') in (tid, str(tid)) or f.get('tournamentId') is None]
+        else:
+            try:
+                fx = get('/fixtures', tournamentId=tid, **{'from': ahora.strftime('%Y-%m-%d'), 'to': (ahora + dt.timedelta(days=DIAS + 1)).strftime('%Y-%m-%d')})
+            except Exception as e:
+                print(liga, 'fixtures error', repr(e)[:80]); continue
+            fx = fx.get('data', fx) if isinstance(fx, dict) else fx
         n = sin = 0
         for m in ms:
             if usadas >= MAXPET: print('Tope de peticiones alcanzado'); break
             mejor, bs = None, 0
             for f in fx:
-                ko = dt.datetime.fromisoformat(f['startTime'].replace('Z', '+00:00')).astimezone(MAD)
-                if ko.date().isoformat() != m['d'] or not f.get('hasOdds'): continue
+                try: k0 = dt.datetime.fromisoformat((f.get('startTime') or '').replace('Z', '+00:00')).astimezone(MAD)
+                except Exception: continue
+                if k0.date().isoformat() != m['d'] or (lote is None and not f.get('hasOdds')): continue
                 s = sim(m['h'], f.get('participant1Name', '')) + sim(m['a'], f.get('participant2Name', ''))
                 if s > bs: mejor, bs = f, s
             if not mejor or bs < 1.2:
                 sin += 1; print('  sin casar:', liga, m['h'], m['a'], m['d'], round(bs, 2)); continue
             try:
-                d = get('/odds', fixtureId=mejor['fixtureId'], bookmakers='bwin.es')
-                mk = d['bookmakerOdds']['bwin.es']['markets']
+                if lote is not None: mk = mejor['bookmakerOdds']['bwin.es']['markets']
+                else: mk = get('/odds', fixtureId=mejor['fixtureId'], bookmakers='bwin.es')['bookmakerOdds']['bwin.es']['markets']
             except Exception as e:
                 print('  sin cuotas:', m['h'], m['a'], repr(e)[:80]); continue
             et = etiquetas(cat, mk, m['h'], m['a'])
@@ -186,7 +217,7 @@ def pedir():
     json.dump(cu, open(CUOTAS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print('peticiones usadas en esta pasada:', usadas)
     cont[mes] = gastado + usadas; json.dump(cont, open(CONT, 'w'))
-    print(f'peticiones del mes (estimadas): {cont[mes]}/{LIMITE_MES}')
+    print(f'peticiones del mes: {cont[mes]}/{limite}')
 
 
 def aplicar():
