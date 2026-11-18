@@ -41,21 +41,25 @@ def objetivos(m):
     """(pH, pD, pA, pOver2.5) sin margen a partir de las cuotas bwin del partido, o None si faltan."""
     bw, H, A = m.get('bw') or {}, m['h'], m['a']
     k1, k2, k3 = f'{H} o empate', f'Empate o {A}', 'No hay empate'
-    ko, ku = 'Goles: más de 2,5', 'Goles: menos de 2,5'
-    if not all(bw.get(k, 0) > 1 for k in (k1, k2, k3, ko, ku)): return None
+    if not all(bw.get(k, 0) > 1 for k in (k1, k2, k3)): return None
+    linea = None  # línea de goles totales con las dos caras cotizadas (2,5 es la validada; si falta, 3,5 o 1,5)
+    for L in (2.5, 3.5, 1.5):
+        ko, ku = f'Goles: más de {c(L)}', f'Goles: menos de {c(L)}'
+        if bw.get(ko, 0) > 1 and bw.get(ku, 0) > 1: linea = L; break
+    if linea is None: return None
     q = np.array([1 / bw[k1], 1 / bw[k2], 1 / bw[k3]])
     a, b, cc = q * 2 / q.sum()  # 1X, X2, 12 sumando 2
     p3 = np.array([1 - b, 1 - cc, 1 - a])  # H, D, A
     if (p3 <= 0.01).any(): return None
-    return p3[0], p3[1], p3[2], devig_pot([bw[ko], bw[ku]])[0]
+    return p3[0], p3[1], p3[2], devig_pot([bw[ko], bw[ku]])[0], linea
 
 
 def ajustar_lambdas(obj, x0):
-    pH, pD, pA, pO = obj
+    pH, pD, pA, pO, L = obj
 
     def f(z):
         M = matrix(np.exp(z[0]), np.exp(z[1]))
-        return [np.tril(M, -1).sum() - pH, np.trace(M) - pD, M[TOT > 2.5].sum() - pO]
+        return [np.tril(M, -1).sum() - pH, np.trace(M) - pD, M[TOT > L].sum() - pO]
     r = least_squares(f, np.log(x0), bounds=(np.log(0.1), np.log(6)), xtol=1e-8)
     return np.exp(r.x), float(np.abs(r.fun).max())
 
@@ -89,7 +93,7 @@ def ajustar(m, pmin=0.42, pmax=0.93):
     obj = objetivos(m)
     if obj is None: return False
     lam, err = ajustar_lambdas(obj, m.get('g') or [1.4, 1.1])
-    if err > 0.02: return False  # el mercado no encaja en la matriz: mejor no tocar
+    if err > 0.03: return False  # el mercado no encaja en la matriz: mejor no tocar
     M = matrix(lam[0], lam[1])
     fi = {}
     for lab, cat, p, f in m['s']:
@@ -117,5 +121,16 @@ def mezclar_conteos(m, w=0.5):
         if not (bw.get(s[0], 0) > 1 and bw.get(otro, 0) > 1): continue
         pm = devig_pot([bw[s[0]], bw[otro]])[0]
         s[2] = round(float(w * pm + (1 - w) * s[2]), 3); n += 1
+    # "Más córners": mercado de 3 resultados. bwin da local y visitante; el empate (≈10 % de los partidos) se toma del modelo.
+    H, A = m['h'], m['a']; kh, ka = f'Más córners: {H}', f'Más córners: {A}'
+    if bw.get(kh, 0) > 1 and bw.get(ka, 0) > 1:
+        sh = [s for s in m['s'] if s[0] == kh]; sa = [s for s in m['s'] if s[0] == ka]
+        ph = sh[0][2] if sh else None; pa = sa[0][2] if sa else None
+        if ph is not None or pa is not None:
+            emp = 1 - ph - pa if (ph is not None and pa is not None) else 0.10
+            emp = min(max(emp, 0.05), 0.2)
+            q = (1 / bw[kh]) / (1 / bw[kh] + 1 / bw[ka])
+            if sh: sh[0][2] = round(float(w * q * (1 - emp) + (1 - w) * sh[0][2]), 3); n += 1
+            if sa: sa[0][2] = round(float(w * (1 - q) * (1 - emp) + (1 - w) * sa[0][2]), 3); n += 1
     if n: m['s'].sort(key=lambda x: -x[2]); m['mkc'] = 1
     return n

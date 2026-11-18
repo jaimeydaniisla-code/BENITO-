@@ -7,3 +7,10 @@ El mercado gana o empata en todos los mercados, incluidos los que no se usan par
 Calibración (2022-26, todos los mercados): modelo sobreestima en 0,5-0,7 (pred 0,55/0,65 -> real 0,525/0,629); mercado calibrado (0,549->0,554; 0,655->0,662; 0,745->0,744; 0,853->0,884; 0,934->0,948: los picks muy probables aciertan algo más de lo previsto).
 Quitar margen: potencia 0,9614 vs proporcional 0,9635 (logloss 1X2 B365).
 Decisión: con cuotas bwin de 1X2 (vía doble oportunidad) y O/U 2,5 las probabilidades de goles y resultado salen del mercado (modelo_cuotas/mercado.py). Córners y tarjetas siguen con el modelo propio (sin cuotas históricas para validar).
+
+## Córners y tarjetas (walk-forward 2022-26, 1.639 partidos; exp_counts.py)
+Logloss de las selecciones over/under: córners total 0,602 (media liga 0,612), córners por equipo 0,593 (0,618), tarjetas total 0,587 (0,595), por equipo 0,527 (0,535).
+Calibración de picks (predicho -> real): córners 0,65->0,64; 0,75->0,74; 0,84->0,825; tarjetas 0,65->0,66; 0,75->0,76; 0,85->0,84. Mezclar con la media de la liga empeora.
+Conclusión: bien calibrados, mejora pequeña sobre la media. Sin cuotas históricas para compararlos con bwin.
+bwin (OddsPapi) cotiza córners (totales, por equipo, quién saca más) pero NO tarjetas en estos partidos. Con cuota real: probabilidad = 50 % modelo + 50 % mercado sin margen (mitad y mitad, sin validar).
+Premier: tournamentId 17 verificado (9 partidos con cuotas reales el 18/11/2026).
