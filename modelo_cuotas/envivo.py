@@ -115,7 +115,7 @@ def cuotas_previas(L):
         import generar_cuotas as G, mercado
     except Exception as e:
         print('Cuotas previas: no disponibles', repr(e)[:80]); return
-    G.HORAS, G.DIAS = 1.3, 1
+    G.HORAS, G.DIAS = 1.3, 1; G.PIN = True
     G.LIGAS_PEDIR = sorted({x[0] for x in L if x[0] in G.TORNEOS})
     if not G.LIGAS_PEDIR: return
     try: G.pedir()
@@ -125,6 +125,7 @@ def cuotas_previas(L):
         v = cu.get(q)
         if v:
             m['bw'], m['bwact'] = v['bw'], v['act']
+            if v.get('pin'): m['pin'] = v['pin']
             try: mercado.ajustar(m)
             except Exception as e: print('  ajuste falló', m['h'], m['a'], e)
 
@@ -135,7 +136,7 @@ def apuntar_picks(liga, m, hora):
     ps = [[x[0], x[1], x[2], bw.get(x[0])] for x in (m.get('s') or []) if x[2] >= 0.5]
     if not ps: return
     with open(os.path.join(HERE, 'picks_log.jsonl'), 'a', encoding='utf-8') as f:
-        f.write(json.dumps({'t': hora, 'liga': liga, 'd': m['d'], 'h': m['h'], 'a': m['a'], 'mk': 1 if m.get('mk') else 0, 'top': mejor_pick(m).split(' · ')[0], 'ps': ps},
+        f.write(json.dumps({'t': hora, 'liga': liga, 'd': m['d'], 'h': m['h'], 'a': m['a'], 'mk': 1 if m.get('mk') else 0, 'pin': 1 if m.get('mkp') else 0, 'top': mejor_pick(m).split(' · ')[0], 'ps': ps},
                            ensure_ascii=False, separators=(',', ':')) + '\n')
 
 

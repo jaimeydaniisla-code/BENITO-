@@ -37,8 +37,40 @@ def devig_pot(o):
     return p / p.sum()
 
 
+def margenes(m):
+    """Margen de bwin por mercado (suma de 1/cuota - 1) en las parejas principales."""
+    bw, H, A, out = m.get('bw') or {}, m['h'], m['a'], {}
+    def mg(*ks):
+        return round(sum(1 / bw[k] for k in ks) - 1, 3) if all(bw.get(k, 0) > 1 for k in ks) else None
+    out['1X2'] = mg(f'Gana {H}', 'Empate', f'Gana {A}')
+    out['Goles'] = mg('Goles: más de 2,5', 'Goles: menos de 2,5')
+    out['Ambos marcan'] = mg('Ambos marcan: Sí', 'Ambos marcan: No')
+    for nm in ('Córners', 'Tarjetas'):
+        ls = sorted({k.split('de ')[-1] for k in bw if k.startswith(nm + ': más de ') and bw.get(nm + ': menos de ' + k.split('de ')[-1])},
+                    key=lambda x: abs(1 / bw[nm + ': más de ' + x] - 1 / bw[nm + ': menos de ' + x]))
+        if ls: out[nm] = mg(nm + ': más de ' + ls[0], nm + ': menos de ' + ls[0])
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def objetivos_pin(m):
+    """(pH, pD, pA, pOver, línea) sin margen a partir de Pinnacle (referencia más fiable), o None."""
+    pn, H, A = m.get('pin') or {}, m['h'], m['a']
+    ks = (f'Gana {H}', 'Empate', f'Gana {A}')
+    if not all(pn.get(k, 0) > 1 for k in ks): return None
+    for L in (2.5, 3.5, 1.5):
+        ko, ku = f'Goles: más de {c(L)}', f'Goles: menos de {c(L)}'
+        if pn.get(ko, 0) > 1 and pn.get(ku, 0) > 1:
+            p3 = devig_pot([pn[k] for k in ks])
+            return p3[0], p3[1], p3[2], devig_pot([pn[ko], pn[ku]])[0], L
+    return None
+
+
 def objetivos(m):
-    """(pH, pD, pA, pOver2.5) sin margen a partir de las cuotas bwin del partido, o None si faltan."""
+    """(pH, pD, pA, pOver2.5) sin margen: de Pinnacle si está; si no, de las cuotas bwin del partido; o None si faltan."""
+    m.pop('mkp', None)
+    if m.get('bw'): m['mg'] = margenes(m)
+    op = objetivos_pin(m)
+    if op: m['mkp'] = 1; m.pop('mkf', None); return op
     bw, H, A = m.get('bw') or {}, m['h'], m['a']
     k1, k2, k3 = f'{H} o empate', f'Empate o {A}', 'No hay empate'
     if not all(bw.get(k, 0) > 1 for k in (k1, k2, k3)):

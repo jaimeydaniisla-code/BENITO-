@@ -11,6 +11,7 @@ for liga, L in app.get('ligas', {}).items():
             v = cu.get(f"{liga}|{m['d']}|{m['h']}|{m['a']}")
             if v and v['act'] != m.get('bwact'):
                 m['bw'], m['bwact'] = v['bw'], v['act']
+                if v.get('pin'): m['pin'] = v['pin']
                 try: mercado.ajustar(m); n += 1
                 except Exception as e: print('ajuste falló', m['h'], m['a'], e)
 json.dump(app, open(os.path.join(ROOT, 'datos.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))

@@ -1,6 +1,6 @@
 """Cuotas de bwin.es vía OddsPapi (clave ODDSPAPI_KEY). Pocas peticiones: solo partidos de los próximos N días.
 Guarda cuotas.json y aplica 'bw' a datos.json. Uso: python generar_cuotas.py [--aplicar-solo]"""
-import os, sys, json, difflib, unicodedata, datetime as dt, urllib.request, urllib.parse
+import os, sys, time, json, difflib, unicodedata, datetime as dt, urllib.request, urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 try:
     import mercado
@@ -18,6 +18,7 @@ TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17, 'champions': 7}          
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
 LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera,segunda,premier,champions').split(',') if x.strip() in TORNEOS]   # con el lote de OddsPapi (1 petición) caben todas las ligas
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
+PIN = os.environ.get('CUOTAS_PIN', '') == '1'   # pedir también Pinnacle (referencia de probabilidad; +1 petición)
 HORAS = float(os.environ.get('CUOTAS_HORAS', '0') or 0)       # >0: solo partidos que empiezan dentro de N horas (cuota casi de cierre)
 HIST = os.path.join(HERE, 'historico_cuotas.jsonl')            # una línea por partido y consulta (apertura, evolución y cierre)
 CONT = os.path.join(HERE, 'peticiones.json')                   # peticiones usadas por mes (plan gratuito de OddsPapi: 250/mes)
@@ -70,6 +71,7 @@ def etiquetas(cat, mk, H, A):
         if t == '1x2' and 'Full Time' in m['marketName']:
             if '1' in pr: out[f'Gana {H}'] = pr['1']
             if '2' in pr: out[f'Gana {A}'] = pr['2']
+            if 'X' in pr: out['Empate'] = pr['X']
         elif t == 'doublechance':
             if '1X' in pr: out[f'{H} o empate'] = pr['1X']
             if '2X' in pr: out[f'Empate o {A}'] = pr['2X']
@@ -174,12 +176,24 @@ def pedir():
     # 1) Lote: UNA petición con las cuotas de bwin de todos los partidos próximos de las ligas pedidas
     lote = None
     try:
-        r = get('/odds-by-tournaments', tournamentIds=','.join(str(TORNEOS[l]) for l in ligas), bookmakers='bwin.es')
+        r = get('/odds-by-tournaments', tournamentIds=','.join(str(TORNEOS[l]) for l in ligas), bookmaker='bwin.es')
         lote = r.get('data', r) if isinstance(r, dict) else r
         if not isinstance(lote, list) or not lote: raise ValueError('respuesta vacía o inesperada')
         print('Lote OddsPapi:', len(lote), 'partidos en total')
     except Exception as e:
         print('AVISO lote no disponible, se usa la vía partido a partido solo para', ligas[0], '->', repr(e)[:100]); lote = None; ligas = ligas[:1]
+    pin = {}
+    if PIN and lote is not None and limite - gastado - usadas >= 30:   # con poco cupo, se prioriza bwin
+        try:
+            time.sleep(1.5)
+            rp = get('/odds-by-tournaments', tournamentIds=','.join(str(TORNEOS[l]) for l in ligas), bookmaker='pinnacle')
+            for f in (rp.get('data', rp) if isinstance(rp, dict) else rp):
+                mk_ = (f.get('bookmakerOdds') or {}).get('pinnacle', {}).get('markets')
+                if mk_: pin[f.get('fixtureId')] = mk_
+            print('Pinnacle:', len(pin), 'partidos')
+        except Exception as e:
+            print('AVISO Pinnacle no disponible:', repr(e)[:100])
+    elif PIN: print('Pinnacle omitido para ahorrar cupo')
     for liga in ligas:
         tid = TORNEOS[liga]; ms = ventana(liga)
         if lote is not None:
@@ -204,14 +218,17 @@ def pedir():
                 sin += 1; print('  sin casar:', liga, m['h'], m['a'], m['d'], round(bs, 2)); continue
             try:
                 if lote is not None: mk = mejor['bookmakerOdds']['bwin.es']['markets']
-                else: mk = get('/odds', fixtureId=mejor['fixtureId'], bookmakers='bwin.es')['bookmakerOdds']['bwin.es']['markets']
+                else: mk = get('/odds', fixtureId=mejor['fixtureId'], bookmaker='bwin.es')['bookmakerOdds']['bwin.es']['markets']
             except Exception as e:
                 print('  sin cuotas:', m['h'], m['a'], repr(e)[:80]); continue
             et = etiquetas(cat, mk, m['h'], m['a'])
             if et:
                 cu[f"{liga}|{m['d']}|{m['h']}|{m['a']}"] = {'act': ahora.strftime('%d/%m %H:%M'), 'bw': et}; n += 1
+                if mejor.get('fixtureId') in pin:
+                    ep = etiquetas(cat, pin[mejor['fixtureId']], m['h'], m['a'])
+                    if ep: cu[f"{liga}|{m['d']}|{m['h']}|{m['a']}"]['pin'] = ep
                 with open(HIST, 'a', encoding='utf-8') as fh:
-                    fh.write(json.dumps({'t': ahora.isoformat(timespec='minutes'), 'liga': liga, 'd': m['d'], 'hora': m.get('t'), 'h': m['h'], 'a': m['a'], 'bw': et},
+                    fh.write(json.dumps({'t': ahora.isoformat(timespec='minutes'), 'liga': liga, 'd': m['d'], 'hora': m.get('t'), 'h': m['h'], 'a': m['a'], 'bw': et, 'pin': cu[f"{liga}|{m['d']}|{m['h']}|{m['a']}"].get('pin')},
                                         ensure_ascii=False, separators=(',', ':')) + '\n')
         print(f'{liga}: {n} partidos con cuotas, {sin} sin casar')
     json.dump(cu, open(CUOTAS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
@@ -229,6 +246,7 @@ def aplicar():
                 v = cu.get(f"{liga}|{m['d']}|{m['h']}|{m['a']}")
                 if v:
                     m['bw'] = v['bw']; m['bwact'] = v['act']; k += 1
+                    if v.get('pin'): m['pin'] = v['pin']
                 try:
                     if mercado and mercado.ajustar(m): aj += 1
                     if mercado and m.get('bw'): mercado.mezclar_conteos(m)
