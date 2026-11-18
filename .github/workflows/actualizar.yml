@@ -26,6 +26,8 @@ jobs:
         run: python modelo/02_codigo/generar_datos.py
       - name: Recalcular Segunda
         run: python modelo_segunda/02_codigo/generar_segunda.py
+      - name: Recalcular Premier
+        run: python modelo_premier/02_codigo/generar_premier.py
       - name: Recalcular Selecciones
         run: python modelo_selecciones/generar_selecciones.py
       - name: Aplicar cuotas bwin guardadas
@@ -34,5 +36,5 @@ jobs:
         run: |
           git config user.name "robot-benitooo"
           git config user.email "actions@users.noreply.github.com"
-          git add datos.json modelo/01_datos/SP1_2026-27.csv modelo_segunda/01_datos/SP2_5.csv modelo_selecciones/resultados_selecciones.csv
+          git add datos.json modelo/01_datos/SP1_2026-27.csv modelo_segunda/01_datos/SP2_5.csv modelo_premier/01_datos/E0_2026-27.csv modelo_selecciones/resultados_selecciones.csv
           git diff --cached --quiet || (git commit -m "Actualización automática" && git pull -q --rebase origin main && git push)

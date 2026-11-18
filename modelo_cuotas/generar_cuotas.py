@@ -8,7 +8,7 @@ try:
     from zoneinfo import ZoneInfo; MAD = ZoneInfo('Europe/Madrid')
 except Exception:
     MAD = dt.timezone.utc
-TORNEOS = {'primera': 8, 'segunda': 54}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
+TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
 usadas = 0
