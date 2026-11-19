@@ -465,7 +465,8 @@ function gana(o) {
 function renderTabs() {
   var t = '';
   Object.keys(LIGAS).forEach(function (k) { t += '<button data-liga="' + k + '" class="' + (k === 'todos' ? 'td ' : '') + (st.liga === k ? 'on' : '') + '">' + LIGAS[k].nombre + '</button>'; });
-  t += '<button data-liga="radar" class="rd' + (st.liga === 'radar' ? ' on' : '') + '">🎯 Radar</button>';
+  var RADAR_ON = false;   // radar en pausa (19/11): se reactiva poniendo true y el cron de radar.yml
+  if (RADAR_ON) t += '<button data-liga="radar" class="rd' + (st.liga === 'radar' ? ' on' : '') + '">🎯 Radar</button>';
   t += '<button data-liga="registro" class="rg' + (st.liga === 'registro' ? ' on' : '') + '">Registro</button>';
   document.getElementById('tabs').innerHTML = t;
 }

@@ -5,8 +5,8 @@ on:
       grupo:
         description: 'Grupo de ligas (B, C, D, E o N; vacío = el que toque)'
         default: ''
-  schedule:
-    - cron: '41 8 * * 1-4'   # lunes a jueves ~09:41 (días sin fútbol de la app): 2 peticiones; se pausa solo si el fútbol necesita el cupo
+  # schedule (EN PAUSA desde el 19/11 para ahorrar cupo; el fútbol tiene prioridad):
+  #   - cron: '41 8 * * 1-4'   # lunes a jueves ~09:41 (días sin fútbol de la app): 2 peticiones; se pausa solo si el fútbol necesita el cupo
 permissions:
   contents: write
 concurrency:
