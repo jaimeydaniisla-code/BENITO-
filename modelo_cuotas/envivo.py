@@ -228,5 +228,18 @@ def main():
     print('envivo.json actualizado:', len(p), 'partidos')
 
 
+def activo():
+    """¿Hay algún partido de la app entre 3 h antes y 2,5 h después de ahora? (para que el robot siga vigilando)"""
+    ahora = dt.datetime.now(MAD); app = json.load(open(DATOS, encoding='utf-8'))
+    for liga in LIGAS:
+        for J in app.get('ligas', {}).get(liga, {}).get('jor', []):
+            for m in J['ms']:
+                if not m.get('t'): continue
+                ko = dt.datetime.fromisoformat(m['d'] + 'T' + m['t']).replace(tzinfo=MAD)
+                if ko - dt.timedelta(minutes=150) <= ahora <= ko + dt.timedelta(minutes=180): return True
+    return False
+
+
 if __name__ == '__main__':
     main()
+    sys.exit(0 if activo() else 3)

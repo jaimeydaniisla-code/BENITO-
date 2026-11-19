@@ -1,8 +1,8 @@
-name: Directo y alineaciones
+name: Directo, alineaciones y avisos
 on:
   schedule:
-    - cron: '*/10 10-22 * * 5,6,0'   # vie/sáb/dom, cada 10 min (UTC 10-22 = 11-23 h Madrid aprox.)
-    - cron: '*/15 16-22 * * 1-4'     # entre semana por la tarde-noche (noches de Champions y Europa)
+    - cron: '*/20 9-22 * * 5,6,0'    # vie/sáb/dom: arranca la vigilancia (cada vuelta dura mientras haya partidos)
+    - cron: '*/20 15-22 * * 1-4'    # entre semana por la tarde-noche
   workflow_dispatch:
     inputs:
       prueba:
@@ -16,7 +16,7 @@ concurrency:
 jobs:
   envivo:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,31 +24,21 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: pip install pywebpush -r requirements.txt
-      - name: Directo, cuotas previas (1 petición por hora de inicio) y avisos
+      - name: Vigilar mientras haya partidos (cada ~5 min; GitHub lanza los cron con retraso, así no se pierde ningún aviso)
         env:
           GIST_ID: ${{ secrets.GIST_ID }}
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRUEBA_AVISO: ${{ github.event.inputs.prueba == 'si' && '1' || '' }}
-        run: python modelo_cuotas/envivo.py
-      - name: Publicar
+          PRUEBA: ${{ github.event.inputs.prueba == 'si' && '1' || '' }}
         run: |
           git config user.name "robot-benitooo"
           git config user.email "actions@users.noreply.github.com"
-          F="envivo.json datos.json cuotas.json modelo_cuotas/picks_log.jsonl modelo_cuotas/peticiones.json modelo_cuotas/historico_cuotas.jsonl modelo_cuotas/catalogo_mercados.json"
-          for f in $F; do [ -f "$f" ] && git add "$f"; done
-          git diff --cached --quiet && exit 0
-          git commit -qm "Directo"
-          for i in 1 2 3; do
-            git pull -q --rebase origin main && git push -q && exit 0
-            git rebase --abort 2>/dev/null || true
-            mkdir -p /tmp/s; for f in $F; do [ -f "$f" ] && cp "$f" /tmp/s/$(basename $f); done
-            git fetch -q origin main && git reset -q --hard origin/main
-            for f in $F; do [ -f /tmp/s/$(basename $f) ] && cp /tmp/s/$(basename $f) "$f"; done
-            git checkout -q origin/main -- datos.json && python modelo_cuotas/aplicar_previas.py
-            for f in $F; do [ -f "$f" ] && git add "$f"; done
-            git diff --cached --quiet && exit 0
-            git commit -qm "Directo"
-            sleep 5
+          export PRUEBA_AVISO="$PRUEBA"
+          for i in $(seq 1 62); do
+            git pull -q --rebase origin main || { git rebase --abort 2>/dev/null; git fetch -q origin main; git reset -q --hard origin/main; }
+            rc=0; python modelo_cuotas/envivo.py || rc=$?
+            export PRUEBA_AVISO=""
+            bash .github/scripts/publicar_envivo.sh || echo "AVISO: no se pudo publicar en esta vuelta"
+            if [ $rc -eq 3 ]; then echo "Sin partidos cerca: fin de la vigilancia"; break; fi
+            sleep 260
           done
-          exit 1
