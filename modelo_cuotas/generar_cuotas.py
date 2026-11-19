@@ -46,7 +46,8 @@ def nz(t):
 
 
 def sim(a, b):
-    a, b = nz(a), nz(b)
+    a, b = nz(a or ''), nz(b or '')
+    if not a or not b: return 0.0
     if a in b or b in a: return 1.0
     return difflib.SequenceMatcher(None, a, b).ratio()
 
@@ -143,6 +144,35 @@ def cuenta():
         print('AVISO contador real no disponible:', repr(e)[:80]); return None
 
 
+PART = os.path.join(HERE, 'participantes.json')   # id -> nombre (OddsPapi solo da números en los lotes); se guarda solo lo usado
+
+
+def nombres(fixtures):
+    """Pone participant1Name/participant2Name a cada partido. Si falta algún equipo, 1 petición a /participants de ese deporte."""
+    try: P = json.load(open(PART, encoding='utf-8'))
+    except Exception: P = {}
+    faltan = {}
+    for f in fixtures:
+        for k in ('participant1Id', 'participant2Id'):
+            if f.get(k) is not None and str(f[k]) not in P: faltan.setdefault(f.get('sportId') or 10, set()).add(str(f[k]))
+    for sid, ids in faltan.items():
+        try:
+            time.sleep(1.2); r = get('/participants', sportId=sid)
+            if isinstance(r, list): r = {str(x.get('participantId')): x.get('name') for x in r}
+            r = r.get('data', r) if isinstance(r, dict) and 'data' in r else r
+            n = 0
+            for i in ids:
+                if r.get(i): P[i] = r[i]; n += 1
+            print(f'Nombres de equipos: {n}/{len(ids)} nuevos (deporte {sid})')
+        except Exception as e:
+            print('AVISO nombres de equipos no disponibles:', repr(e)[:100])
+    json.dump(P, open(PART, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+    for f in fixtures:
+        f['participant1Name'] = f.get('participant1Name') or P.get(str(f.get('participant1Id')))
+        f['participant2Name'] = f.get('participant2Name') or P.get(str(f.get('participant2Id')))
+    return fixtures
+
+
 def lote(bookmaker, ids):
     """Cuotas de varias competiciones. OddsPapi admite como mucho 3 competiciones por petición: se trocea."""
     out, ok = [], False
@@ -156,7 +186,7 @@ def lote(bookmaker, ids):
         except Exception as e:
             print('AVISO lote', bookmaker, ids[n:n + 3], repr(e)[:100])
     if not ok: raise ValueError('lote sin respuesta')
-    return out
+    return nombres(out)
 
 
 def pedir():

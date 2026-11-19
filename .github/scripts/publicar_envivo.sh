@@ -1,6 +1,6 @@
 #!/bin/bash
 # Publica lo que haya cambiado el robot del directo, reintentando si el otro robot ha subido datos a la vez.
-F="envivo.json datos.json cuotas.json modelo_cuotas/picks_log.jsonl modelo_cuotas/peticiones.json modelo_cuotas/historico_cuotas.jsonl modelo_cuotas/catalogo_mercados.json"
+F="envivo.json datos.json cuotas.json modelo_cuotas/participantes.json modelo_cuotas/picks_log.jsonl modelo_cuotas/peticiones.json modelo_cuotas/historico_cuotas.jsonl modelo_cuotas/catalogo_mercados.json"
 for f in $F; do [ -f "$f" ] && git add "$f"; done
 git diff --cached --quiet && exit 0
 git commit -qm "Directo"
