@@ -14,6 +14,7 @@ GRUPOS = {   # tournamentId de OddsPapi: nombre, deporte, fiabilidad (1 = mercad
     'D': {23: ('Serie A (Italia)', 'Fútbol', 1), 35: ('Bundesliga (Alemania)', 'Fútbol', 1), 34: ('Ligue 1 (Francia)', 'Fútbol', 1)},
     # Otros deportes: bwin no está en OddsPapi, así que se usa Winamax (casa "blanda" parecida a bwin) como señal: si paga más que lo justo,
     # el partido es CANDIDATO y la app da la cuota mínima que debe pagar bwin para que sea ganga. Se comprueba en bwin a mano.
+    'E': {679: ('Europa League', 'Fútbol', 1), 34480: ('Conference League', 'Fútbol', 0), 18: ('Championship (Inglaterra)', 'Fútbol', 1)},
     'N': {132: ('NBA', 'Baloncesto', 1), 138: ('Euroliga', 'Baloncesto', 1), 234: ('NHL', 'Hockey', 1)},
 }
 CASA = {'N': 'winamax.es'}          # por defecto bwin.es
@@ -21,15 +22,15 @@ VISTOS = {}
 MARGEN_GANGA = 0.02                 # cuota mínima en bwin = justa × 1,02
 TIPOS = {'1x2': 'Resultado', 'totals': 'Goles', 'bothteamsscore': 'Ambos marcan', 'doublechance': 'Doble oportunidad', 'spreads': 'Hándicap asiático',
          'teamtotals-team1': 'Goles {H}', 'teamtotals-team2': 'Goles {A}', 'totals-corners': 'Córners', 'totals-bookings': 'Tarjetas', 'drawnobet': 'Empate no válido'}
-DIAS, EV_MIN, EV_MIN_MENOR, EV_MAX, P_MIN = 4, 0.03, 0.05, 0.20, 0.40
+DIAS, EV_MIN, EV_MIN_MENOR, EV_MAX, P_MIN = 1.6, 0.03, 0.05, 0.20, 0.40
 FUTBOL_DIA = 7     # peticiones que se reservan para el fútbol por cada día que queda de mes
 TRAD = {'Over': 'Más de', 'Under': 'Menos de', 'X': 'Empate', 'Yes': 'Sí', 'No': 'No'}
 
 
 def grupo_hoy(ahora):
     if os.environ.get('RADAR_GRUPO'): return os.environ['RADAR_GRUPO']
-    if ahora.weekday() in (0, 1, 2): return 'N'                            # martes: baloncesto y hockey (candidatos)
-    return 'BCD'[ahora.isocalendar()[1] % 3]                               # viernes: fútbol con bwin, rotando grupos por semana
+    # Días sin fútbol de la app (lunes a jueves): lun y mié baloncesto/hockey, mar fútbol de otras ligas, jue Europa/Conference League
+    return {0: 'N', 1: 'BCD'[ahora.isocalendar()[1] % 3], 2: 'N', 3: 'E'}.get(ahora.weekday(), 'BCD'[ahora.isocalendar()[1] % 3])
 
 
 def catalogo(sports):

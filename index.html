@@ -680,7 +680,7 @@ function renderRadar() {
   h += '<p class="hint">Apuestas donde la casa paga <b>más que la cuota justa de Pinnacle</b> (sin su margen). No son «seguras»: están mejor pagadas de lo que deberían y solo suman a la larga. Reglas: <b>stake 1 fijo</b>, siempre simples, y si al abrir bwin la cuota está por debajo de la indicada, no se apuesta.</p>';
   if (!R) { document.getElementById('picks').innerHTML = h + '<p class="empty">Cargando…</p></section>'; return; }
   if (R.pausa) h += '<p class="nota">⏸ ' + esc(R.pausa) + '</p>';
-  h += '<p class="hint">Escanea martes (baloncesto y hockey) y viernes (fútbol, rotando ligas). El fútbol de la app tiene prioridad en el cupo' + (R.pet ? ' · peticiones del mes ' + esc(R.pet) : '') + '.</p></section>';
+  h += '<p class="hint">Pensado para los días sin fútbol de la app: escanea de lunes a jueves por la mañana (lun y mié baloncesto y hockey, mar otras ligas de fútbol, jue Europa y Conference League) y muestra lo que se juega ese día y el siguiente. El fútbol de la app tiene prioridad en el cupo' + (R.pet ? ' · peticiones del mes ' + esc(R.pet) : '') + '.</p></section>';
   var ahora = new Date();
   [['F', '⚽ Fútbol: bwin directo', 'Cuota de bwin ya comprobada por el robot.'], ['N', '🏀🏒 Baloncesto y hockey: búscalo en bwin', 'bwin no da estas cuotas al robot. Otra casa parecida (Winamax) paga de más aquí: mira en bwin y apuesta solo si paga la cuota mínima o más.']].forEach(function (T) {
     var E = R.esc && R.esc[T[0]];
