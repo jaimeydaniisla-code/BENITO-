@@ -3,31 +3,35 @@ on: workflow_dispatch
 permissions:
   contents: read
 jobs:
-  pinnacle:
+  radar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - name: Prueba real bwin + Pinnacle (sin guardar)
+      - name: Descubrir deportes y competiciones (pocas peticiones)
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
-          CUOTAS_PIN: '1'
-          CUOTAS_DIAS: '4'
         run: |
-          python modelo_cuotas/generar_cuotas.py
           python - <<'PY'
-          import json
-          cu = json.load(open('cuotas.json'))
-          con = [k for k, v in cu.items() if v.get('pin')]
-          print('partidos con Pinnacle:', len(con), 'de', len(cu))
-          for k in con[:2]: print(k, json.dumps(cu[k]['pin'], ensure_ascii=False)[:300])
-          d = json.load(open('datos.json'))
-          for lg, L in d['ligas'].items():
-              n = sum(1 for j in L['jor'] for m in j['ms'] if m.get('mkp'))
-              if n: print(lg, 'partidos con probabilidad de Pinnacle:', n)
-          m = next((m for L in d['ligas'].values() for j in L['jor'] for m in j['ms'] if m.get('mkp')), None)
-          if m: print(m['h'], m['a'], 'margenes bwin', m.get('mg'), 'goles esperados', m['g'])
+          import os, json, time, urllib.request, urllib.parse, urllib.error
+          K = os.environ['ODDSPAPI_KEY']
+          def get(p, **q):
+              q['apiKey'] = K; time.sleep(1.2)
+              try:
+                  return json.loads(urllib.request.urlopen(urllib.request.Request('https://api.oddspapi.io/v4' + p + '?' + urllib.parse.urlencode(q), headers={'User-Agent': 'benitooo'}), timeout=60).read().decode())
+              except urllib.error.HTTPError as e:
+                  print('ERROR', p, e.code, e.read().decode()[:300]); return []
+          sp = get('/sports'); sp = sp.get('data', sp) if isinstance(sp, dict) else sp
+          print('DEPORTES:', [(s.get('sportId'), s.get('sportName') or s.get('slug')) for s in sp][:40])
+          ids = {(s.get('sportName') or s.get('slug') or '').lower(): s.get('sportId') for s in sp}
+          for nombre in ('basketball', 'ice hockey', 'tennis', 'soccer'):
+              sid = next((v for k, v in ids.items() if nombre in k), None)
+              if sid is None: print('no encontrado', nombre); continue
+              T = get('/tournaments', sportId=sid); T = T.get('data', T) if isinstance(T, dict) else T
+              T = sorted([t for t in T if (t.get('upcomingFixtures') or 0) + (t.get('futureFixtures') or 0) > 0], key=lambda t: -((t.get('upcomingFixtures') or 0) + (t.get('futureFixtures') or 0)))
+              print('==', nombre, sid, len(T), 'con partidos')
+              for t in T[:60]:
+                  print('  ', t.get('tournamentId'), '|', t.get('categoryName'), '|', t.get('tournamentName'), '|', t.get('upcomingFixtures'), t.get('futureFixtures'))
           PY
