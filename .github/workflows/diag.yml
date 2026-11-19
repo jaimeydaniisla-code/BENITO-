@@ -16,14 +16,14 @@ jobs:
         run: |
           cd modelo_cuotas && python - <<'PY'
           import json, generar_cuotas as G
-          b = G.get('/bookmakers'); b = b.get('data', b) if isinstance(b, dict) else b
-          slugs = [x.get('slug') or x.get('bookmaker') for x in b] if isinstance(b, list) else list(b)
-          es = [s for s in slugs if s and (s.endswith('.es') or s.endswith('-es') or 'spain' in s)]
-          print('total casas', len(slugs)); print('ESPAÑOLAS', es)
-          r = G.get('/odds-by-tournaments', tournamentIds='132,234,138')   # sin bookmaker: todas las casas
-          L = r.get('data', r) if isinstance(r, dict) else r
-          from collections import Counter
-          c = Counter(k for f in L for k in (f.get('bookmakerOdds') or {}))
-          print('partidos', len(L)); print('casas con NBA/NHL/Euroliga (.es):', {k: v for k, v in c.items() if k in es}); print('top', c.most_common(25))
+          import time
+          for bk in ('bet365.es', 'winamax.es', 'codere.es', '888sport.es'):
+              try:
+                  r = G.get('/odds-by-tournaments', tournamentIds='132,234,138', bookmaker=bk)
+                  L = r.get('data', r) if isinstance(r, dict) else r
+                  con = [f for f in L if (f.get('bookmakerOdds') or {}).get(bk)]
+                  from collections import Counter
+                  print('CASA', bk, 'partidos con cuotas:', len(con), dict(Counter(f.get('tournamentId') for f in con)), 'mercados ej.:', len(((con[0]['bookmakerOdds'][bk]).get('markets') or {})) if con else 0)
+              except Exception as e: print('CASA', bk, 'ERROR', repr(e)[:120])
           print('usadas', G.usadas)
           PY
