@@ -112,7 +112,7 @@ def main():
             for oid, cb in pb.items():
                 if oid not in jus: continue
                 pr = float(jus[oid]); ev = cb * pr - 1
-                if pr >= P_MIN and (EV_MIN if fiab else EV_MIN_MENOR) <= ev <= EV_MAX and (not mejor or ev > mejor['ev']):
+                if pr >= P_MIN and ((0.015 if g == 'N' else EV_MIN) if fiab else EV_MIN_MENOR) <= ev <= EV_MAX and (not mejor or ev > mejor['ev']):
                     o0 = c['o'].get(oid, oid); on = o0; on = {'1': H, '2': A, '1X': H + ' o empate', 'X2': 'Empate o ' + A, '12': 'No hay empate'}.get(on, TRAD.get(on, on))
                     h = c.get('h'); hs = str(h).replace('.', ',') if h not in (None, '') else ''
                     lin = f" {hs}" if hs and on.startswith(('Más', 'Menos')) else (f" ({'+' if hv > 0 else ''}{str(hv).replace('.', ',')})" if c.get('t') == 'spreads' and hs and (hv := float(h) * (-1 if o0 == '2' else 1)) is not None else '')
