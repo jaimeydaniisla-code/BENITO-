@@ -11,10 +11,21 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Prueba del radar (grupos A y B, sin guardar)
+      - name: Radar detalle
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
         run: |
-          RADAR_GRUPO=A python modelo_cuotas/radar.py
-          RADAR_GRUPO=B python modelo_cuotas/radar.py
-          python -c "import json;d=json.load(open('radar.json'));print('ejemplo', json.dumps(d['picks'][:2], ensure_ascii=False))"
+          cd modelo_cuotas && python - <<'PY'
+          import json, generar_cuotas as G
+          for bk in ('bwin.es', 'pinnacle'):
+              try:
+                  r = G.get('/odds-by-tournaments', tournamentIds='132,234,18', bookmaker=bk)
+              except Exception as e:
+                  print(bk, 'ERROR', repr(e)[:200]); continue
+              L = r.get('data', r) if isinstance(r, dict) else r
+              from collections import Counter
+              print(bk, 'total', len(L), Counter(f.get('tournamentId') for f in L), 'con cuotas', Counter(f.get('tournamentId') for f in L if (f.get('bookmakerOdds') or {}).get(bk)))
+              f = next((f for f in L if (f.get('bookmakerOdds') or {}).get(bk)), L[0] if L else None)
+              if f: print('  claves', sorted(k for k in f if k != 'bookmakerOdds'), '| ejemplo', {k: f.get(k) for k in ('participant1Name', 'participant2Name', 'participant1Id', 'startTime', 'sportId')})
+          print('usadas', G.usadas)
+          PY
