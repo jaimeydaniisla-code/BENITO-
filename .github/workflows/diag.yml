@@ -10,28 +10,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Descubrir deportes y competiciones (pocas peticiones)
+      - run: pip install -r requirements.txt
+      - name: Prueba del radar (grupos A y B, sin guardar)
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
         run: |
-          python - <<'PY'
-          import os, json, time, urllib.request, urllib.parse, urllib.error
-          K = os.environ['ODDSPAPI_KEY']
-          def get(p, **q):
-              q['apiKey'] = K; time.sleep(1.2)
-              try:
-                  return json.loads(urllib.request.urlopen(urllib.request.Request('https://api.oddspapi.io/v4' + p + '?' + urllib.parse.urlencode(q), headers={'User-Agent': 'benitooo'}), timeout=60).read().decode())
-              except urllib.error.HTTPError as e:
-                  print('ERROR', p, e.code, e.read().decode()[:300]); return []
-          sp = get('/sports'); sp = sp.get('data', sp) if isinstance(sp, dict) else sp
-          print('DEPORTES:', [(s.get('sportId'), s.get('sportName') or s.get('slug')) for s in sp][:40])
-          ids = {(s.get('sportName') or s.get('slug') or '').lower(): s.get('sportId') for s in sp}
-          for nombre in ('basketball', 'ice hockey', 'tennis', 'soccer'):
-              sid = next((v for k, v in ids.items() if nombre in k), None)
-              if sid is None: print('no encontrado', nombre); continue
-              T = get('/tournaments', sportId=sid); T = T.get('data', T) if isinstance(T, dict) else T
-              T = sorted([t for t in T if (t.get('upcomingFixtures') or 0) + (t.get('futureFixtures') or 0) > 0], key=lambda t: -((t.get('upcomingFixtures') or 0) + (t.get('futureFixtures') or 0)))
-              print('==', nombre, sid, len(T), 'con partidos')
-              for t in T[:60]:
-                  print('  ', t.get('tournamentId'), '|', t.get('categoryName'), '|', t.get('tournamentName'), '|', t.get('upcomingFixtures'), t.get('futureFixtures'))
-          PY
+          RADAR_GRUPO=A python modelo_cuotas/radar.py
+          RADAR_GRUPO=B python modelo_cuotas/radar.py
+          python -c "import json;d=json.load(open('radar.json'));print('ejemplo', json.dumps(d['picks'][:2], ensure_ascii=False))"

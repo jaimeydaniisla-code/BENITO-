@@ -143,6 +143,22 @@ def cuenta():
         print('AVISO contador real no disponible:', repr(e)[:80]); return None
 
 
+def lote(bookmaker, ids):
+    """Cuotas de varias competiciones. OddsPapi admite como mucho 3 competiciones por petición: se trocea."""
+    out, ok = [], False
+    ids = [str(i) for i in ids]
+    for n in range(0, len(ids), 3):
+        if n: time.sleep(1.2)
+        try:
+            r = get('/odds-by-tournaments', tournamentIds=','.join(ids[n:n + 3]), bookmaker=bookmaker)
+            r = r.get('data', r) if isinstance(r, dict) else r
+            if isinstance(r, list): out += r; ok = True
+        except Exception as e:
+            print('AVISO lote', bookmaker, ids[n:n + 3], repr(e)[:100])
+    if not ok: raise ValueError('lote sin respuesta')
+    return out
+
+
 def pedir():
     if not KEY:
         print('Sin ODDSPAPI_KEY'); return
@@ -174,20 +190,17 @@ def pedir():
     try: cu = json.load(open(CUOTAS, encoding='utf-8'))
     except Exception: cu = {}
     # 1) Lote: UNA petición con las cuotas de bwin de todos los partidos próximos de las ligas pedidas
-    lote = None
+    lote_ = None
     try:
-        r = get('/odds-by-tournaments', tournamentIds=','.join(str(TORNEOS[l]) for l in ligas), bookmaker='bwin.es')
-        lote = r.get('data', r) if isinstance(r, dict) else r
-        if not isinstance(lote, list) or not lote: raise ValueError('respuesta vacía o inesperada')
-        print('Lote OddsPapi:', len(lote), 'partidos en total')
+        lote_ = lote('bwin.es', [TORNEOS[l] for l in ligas])   # lista vacía = bwin aún sin cuotas: no se gasta más
+        print('Lote OddsPapi:', len(lote_), 'partidos en total')
     except Exception as e:
-        print('AVISO lote no disponible, se usa la vía partido a partido solo para', ligas[0], '->', repr(e)[:100]); lote = None; ligas = ligas[:1]
+        print('AVISO lote no disponible, se usa la vía partido a partido solo para', ligas[0], '->', repr(e)[:100]); lote_ = None; ligas = ligas[:1]
     pin = {}
-    if PIN and lote is not None and limite - gastado - usadas >= 30:   # con poco cupo, se prioriza bwin
+    if PIN and lote_ is not None and limite - gastado - usadas >= 30:   # con poco cupo, se prioriza bwin
         try:
             time.sleep(1.5)
-            rp = get('/odds-by-tournaments', tournamentIds=','.join(str(TORNEOS[l]) for l in ligas), bookmaker='pinnacle')
-            for f in (rp.get('data', rp) if isinstance(rp, dict) else rp):
+            for f in lote('pinnacle', [TORNEOS[l] for l in ligas]):
                 mk_ = (f.get('bookmakerOdds') or {}).get('pinnacle', {}).get('markets')
                 if mk_: pin[f.get('fixtureId')] = mk_
             print('Pinnacle:', len(pin), 'partidos')
@@ -196,8 +209,8 @@ def pedir():
     elif PIN: print('Pinnacle omitido para ahorrar cupo')
     for liga in ligas:
         tid = TORNEOS[liga]; ms = ventana(liga)
-        if lote is not None:
-            fx = [f for f in lote if f.get('tournamentId') in (tid, str(tid)) or f.get('tournamentId') is None]
+        if lote_ is not None:
+            fx = [f for f in lote_ if f.get('tournamentId') in (tid, str(tid)) or f.get('tournamentId') is None]
         else:
             try:
                 fx = get('/fixtures', tournamentId=tid, **{'from': ahora.strftime('%Y-%m-%d'), 'to': (ahora + dt.timedelta(days=DIAS + 1)).strftime('%Y-%m-%d')})
@@ -211,13 +224,13 @@ def pedir():
             for f in fx:
                 try: k0 = dt.datetime.fromisoformat((f.get('startTime') or '').replace('Z', '+00:00')).astimezone(MAD)
                 except Exception: continue
-                if k0.date().isoformat() != m['d'] or (lote is None and not f.get('hasOdds')): continue
+                if k0.date().isoformat() != m['d'] or (lote_ is None and not f.get('hasOdds')): continue
                 s = sim(m['h'], f.get('participant1Name', '')) + sim(m['a'], f.get('participant2Name', ''))
                 if s > bs: mejor, bs = f, s
             if not mejor or bs < 1.2:
                 sin += 1; print('  sin casar:', liga, m['h'], m['a'], m['d'], round(bs, 2)); continue
             try:
-                if lote is not None: mk = mejor['bookmakerOdds']['bwin.es']['markets']
+                if lote_ is not None: mk = mejor['bookmakerOdds']['bwin.es']['markets']
                 else: mk = get('/odds', fixtureId=mejor['fixtureId'], bookmaker='bwin.es')['bookmakerOdds']['bwin.es']['markets']
             except Exception as e:
                 print('  sin cuotas:', m['h'], m['a'], repr(e)[:80]); continue
