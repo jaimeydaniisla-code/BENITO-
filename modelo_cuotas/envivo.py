@@ -138,7 +138,9 @@ def cuotas_previas(L):
 def apuntar_picks(liga, m, hora):
     """Registro automático de lo que propone la app (se apueste o no) para medir el modelo con datos reales."""
     bw = m.get('bw') or {}
-    ps = [[x[0], x[1], x[2], bw.get(x[0])] for x in (m.get('s') or []) if x[2] >= 0.5]
+    pj = m.get('pj') or {}
+    ref = lambda x: pj.get(x[0]) or (x[2] if m.get('mkp') and x[1] in ('gol', 'res') else None)
+    ps = [[x[0], x[1], x[2], bw.get(x[0]), ref(x)] for x in (m.get('s') or []) if x[2] >= 0.5]
     if not ps: return
     with open(os.path.join(HERE, 'picks_log.jsonl'), 'a', encoding='utf-8') as f:
         f.write(json.dumps({'t': hora, 'liga': liga, 'd': m['d'], 'h': m['h'], 'a': m['a'], 'mk': 1 if m.get('mk') else 0, 'pin': 1 if m.get('mkp') else 0, 'top': mejor_pick(m).split(' · ')[0], 'ps': ps},

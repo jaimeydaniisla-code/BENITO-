@@ -91,6 +91,7 @@ main{max-width:640px;margin:0 auto;padding:18px 14px 60px}
 .simple .tag{background:var(--grass)}
 .combi .tag{background:var(--hot)}
 .pick{display:flex;gap:12px;align-items:center}
+#tabs .rd{background:#1b1340;color:#ffd54a}#tabs .rd.on{background:#d4a017;color:#1b1340}
 .oro{background:linear-gradient(135deg,#fff8dc,#ffe08a)!important;border:2px solid #d4a017!important;border-radius:14px;padding:8px;box-shadow:0 0 0 3px rgba(212,160,23,.25),0 0 14px rgba(255,196,0,.55);animation:brillo 2.4s ease-in-out infinite}
 .pobre{opacity:.55;filter:grayscale(1);background:#eee!important;border-radius:12px}
 .pobre b,.pobre span{text-decoration:line-through;text-decoration-color:rgba(0,0,0,.35)}
@@ -235,7 +236,7 @@ function opciones() {
   document.getElementById('dat').textContent = M.datos || '—';
 }
 function setLiga(k, keep) {
-  if (k === 'registro') { st.liga = k; return; }
+  if (k === 'registro' || k === 'radar') { st.liga = k; return; }
   var cur = keep && JOR[st.j] ? JOR[st.j].j : null;
   st.liga = k;
   if (k === 'todos') { JOR = armarTodos(); META = { act: (LIGAS.primera.meta || {}).act, datos: TODOS_DT }; setJ(0); opciones(); return; }
@@ -267,6 +268,7 @@ function rendCard() {
   var fila = function (n, o) { return '<div class="rrow"><b>' + n + '</b> · ' + o.n + ' picks · acierta ' + P(o.acierto) + ' (esperado ' + P(o.p_media) + ')' + R(o) + '</div>'; };
   h += '<p class="hint">' + REND.partidos + ' partidos medidos' + (REND.pendientes ? ' · ' + REND.pendientes + ' pendientes de resultado' : '') + ' · act. ' + esc(REND.act) + '</p>';
   if (REND.top && REND.top.n) h += fila('Pick del aviso', REND.top);
+  if (REND.oro && REND.oro.n) h += fila('💎 Dorados', REND.oro);
   h += '<p class="hint" style="margin:8px 0 2px"><b>¿Acierta lo que dice? (por probabilidad)</b></p>';
   Object.keys(REND.franja || {}).forEach(function (k) { h += fila(k, REND.franja[k]); });
   h += '<p class="hint" style="margin:8px 0 2px"><b>Por mercado</b></p>';
@@ -463,13 +465,15 @@ function gana(o) {
 function renderTabs() {
   var t = '';
   Object.keys(LIGAS).forEach(function (k) { t += '<button data-liga="' + k + '" class="' + (k === 'todos' ? 'td ' : '') + (st.liga === k ? 'on' : '') + '">' + LIGAS[k].nombre + '</button>'; });
+  t += '<button data-liga="radar" class="rd' + (st.liga === 'radar' ? ' on' : '') + '">🎯 Radar</button>';
   t += '<button data-liga="registro" class="rg' + (st.liga === 'registro' ? ' on' : '') + '">Registro</button>';
   document.getElementById('tabs').innerHTML = t;
 }
 function render() {
   renderTabs();
-  document.getElementById('app').classList.toggle('reg', st.liga === 'registro');
+  document.getElementById('app').classList.toggle('reg', st.liga === 'registro' || st.liga === 'radar');
   if (st.liga === 'registro') { renderRegistro(); renderSlip(); return; }
+  if (st.liga === 'radar') { renderRadar(); renderSlip(); return; }
   if (!DATA.length) {
     document.getElementById('picks').innerHTML = '<section class="card"><p class="empty">' + esc(LIGAS[st.liga].aviso || 'No hay partidos próximos publicados para esta liga. Se actualiza solo cada hora.') + '</p></section>';
     document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = ''; return;
@@ -591,7 +595,8 @@ function renderSlip() {
   });
   h += '<div class="tt"><span>Probabilidad <b>' + pct(P) + '</b></span><span>Cuota <b>' + num(Oe) + '</b></span></div>';
   h += '<div class="tt"><span>Tu cuota real en bwin:</span><input id="slipo" inputmode="decimal" placeholder="' + num(O) + '" value="' + (st.slipo > 1 ? num(st.slipo) : '') + '"></div>';
-  h += gana(Oe) + stakeTabla(P);
+  var esRadar = st.slip.some(function (l) { return l.cat === 'radar'; });
+  h += gana(Oe) + (esRadar ? '<p class="nota">🎯 Radar: <b>stake 1 fijo</b>' + (bancaActual() ? ' (' + eur(bancaActual() / 100) + ')' : '') + ', siempre simple. Comprueba que bwin sigue pagando más que la cuota justa.' + (st.slip.length > 1 ? ' <b>No la mezcles en combinada.</b>' : '') + '</p>' : stakeTabla(P));
   if (rep) h += '<p class="nota">Hay dos selecciones del mismo partido: la probabilidad conjunta es aproximada (no son independientes).</p>';
   h += '<div class="bt"><button class="no" data-slip="clear">Vaciar</button><button class="ok" data-slip="save">Apuntar apuesta</button></div>';
   el.innerHTML = h; el.hidden = false;
@@ -626,7 +631,8 @@ function capturarCierre() {
       var m = null; (L.jor || []).forEach(function (J) { (J.ms || []).forEach(function (q) { if (q.d === z[1] && q.h === z[2] && q.a === z[3]) m = q; }); });
       if (!m || !m.bw || !(m.bw[l.lab] > 1)) return;
       var t = fechaBw(m.bwact, ko.getFullYear()); if (!t || t > ko) return;       // solo cuotas tomadas antes del inicio
-      if (l.oc !== m.bw[l.lab] || l.oct !== m.bwact) { l.oc = m.bw[l.lab]; l.oct = m.bwact; l.och = Math.round((ko - t) / 36e5); cambio = true; x.u = Date.now(); }
+      var pj = (m.pj && m.pj[l.lab]) || (m.mkp && (function () { var q = (m.s || []).filter(function (s) { return s[0] === l.lab && (s[1] === 'gol' || s[1] === 'res'); })[0]; return q ? q[2] : 0; })()) || 0;
+      if (l.oc !== m.bw[l.lab] || l.oct !== m.bwact || (pj && l.pjc !== pj)) { l.oc = m.bw[l.lab]; l.oct = m.bwact; l.och = Math.round((ko - t) / 36e5); if (pj) l.pjc = pj; cambio = true; x.u = Date.now(); }
     });
   });
   if (cambio) regSave(r);
@@ -638,6 +644,12 @@ function clv(x) {   // cuota tomada / cuota de cierre - 1 (solo si todas las sel
   var real = x.real || x.legs.every(function (l) { return !l.est; });
   return real ? x.o / oc - 1 : null;
 }
+function evPin(x) {   // valor esperado según Pinnacle al cierre: cuota tomada × probabilidad justa - 1
+  if (!x.legs || !x.legs.length) return null;
+  var p = 1, ok = true; x.legs.forEach(function (l) { if (l.pjc > 0 && l.och <= 24) p *= l.pjc; else ok = false; });
+  var real = x.real || x.legs.every(function (l) { return !l.est; });
+  return ok && real ? x.o * p - 1 : null;
+}
 function grafica(vl) {
   var acc = 0, pts = [0]; vl.slice().sort(function (a, b) { return a.id - b.id; }).forEach(function (x) { acc += x.res === 'G' ? x.stake * (x.o - 1) : x.res === 'P' ? -x.stake : 0; pts.push(acc); });
   if (pts.length < 3) return '';
@@ -647,7 +659,38 @@ function grafica(vl) {
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;margin:6px 0"><line x1="0" x2="' + W + '" y1="' + y0 + '" y2="' + y0 + '" stroke="#999" stroke-dasharray="4 4"/>' +
     '<polyline fill="none" stroke="' + (acc >= 0 ? '#1a7f37' : '#d62828') + '" stroke-width="3" points="' + pts.map(xy).join(' ') + '"/></svg><p class="hint">Evolución del balance (€), apuesta a apuesta.</p>';
 }
-var CATN = { gol: 'Goles', cor: 'Córners', tar: 'Tarjetas', res: 'Resultado', combi: 'Combinadas' };
+var CATN = { gol: 'Goles', cor: 'Córners', tar: 'Tarjetas', res: 'Resultado', combi: 'Combinadas', radar: '🎯 Radar' };
+// ---------- 🎯 Radar de bwin: ocio aparte del fútbol de la app. bwin frente a la cuota justa de Pinnacle en otras ligas ----------
+var RADAR = null;
+function cargarRadar() {
+  return fetch('radar.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { RADAR = d; if (st.liga === 'radar') render(); }).catch(function () { RADAR = RADAR || {}; if (st.liga === 'radar') render(); });
+}
+function fechaCorta(iso) { var d = new Date(iso); if (isNaN(d)) return ''; var D = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']; return D[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1) + ' · ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function addRadar(n) {
+  var x = RADAR && RADAR.picks && RADAR.picks[n]; if (!x) return;
+  var k = 'radar|' + x.ko + '|' + x.h + '|' + x.sel;
+  if (enSlip(k)) { st.slip = st.slip.filter(function (l) { return l.k !== k; }); return; }
+  st.slip.push({ k: k, lab: x.mer + ': ' + x.sel, partido: x.h + ' – ' + x.a, p: x.p, o: x.bw, cat: 'radar', liga: 'radar', est: false, ko: x.ko });
+  toast('Añadida. Radar = stake 1 fijo');
+}
+function renderRadar() {
+  var R = RADAR, h = '<section class="card"><h2><span class="tag">🎯 Radar bwin</span> ocio aparte</h2>';
+  h += '<p class="hint">Busca en otras ligas apuestas donde <b>bwin paga más que la cuota justa de Pinnacle</b> (sin su margen). No son «seguras»: son cuotas mejor pagadas de lo que deberían, y solo a la larga suman. Reglas: <b>stake 1 fijo</b>, simples, nunca en combinada, y si al abrir bwin la cuota ya ha bajado de la justa, no se apuesta.</p>';
+  if (!R) { h += '<p class="empty">Cargando…</p></section>'; document.getElementById('picks').innerHTML = h; return; }
+  if (R.pausa) h += '<p class="nota">⏸ ' + esc(R.pausa) + '</p>';
+  if (R.act) h += '<p class="hint">Último escaneo: ' + esc(R.act) + ' · ' + esc((R.comps || []).join(', ')) + ' · ' + (R.eventos || 0) + ' partidos comparados · peticiones del mes ' + esc(R.pet || '') + '. Escanea martes y viernes, rotando ligas (el fútbol de la app tiene prioridad en el cupo).</p>';
+  h += '</section>';
+  var P = (R.picks || []).filter(function (x) { return new Date(x.ko) > new Date(); });
+  if (!R.act) h += '<section class="card"><p class="empty">Aún no hay ningún escaneo. El primero será el próximo martes o viernes por la mañana.</p></section>';
+  else if (!P.length) h += '<section class="card"><p class="empty">En el último escaneo no apareció nada que bwin pague por encima de lo justo (o ya se ha jugado). Es lo normal muchas semanas.</p></section>';
+  P.forEach(function (x) {
+    var n = R.picks.indexOf(x), k = 'radar|' + x.ko + '|' + x.h + '|' + x.sel;
+    h += '<section class="card"><div class="leg oro"><b>' + pct(x.p) + '</b><span>' + esc(x.mer) + ': ' + esc(x.sel) + '<span class="joya">💎 +' + Math.round(x.ev * 100) + ' %</span><em>' + esc(x.h) + ' – ' + esc(x.a) + ' · ' + esc(x.comp) + '<br>' + fechaCorta(x.ko) + ' · cuota justa ' + num(x.justa) + (x.fiab ? '' : ' · liga menor: poco fiable') + '</em></span><span class="odd">' + num(x.bw) + ' <small>bwin</small></span></div>' +
+      '<button class="addb' + (enSlip(k) ? ' on' : '') + '" data-radar="' + n + '">' + (enSlip(k) ? '✓ En mi apuesta (quitar)' : '＋ Añadir a mi apuesta (stake 1)') + '</button></section>';
+  });
+  h += '<section class="card"><p class="hint">Estas apuestas no se resuelven solas: márcalas como ganada o perdida en Registro. En «Por liga» verás si el radar suma o resta a la larga.</p></section>';
+  document.getElementById('picks').innerHTML = h;
+}
 function renderRegistro() {
   var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + avisosCard() + rendCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
   var ok = res.filter(function (x) { return x.res === 'G'; }).length, vl = res.filter(function (x) { return x.res !== 'N'; }),
@@ -665,7 +708,7 @@ function renderRegistro() {
     var invertido = 0; vl.forEach(function (x) { invertido += x.res === 'N' ? 0 : x.stake; });
     h += '<div class="rrow"><b>Rentabilidad</b> · ' + (invertido ? (bal >= 0 ? '+' : '') + String(Math.round(1000 * bal / invertido) / 10).replace('.', ',') + ' % sobre ' + eur(invertido) + ' apostados' : '—') + '</div>';
     h += grafica(vl);
-    var pl = {}, NL = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' };
+    var pl = {}, NL = { radar: '🎯 Radar', primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' };
     vl.forEach(function (x) { var k = NL[x.liga] || x.liga || '—', o = pl[k] = pl[k] || { n: 0, g: 0, b: 0, s: 0 }; o.n++; o.s += x.stake; if (x.res === 'G') { o.g++; o.b += x.stake * (x.o - 1); } else o.b -= x.stake; });
     h += '<p class="hint" style="margin:8px 0 2px"><b>Por liga</b></p>';
     Object.keys(pl).forEach(function (k) { var o = pl[k]; h += '<div class="rrow"><b>' + k + '</b> · ' + o.g + '/' + o.n + ' · <span class="' + (o.b >= 0 ? 'pos' : 'neg') + '">' + (o.b >= 0 ? '+' : '') + eur(o.b) + ' (' + Math.round(100 * o.b / o.s) + ' %)</span></div>'; });
@@ -689,6 +732,8 @@ function renderRegistro() {
     var med = cl.reduce(function (a, v) { return a + v; }, 0) / cl.length, mej = cl.filter(function (v) { return v > 0.005; }).length;
     h += '<div class="rsum"><div>Apuestas medidas<b>' + cl.length + '</b></div><div>Mejor que el cierre<b>' + Math.round(100 * mej / cl.length) + ' %</b></div>' +
       '<div style="grid-column:1/3">Diferencia media con la cuota de cierre<b class="' + (med >= 0 ? 'pos' : 'neg') + '">' + (med >= 0 ? '+' : '') + String(Math.round(1000 * med) / 10).replace('.', ',') + ' %</b></div></div>';
+    var ep = r.map(evPin).filter(function (v) { return v !== null; });
+    if (ep.length) { var me = ep.reduce(function (a, v) { return a + v; }, 0) / ep.length; h += '<div class="rrow"><b>Valor esperado según Pinnacle</b> · ' + ep.length + ' apuestas · <span class="' + (me >= 0 ? 'pos' : 'neg') + '">' + (me >= 0 ? '+' : '') + String(Math.round(1000 * me) / 10).replace('.', ',') + ' % de media</span></div><p class="hint">Es la mejor estimación de si vuestras apuestas tienen valor real: la cuota que cogisteis frente a la probabilidad justa de Pinnacle justo antes del partido. En positivo, a la larga se gana.</p>'; }
     h += '<p class="hint">' + (cl.length < 50 ? 'Aún pocas apuestas (' + cl.length + '): hace falta llegar a unas 50 para fiarse. ' : '') + 'Si de media cogéis cuotas más altas que las de cierre, hay valor real; si no, ganar o perder es sobre todo suerte. Solo cuenta las apuestas con cuota bwin real y cierre tomado como mucho 24 h antes del partido.</p>';
   } else h += '<p class="empty">Aún no hay apuestas con cuota de cierre. Se mide sola: el robot guarda la última cuota bwin antes de cada partido y la app la compara con la vuestra.</p>';
   h += '</section>';
@@ -914,7 +959,7 @@ function init() {
   if (st.sync) syncNow(false);
   setInterval(function () { if (!document.hidden) syncNow(false); }, 60000);
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-av],[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
+    var t = e.target.closest('[data-radar],[data-av],[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
     if (!t) return;
     if (t.dataset.av) { avisosAccion(t.dataset.av, t); return; }
     if (t.dataset.sync) {
@@ -933,6 +978,8 @@ function init() {
     else if (t.dataset.res) { var rr = t.dataset.res.split(','); regRes(+rr[0], rr[1]); }
     else if (t.dataset.csv) { regCsv(t); }
     else if (t.dataset.liga === 'registro') { st.liga = 'registro'; render(); window.scrollTo(0, 0); }
+    else if (t.dataset.liga === 'radar') { st.liga = 'radar'; render(); cargarRadar(); window.scrollTo(0, 0); }
+    else if (t.dataset.radar !== undefined) { addRadar(+t.dataset.radar); render(); }
     else if (t.dataset.liga) { setLiga(t.dataset.liga, false); render(); }
     else if (t.dataset.cat) { st.cat = t.dataset.cat; render(); }
     else if (t.dataset.j) { setJ(st.j + (+t.dataset.j)); document.getElementById('jsel').value = st.j; render(); }

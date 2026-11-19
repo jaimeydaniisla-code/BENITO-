@@ -7,11 +7,14 @@ import generar_cuotas as G
 from mercado import devig_pot
 ROOT = os.path.abspath(os.path.join(HERE, '..')); SAL = os.path.join(ROOT, 'radar.json')
 CATR = os.path.join(HERE, 'catalogo_radar.json')
+# En OddsPapi, bwin.es solo trae fútbol (comprobado: sin NBA ni NHL). Se rotan grupos de 3 competiciones (máximo por petición).
 GRUPOS = {   # tournamentId de OddsPapi: nombre, deporte, fiabilidad (1 = mercado grande y eficiente; 0 = liga menor: se exige más diferencia)
-    'A': {132: ('NBA', 'Baloncesto', 1), 138: ('Euroliga', 'Baloncesto', 1), 234: ('NHL', 'Hockey', 1)},
     'B': {18: ('Championship (Inglaterra)', 'Fútbol', 1), 52: ('Süper Lig (Turquía)', 'Fútbol', 0), 37: ('Eredivisie (Países Bajos)', 'Fútbol', 0)},
     'C': {238: ('Primeira Liga (Portugal)', 'Fútbol', 0), 325: ('Brasileirão', 'Fútbol', 0), 955: ('Saudi Pro League', 'Fútbol', 0)},
+    'D': {23: ('Serie A (Italia)', 'Fútbol', 1), 35: ('Bundesliga (Alemania)', 'Fútbol', 1), 34: ('Ligue 1 (Francia)', 'Fútbol', 1)},
 }
+TIPOS = {'1x2': 'Resultado', 'totals': 'Goles', 'bothteamsscore': 'Ambos marcan', 'doublechance': 'Doble oportunidad', 'spreads': 'Hándicap asiático',
+         'teamtotals-team1': 'Goles {H}', 'teamtotals-team2': 'Goles {A}', 'totals-corners': 'Córners', 'totals-bookings': 'Tarjetas', 'drawnobet': 'Empate no válido'}
 DIAS, EV_MIN, EV_MIN_MENOR, EV_MAX, P_MIN = 4, 0.03, 0.05, 0.20, 0.40
 FUTBOL_DIA = 7     # peticiones que se reservan para el fútbol por cada día que queda de mes
 TRAD = {'Over': 'Más de', 'Under': 'Menos de', 'X': 'Empate', 'Yes': 'Sí', 'No': 'No'}
@@ -19,8 +22,8 @@ TRAD = {'Over': 'Más de', 'Under': 'Menos de', 'X': 'Empate', 'Yes': 'Sí', 'No
 
 def grupo_hoy(ahora):
     if os.environ.get('RADAR_GRUPO'): return os.environ['RADAR_GRUPO']
-    if ahora.weekday() in (0, 1, 2): return 'A'                            # lun-mié: baloncesto y hockey
-    return 'B' if ahora.isocalendar()[1] % 2 == 0 else 'C'                # jue-dom: fútbol, alternando semanas
+    n = ahora.isocalendar()[1] * 2 + (1 if ahora.weekday() >= 3 else 0)   # 2 escaneos por semana, rotando B, C, D
+    return 'BCD'[n % 3]
 
 
 def catalogo(sports):
@@ -65,7 +68,7 @@ def main():
     bw = G.lote('bwin.es', list(comps)); time.sleep(1.2); pn = G.lote('pinnacle', list(comps))
     pnd = {f['fixtureId']: f for f in pn}
     cat = catalogo(sorted({f.get('sportId') for f in bw + pn if f.get('sportId') and f.get('sportId') != 10}))
-    try: cat10 = {str(k): {'n': v.get('marketName'), 'h': v.get('handicap'), 'p': v.get('period'), 'l': v.get('marketLength'), 'pp': v.get('playerProp'),
+    try: cat10 = {str(k): {'n': v.get('marketName'), 'h': v.get('handicap'), 'p': v.get('period'), 'l': v.get('marketLength'), 'pp': v.get('playerProp'), 't': v.get('marketType'),
                            'o': {str(o['outcomeId']): o['outcomeName'] for o in v.get('outcomes', [])}} for k, v in json.load(open(os.path.join(HERE, 'catalogo_mercados.json'), encoding='utf-8')).items()}
     except Exception: cat10 = {}
     picks, eventos = [], 0
@@ -81,7 +84,7 @@ def main():
         mejor = None
         for mid, v in mb.items():
             c = (cat10 if f.get('sportId') == 10 else cat).get(str(mid))
-            if not c or c.get('pp') or mid not in mp: continue
+            if not c or c.get('pp') or mid not in mp or c.get('p') != 'fulltime' or c.get('t') not in TIPOS: continue
             pb, pp = precios(v), precios(mp[mid])
             if not c.get('l') or len(pp) != c['l'] or len(pp) < 2: continue      # hace falta el mercado completo en Pinnacle para quitar su margen
             ks = list(pp); jus = dict(zip(ks, devig_pot([pp[k] for k in ks])))
@@ -89,9 +92,10 @@ def main():
                 if oid not in jus: continue
                 pr = float(jus[oid]); ev = cb * pr - 1
                 if pr >= P_MIN and (EV_MIN if fiab else EV_MIN_MENOR) <= ev <= EV_MAX and (not mejor or ev > mejor['ev']):
-                    on = c['o'].get(oid, oid); on = {'1': H, '2': A}.get(on, TRAD.get(on, on))
-                    h = c.get('h'); lin = f" {str(h).replace('.', ',')}" if h not in (None, 0, 0.0) and on.startswith(('Más', 'Menos')) else ''
-                    mejor = {'dep': dep, 'comp': nombre, 'h': H, 'a': A, 'ko': ko.strftime('%Y-%m-%dT%H:%M'), 'mer': c.get('n') or '', 'per': c.get('p'),
+                    o0 = c['o'].get(oid, oid); on = o0; on = {'1': H, '2': A, '1X': H + ' o empate', 'X2': 'Empate o ' + A, '12': 'No hay empate'}.get(on, TRAD.get(on, on))
+                    h = c.get('h'); hs = str(h).replace('.', ',') if h not in (None, '') else ''
+                    lin = f" {hs}" if hs and on.startswith(('Más', 'Menos')) else (f" ({'+' if hv > 0 else ''}{str(hv).replace('.', ',')})" if c.get('t') == 'spreads' and hs and (hv := float(h) * (-1 if o0 == '2' else 1)) is not None else '')
+                    mejor = {'dep': dep, 'comp': nombre, 'h': H, 'a': A, 'ko': ko.strftime('%Y-%m-%dT%H:%M'), 'mer': TIPOS[c['t']].format(H=H, A=A), 'per': c.get('p'),
                              'sel': on + lin, 'p': round(pr, 3), 'justa': round(1 / pr, 2), 'bw': cb, 'ev': round(ev, 3), 'fiab': fiab}
         if mejor: picks.append(mejor)
     picks.sort(key=lambda x: -x['ev'])

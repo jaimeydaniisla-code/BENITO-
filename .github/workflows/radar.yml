@@ -1,0 +1,34 @@
+name: radar
+on:
+  workflow_dispatch:
+    inputs:
+      grupo:
+        description: 'Grupo de ligas (B, C o D; vacío = el que toque)'
+        default: ''
+  schedule:
+    - cron: '41 8 * * 2,5'   # martes y viernes ~09:41 (Madrid): 2 peticiones; se pausa solo si el fútbol necesita el cupo
+permissions:
+  contents: write
+concurrency:
+  group: actualizar
+  cancel-in-progress: false
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Radar bwin frente a Pinnacle
+        env:
+          ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
+          RADAR_GRUPO: ${{ github.event.inputs.grupo }}
+        run: python modelo_cuotas/radar.py
+      - name: Guardar
+        run: |
+          git config user.name "robot"; git config user.email "robot@users.noreply.github.com"
+          git add -A radar.json modelo_cuotas
+          git diff --staged --quiet || (git commit -m "Radar" && git pull -q --rebase -X theirs origin main && git push)

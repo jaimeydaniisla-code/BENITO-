@@ -43,12 +43,12 @@ def main():
         if k in hechos: continue
         for r in (app.get('ligas', {}).get(x['liga'], {}).get('res') or []):
             if r[1] == x['h'] and r[2] == x['a'] and r[0] >= x['d']:
-                hechos[k] = [[lab, cat, p, o, evaluar(lab, x['h'], x['a'], r), 1 if lab == x.get('top') else 0] for lab, cat, p, o in x['ps']]
+                hechos[k] = [[z[0], z[1], z[2], z[3], evaluar(z[0], x['h'], x['a'], r), 1 if z[0] == x.get('top') else 0, 1 if len(z) > 4 and z[4] and z[3] and 0.02 <= z[3] * z[4] - 1 <= 0.25 else 0] for z in x['ps']]
                 hechos[k] = [z for z in hechos[k] if z[4] is not None]
                 break
     json.dump(hechos, open(RES, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     def acum(): return {'n': 0, 'ok': 0, 'p': 0.0, 'nc': 0, 'ben': 0.0}
-    cat, liga, franja, top = {}, {}, {}, acum()
+    cat, liga, franja, top, oro = {}, {}, {}, acum(), acum()
     def suma(o, z):
         o['n'] += 1; ok = z[4] is True; o['ok'] += ok; o['p'] += z[2]
         if z[3] and z[4] != 'N': o['nc'] += 1; o['ben'] += (z[3] - 1) if ok else -1
@@ -59,9 +59,10 @@ def main():
             suma(cat.setdefault(z[1], acum()), z); suma(liga.setdefault(lg, acum()), z)
             b = min(int(z[2] * 10), 9); suma(franja.setdefault(f'{b * 10}-{b * 10 + 9} %' if b < 9 else '90 %+', acum()), z)
             if z[5]: suma(top, z)
+            if len(z) > 6 and z[6]: suma(oro, z)
     fmt = lambda o: {'n': o['n'], 'acierto': round(o['ok'] / o['n'], 3) if o['n'] else None, 'p_media': round(o['p'] / o['n'], 3) if o['n'] else None,
                      'n_cuota': o['nc'], 'roi': round(o['ben'] / o['nc'], 3) if o['nc'] else None}
-    out = {'act': dt.datetime.now(__import__('zoneinfo').ZoneInfo('Europe/Madrid')).strftime('%d/%m %H:%M'), 'partidos': len(hechos), 'pendientes': len(picks) - len(hechos), 'top': fmt(top),
+    out = {'act': dt.datetime.now(__import__('zoneinfo').ZoneInfo('Europe/Madrid')).strftime('%d/%m %H:%M'), 'partidos': len(hechos), 'pendientes': len(picks) - len(hechos), 'top': fmt(top), 'oro': fmt(oro),
            'cat': {k: fmt(v) for k, v in cat.items()}, 'liga': {k: fmt(v) for k, v in liga.items()}, 'franja': {k: fmt(v) for k, v in sorted(franja.items())}}
     json.dump(out, open(SAL, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print('Rendimiento:', len(hechos), 'partidos resueltos,', out['pendientes'], 'pendientes; mejor pick', out['top'])
