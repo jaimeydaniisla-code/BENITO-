@@ -236,7 +236,7 @@ function opciones() {
   document.getElementById('dat').textContent = M.datos || '—';
 }
 function setLiga(k, keep) {
-  if (k === 'registro' || k === 'radar') { st.liga = k; return; }
+  if (k === 'registro' || k === 'radar' || k === 'directo') { st.liga = k; return; }
   var cur = keep && JOR[st.j] ? JOR[st.j].j : null;
   st.liga = k;
   if (k === 'todos') { JOR = armarTodos(); META = { act: (LIGAS.primera.meta || {}).act, datos: TODOS_DT }; setJ(0); opciones(); return; }
@@ -467,14 +467,16 @@ function renderTabs() {
   Object.keys(LIGAS).forEach(function (k) { t += '<button data-liga="' + k + '" class="' + (k === 'todos' ? 'td ' : '') + (st.liga === k ? 'on' : '') + '">' + LIGAS[k].nombre + '</button>'; });
   var RADAR_ON = false;   // radar en pausa (19/11): se reactiva poniendo true y el cron de radar.yml
   if (RADAR_ON) t += '<button data-liga="radar" class="rd' + (st.liga === 'radar' ? ' on' : '') + '">🎯 Radar</button>';
+  t += '<button data-liga="directo" class="rd' + (st.liga === 'directo' ? ' on' : '') + '">📡 Directo IA</button>';
   t += '<button data-liga="registro" class="rg' + (st.liga === 'registro' ? ' on' : '') + '">Registro</button>';
   document.getElementById('tabs').innerHTML = t;
 }
 function render() {
   renderTabs();
-  document.getElementById('app').classList.toggle('reg', st.liga === 'registro' || st.liga === 'radar');
+  document.getElementById('app').classList.toggle('reg', st.liga === 'registro' || st.liga === 'radar' || st.liga === 'directo');
   if (st.liga === 'registro') { renderRegistro(); renderSlip(); return; }
   if (st.liga === 'radar') { renderRadar(); renderSlip(); return; }
+  if (st.liga === 'directo') { renderDirectoIA(); renderSlip(); return; }
   if (!DATA.length) {
     document.getElementById('picks').innerHTML = '<section class="card"><p class="empty">' + esc(LIGAS[st.liga].aviso || 'No hay partidos próximos publicados para esta liga. Se actualiza solo cada hora.') + '</p></section>';
     document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = ''; return;
@@ -700,6 +702,12 @@ function renderRadar() {
   });
   h += '<section class="card"><p class="hint">Estas apuestas no se resuelven solas: márcalas como ganada o perdida en Registro. En «Por liga» verás si el radar suma o resta a la larga.</p></section>';
   document.getElementById('picks').innerHTML = h;
+}
+// 📡 Directo IA: idea de Benito (20/11/2026), pendiente. Se decide a mediados de diciembre, cuando sepamos si los picks previos tienen valor.
+function renderDirectoIA() {
+  document.getElementById('picks').innerHTML = '<section class="card"><h2><span class="tag">📡 Directo IA</span> próximamente</h2>' +
+    '<p><b>La idea de noviembre:</b> eliges un partido en directo (p. ej. Madrid–Barça) y el robot lo sigue cada 1–2 minutos con marcador, minuto, tiros, ocasiones (xG), posesión y expulsiones. Calcula, por ejemplo, «Madrid pierde 0–1 en el 60\', pero por cómo juega tiene un 38 % de no perder: si bwin paga 3,00 o más, hay valor».</p>' +
+    '<p class="hint">Plan: a mediados de diciembre miramos si los picks de antes del partido tienen valor real. Si lo tienen, se monta primero en modo prueba (solo probabilidades, sin recomendar apostar) para ver si acierta lo que dice. Ojo: en directo bwin cobra más margen y ajusta la cuota en segundos, así que es lo más difícil de ganar.</p></section>';
 }
 function renderRegistro() {
   var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + avisosCard() + rendCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
@@ -988,6 +996,7 @@ function init() {
     else if (t.dataset.res) { var rr = t.dataset.res.split(','); regRes(+rr[0], rr[1]); }
     else if (t.dataset.csv) { regCsv(t); }
     else if (t.dataset.liga === 'registro') { st.liga = 'registro'; render(); window.scrollTo(0, 0); }
+    else if (t.dataset.liga === 'directo') { st.liga = 'directo'; render(); window.scrollTo(0, 0); }
     else if (t.dataset.liga === 'radar') { st.liga = 'radar'; render(); cargarRadar(); window.scrollTo(0, 0); }
     else if (t.dataset.radar !== undefined) { addRadar(t.dataset.radar); render(); }
     else if (t.dataset.liga) { setLiga(t.dataset.liga, false); render(); }
