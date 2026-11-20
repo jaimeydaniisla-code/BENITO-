@@ -202,7 +202,7 @@ def main():
     for liga, lst in cerca.items():
         for m, ko in lst:
             q = f"{liga}|{m['d']}|{m['h']}|{m['a']}"; mins = (ko - ahora).total_seconds() / 60
-            if 30 <= mins <= 55 and q not in av: grupos.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q))
+            if 38 <= mins <= 50 and q not in av: grupos.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q))
     if grupos:
         cuotas_previas([x for L in grupos.values() for x in L])
         json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
