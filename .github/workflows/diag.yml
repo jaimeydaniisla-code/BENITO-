@@ -3,27 +3,22 @@ on: workflow_dispatch
 permissions:
   contents: read
 jobs:
-  casas:
+  prueba:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Casas españolas en OddsPapi y cobertura NBA/NHL
+      - run: pip install pywebpush
+      - name: Aviso de prueba a todos los móviles
         env:
-          ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd modelo_cuotas && python - <<'PY'
-          import json, generar_cuotas as G
-          import time
-          for bk in ('bet365.es', 'winamax.es', 'codere.es', '888sport.es'):
-              try:
-                  r = G.get('/odds-by-tournaments', tournamentIds='132,234,138', bookmaker=bk)
-                  L = r.get('data', r) if isinstance(r, dict) else r
-                  con = [f for f in L if (f.get('bookmakerOdds') or {}).get(bk)]
-                  from collections import Counter
-                  print('CASA', bk, 'partidos con cuotas:', len(con), dict(Counter(f.get('tournamentId') for f in con)), 'mercados ej.:', len(((con[0]['bookmakerOdds'][bk]).get('markets') or {})) if con else 0)
-              except Exception as e: print('CASA', bk, 'ERROR', repr(e)[:120])
-          print('usadas', G.usadas)
-          PY
+          cd modelo_cuotas && python -c "
+          import envivo as E
+          s = E.leer_avisos()
+          print('móviles suscritos:', [(k, v.get('nom'), 'activo' if (not v.get('off') and v.get('sub')) else 'desactivado') for k, v in s.items()])
+          print('enviados:', E.enviar(s, '⚽ Prueba de Benitooo', 'Si ves esto, los avisos te funcionan. Llegarán antes de cada partido con alineaciones y picks.', 'prueba-amigo'))
+          "
