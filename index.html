@@ -283,6 +283,34 @@ function cargarVivo() {
     var n = autoResolver(); render(); return n;
   }).catch(function () {});
 }
+function irAvisos() {
+  if (location.hash !== '#avisos') return;
+  if (st.liga !== 'todos') setLiga('todos', false);
+  render(); var el = document.getElementById('avisos'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth' });
+}
+function avisosHoy() {
+  var hoy = new Date(), iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
+  var ayer = new Date(hoy - 864e5), L = [];
+  Object.keys(EV.p || {}).forEach(function (q) { var e = EV.p[q], z = q.split('|'); if (e.aviso && (z[1] === iso(hoy) || (z[1] === iso(ayer) && hoy.getHours() < 4))) L.push({ q: q, z: z, e: e }); });
+  if (!L.length) return '';
+  var NL = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions' };
+  var hora = function (x) { var d = null; ((LIGAS[x.z[0]] && LIGAS[x.z[0]].jor) || []).forEach(function (J) { J.ms.forEach(function (m) { if (m.d === x.z[1] && m.h === x.z[2] && m.a === x.z[3]) d = m; }); }); return d ? d.t : ''; };
+  L.forEach(function (x) { x.t = hora(x); }); L.sort(function (a, b) { return (a.z[1] + a.t) < (b.z[1] + b.t) ? -1 : 1; });
+  var res = function (x, l) {
+    var g = String(x.e.sc || '').match(/^(\d+)\s*-\s*(\d+)$/); if (x.e.e !== 'f' || !g || !l) return '';
+    var v = evalLeg(l.lab, x.z[2], x.z[3], [x.z[1], x.z[2], x.z[3], +g[1], +g[2]]);
+    return v === true ? ' ✅' : v === false ? ' ❌' : v === 'N' ? ' ↩️' : '';
+  };
+  var h = '<section class="card" id="avisos"><h2><span class="tag">🔔 Avisos de hoy</span> picks guardados al avisar</h2>';
+  L.forEach(function (x) {
+    var a = x.e.aviso, pk = a.pick, vl = a.val;
+    h += '<div class="leg' + (vl ? ' oro' : '') + '"><b>' + (pk ? pct(pk.p) : '—') + '</b><span>' + esc(x.z[2]) + ' – ' + esc(x.z[3]) + (x.e.e ? ' ' + insignia({ lg: x.z[0], d: x.z[1], h: x.z[2], a: x.z[3] }) : '') +
+      '<em>' + (NL[x.z[0]] || '') + ' · ' + esc(x.t) + ' · aviso ' + esc(a.t) + ' · ' + (a.conf ? 'alineaciones confirmadas' : '⚠ alineaciones no oficiales') + '</em>' +
+      (pk ? '<em>Pick: <b>' + esc(pk.lab) + '</b>' + (pk.o ? ' · bwin ' + num(pk.o) : ' · cuota estimada') + res(x, pk) + '</em>' : '') +
+      (vl ? '<em><span class="joya">💎 ' + esc(vl.lab) + ' · ' + num(vl.o) + ' · +' + Math.round(vl.ev * 100) + ' %</span>' + res(x, vl) + '</em>' : '') + '</span></div>';
+  });
+  return h + '<p class="hint">Se quedan como estaban al llegar el aviso (con esas alineaciones y cuotas). Comprueba siempre la cuota real en bwin antes de apostar.</p></section>';
+}
 function vivo(d) { return EV.p[(d.lg || st.liga) + '|' + d.d + '|' + d.h + '|' + d.a] || null; }
 function insignia(d) {
   var v = vivo(d); if (!v || !v.e) return '';
@@ -538,14 +566,16 @@ function render() {
     } else h += '<p class="empty">Ahora no hay ningún pick con cuota bwin real por encima de la justa.</p>';
     h += '<p class="hint">💎 Dorado = bwin paga más que la cuota justa de Pinnacle (la referencia más fiable), también en córners y tarjetas. Gris = bwin paga un 10 % o más por debajo: mejor evitarlo. Lo normal es que haya pocos. Más de un 20-25 % de diferencia suele ser un error de datos, no un regalo: comprueba la cuota en bwin.</p></section>';
   }
+  if (st.liga === 'todos') h = avisosHoy() + h;
   document.getElementById('picks').innerHTML = h;
   // partidos
   var m = '';
   DATA.forEach(function (d, i) {
     var sel = d.s.filter(function (s) { return st.cat === 'todo' || s[1] === st.cat; }).slice(0, 12);
-    m += '<article class="match' + (st.open === i ? ' open' : '') + '"><button class="mh" data-open="' + i + '"><span class="teams">' + esc(d.h) + ' <i>–</i> ' + esc(d.a) + (d.s.some(function (q) { var c = cuota(i, q); return oroEv({ i: i, lab: q[0], cat: q[1], p: q[2], o: c.o, est: c.est }); }) ? ' <span class="joya">💎</span>' : '') + '</span><span class="when">' + insignia(d) + cuando(d) + '</span></button>';
+    m += '<article class="match' + (st.open === i ? ' open' : '') + '"><button class="mh" data-open="' + i + '"><span class="teams">' + esc(d.h) + ' <i>–</i> ' + esc(d.a) + (function () { var b = null; d.s.forEach(function (q) { var c = cuota(i, q), ev = oroEv({ i: i, lab: q[0], cat: q[1], p: q[2], o: c.o, est: c.est }); if (ev && (!b || ev > b.ev)) b = { lab: q[0], ev: ev, o: c.o }; }); return b ? ' <span class="joya">💎 ' + esc(b.lab) + ' · ' + num(b.o) + ' · +' + Math.round(b.ev * 100) + ' %</span>' : ''; })() + '</span><span class="when">' + insignia(d) + cuando(d) + '</span></button>';
     if (st.open === i) {
       var vv = vivo(d) || {};
+      if (vv.aviso && vv.aviso.pick) m += '<p class="nota">🔔 Aviso de las ' + esc(vv.aviso.t) + ' (' + (vv.aviso.conf ? 'alineaciones confirmadas' : 'alineaciones no oficiales') + '): <b>' + esc(vv.aviso.pick.lab) + '</b> ' + pct(vv.aviso.pick.p) + (vv.aviso.pick.o ? ' · bwin ' + num(vv.aviso.pick.o) : '') + (vv.aviso.val ? ' · 💎 ' + esc(vv.aviso.val.lab) + ' +' + Math.round(vv.aviso.val.ev * 100) + ' %' : '') + '</p>';
       m += '<div class="mb"><div class="facts"><span>Árbitro: <b>' + esc(vv.arb || d.arb || 'sin designar') + '</b></span><span>Alineaciones: <b>' + esc(vv.ali || d.ali || 'sin confirmar (≈1 h antes)') + '</b></span></div>';
       var ex = function (t, v) { return v && v[0] != null && v[1] != null ? '<span>' + t + ' <b>' + v[0] + ' – ' + v[1] + '</b></span>' : ''; };
       m += '<div class="exp">' + (ex('Goles esperados', d.g) + ex('Córners', d.c) + ex('Tarjetas', d.k) || '<span>Sin goles esperados: aún no hay cuotas ni ratings</span>') + '</div>';
@@ -970,8 +1000,9 @@ function init() {
   setLiga('todos', false);
   document.getElementById('jsel').addEventListener('change', function (e) { setJ(+e.target.value); render(); });
   render();
-  cargarDatos(false).then(cargarVivo).then(cargarRend);
-  if (pushSoportado()) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data === 'refrescar') cargarDatos(false).then(cargarVivo); }); }
+  cargarDatos(false).then(cargarVivo).then(cargarRend).then(irAvisos);
+  window.addEventListener('hashchange', irAvisos);
+  if (pushSoportado()) { navigator.serviceWorker.register('sw.js').catch(function () {}); navigator.serviceWorker.addEventListener('message', function (e) { if (e.data === 'refrescar') { location.hash = 'avisos'; cargarDatos(false).then(cargarVivo).then(irAvisos); } }); }
   setInterval(function () { if (!document.hidden) cargarDatos(false); }, 600000);
   setInterval(function () { if (!document.hidden) cargarVivo(); }, 60000);
   if (st.sync) syncNow(false);

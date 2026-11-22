@@ -77,7 +77,7 @@ def leer_avisos():
     return {}
 
 
-def enviar(subs, titulo, cuerpo, tag, ligas=None):
+def enviar(subs, titulo, cuerpo, tag, ligas=None, url='./'):
     try:
         from pywebpush import webpush, WebPushException
     except Exception as e:
@@ -87,7 +87,7 @@ def enviar(subs, titulo, cuerpo, tag, ligas=None):
         if v.get('off') or not v.get('sub') or not v.get('d'): continue
         if ligas and not set(ligas) & set(v.get('ligas') or LIGAS): continue
         try:
-            webpush(subscription_info=v['sub'], data=json.dumps({'title': titulo, 'body': cuerpo, 'tag': tag, 'url': './'}, ensure_ascii=False),
+            webpush(subscription_info=v['sub'], data=json.dumps({'title': titulo, 'body': cuerpo, 'tag': tag, 'url': url}, ensure_ascii=False),
                     vapid_private_key=v['d'], vapid_claims={'sub': 'mailto:benitooo@users.noreply.github.com'}, ttl=3600)
             n += 1
         except Exception as e:
@@ -109,6 +109,22 @@ def mejor_pick(m):
     if c:
         x = max(c, key=lambda x: x[2]); return f"{x[0]} · {round(x[2] * 100)} % (cuota estimada)"
     return 'sin pick claro'
+
+
+def pick_aviso(m):
+    """El pick del aviso en datos (para guardarlo en la app): mejor por probabilidad con cuota bwin real y el de más valor frente a Pinnacle."""
+    bw, pj = m.get('bw') or {}, m.get('pj') or {}
+    c = [x for x in m.get('s') or [] if 0.5 <= x[2] <= 0.92]
+    con = [x for x in c if bw.get(x[0], 0) >= 1.25]
+    x = max(con or c, key=lambda x: x[2]) if (con or c) else None
+    out = {'lab': x[0], 'p': round(x[2], 3), 'o': bw.get(x[0]), 'cat': x[1]} if x else None
+    val = []
+    for y in m.get('s') or []:
+        ref = pj.get(y[0]) or (y[2] if m.get('mkp') and y[1] in ('gol', 'res') else None)
+        if ref and bw.get(y[0], 0) > 1 and ref >= 0.4:
+            ev = bw[y[0]] * ref - 1
+            if 0.02 <= ev <= 0.25: val.append({'lab': y[0], 'p': round(ref, 3), 'o': bw[y[0]], 'ev': round(ev, 3), 'cat': y[1]})
+    return out, (max(val, key=lambda v: v['ev']) if val else None)
 
 
 def cuotas_previas(L):
@@ -198,28 +214,39 @@ def main():
             if e: p.setdefault(f"{liga}|{m['d']}|{m['h']}|{m['a']}", {}).update(e)
     # Avisos ~1 h antes (se agrupan los partidos que empiezan a la misma hora)
     av = [k for k in previo.get('av', []) if k.split('|')[1] >= ayer]
-    grupos = {}
+    # El aviso espera a las alineaciones confirmadas (de 55 a 20 min antes); si a 25 min no están, sale igualmente y lo dice
+    cand, grupos = {}, {}
     for liga, lst in cerca.items():
         for m, ko in lst:
             q = f"{liga}|{m['d']}|{m['h']}|{m['a']}"; mins = (ko - ahora).total_seconds() / 60
-            if 38 <= mins <= 50 and q not in av: grupos.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q))
+            if 20 <= mins <= 55 and q not in av: cand.setdefault(m['d'] + ' ' + m['t'], []).append((liga, m, q, mins))
+    conf = lambda q: ((p.get(q) or {}).get('ali') or '').startswith('confirmadas')
+    for hora, L in cand.items():
+        if all(conf(x[2]) for x in L) or min(x[3] for x in L) <= 25: grupos[hora] = [x[:3] for x in L]
+        else: print('Esperando alineaciones confirmadas:', hora, [x[1]['h'] for x in L if not conf(x[2])])
     if grupos:
         cuotas_previas([x for L in grupos.values() for x in L])
         json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
         for hora, L in grupos.items():
-            for liga, m, q in L: apuntar_picks(liga, m, ahora.isoformat(timespec='minutes'))
+            for liga, m, q in L:
+                apuntar_picks(liga, m, ahora.isoformat(timespec='minutes'))
+                pk, vl = pick_aviso(m)
+                p.setdefault(q, {})['aviso'] = {'t': ahora.strftime('%H:%M'), 'conf': 1 if conf(q) else 0, 'ali': ((p.get(q) or {}).get('ali') or '').split(' · ')[0][:60],
+                                                'pick': pk, 'val': vl}
         subs = leer_avisos()
         for hora, L in sorted(grupos.items()):
             t = hora[-5:]
             if len(L) == 1:
                 liga, m, q = L[0]; ali = (p.get(q) or {}).get('ali') or 'alineaciones aún sin publicar'
+                if not conf(q): ali = '⚠ Alineaciones aún NO oficiales a 25 min'
                 tit = f"⚽ Empieza a las {t}: {m['h']} – {m['a']}"
-                cuerpo = f"{ali.split(' · ')[0][:70]}\nMejor pick: {mejor_pick(m)}\nRevisa bajas y la cuota real en bwin antes de apostar."
+                vl = pick_aviso(m)[1]
+                cuerpo = f"{ali.split(' · ')[0][:70]}\nMejor pick: {mejor_pick(m)}" + (f"\n💎 Valor: {vl['lab']} a {str(vl['o']).replace('.', ',')} (+{round(vl['ev'] * 100)} %)" if vl else '') + "\nRevisa la cuota real en bwin antes de apostar."
             else:
                 L.sort(key=lambda x: ['primera', 'champions', 'premier', 'segunda'].index(x[0]) if x[0] in ('primera', 'champions', 'premier', 'segunda') else 9)
                 tit = f"⚽ Empieza a las {t}: {L[0][1]['h']} – {L[0][1]['a']} y {len(L) - 1} más"
-                cuerpo = '\n'.join(f"{m['h']} – {m['a']}: {mejor_pick(m)}" for _, m, _ in L[:5]) + '\nAbre la app: alineaciones ya cargadas.'
-            n = enviar(subs, tit, cuerpo, 'k' + hora, [x[0] for x in L]) if subs else 0
+                cuerpo = '\n'.join(f"{m['h']} – {m['a']}: {mejor_pick(m)}" for _, m, _ in L[:5]) + ('\nAlineaciones confirmadas. Picks guardados en la app (TODOS).' if all(conf(x[2]) for x in L) else '\n⚠ Alguna alineación aún no es oficial.')
+            n = enviar(subs, tit, cuerpo, 'k' + hora, [x[0] for x in L], url='./#avisos') if subs else 0
             print('Aviso', hora, len(L), 'partidos ->', n, 'móviles')
             av += [x[2] for x in L]
     nuevo = {'p': p, 'av': av}
