@@ -3,28 +3,28 @@ on: workflow_dispatch
 permissions:
   contents: read
 jobs:
-  registro:
+  stats:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Resumen del registro compartido (solo lectura)
-        env:
-          GIST_ID: ${{ secrets.GIST_ID }}
+      - name: Estadísticas finales en FotMob
         run: |
-          python - <<'PY'
-          import os, json, re, urllib.request
-          gid = re.search(r'[0-9a-f]{32}', os.environ['GIST_ID']).group(0)
-          g = json.loads(urllib.request.urlopen(urllib.request.Request('https://api.github.com/gists/' + gid, headers={'User-Agent': 'benitooo'}), timeout=30).read())
-          f = g['files']['registro.json']; txt = f['content'] if not f.get('truncated') else urllib.request.urlopen(f['raw_url']).read().decode()
-          R = [x for x in json.loads(txt).get('reg', []) if not x.get('del')]
-          print('APUESTAS', len(R))
-          bal = st = 0
-          for x in sorted(R, key=lambda x: x['id']):
-              b = x['stake'] * (x['o'] - 1) if x.get('res') == 'G' else -x['stake'] if x.get('res') == 'P' else 0
-              if x.get('res') in ('G', 'P'): bal += b; st += x['stake']
-              print('FILA', x.get('f'), '|', x.get('liga'), '|', ' + '.join(l['lab'] + ' (' + l.get('partido', '') + ')' for l in x.get('legs', [])), '| cuota', x.get('o'), '| real' if x.get('real') else '| est', '| stake', x.get('stake'), '| res', x.get('res'), '| auto' if x.get('auto') else '')
-          print('BALANCE', round(bal, 2), 'APOSTADO', round(st, 2), 'BANCA', json.loads(txt).get('odds', {}).get('__bank'))
+          cd modelo_cuotas && python - <<'PY'
+          import envivo as E, json
+          allm = E.fm_get('https://www.fotmob.com/leagues/87/overview/laliga')['fixtures']['allMatches']
+          fin = [f for f in allm if f['status'].get('finished')][-2:]
+          for f in fin:
+              g = E.fm_get('https://www.fotmob.com' + f['pageUrl'].split('#')[0])['content']
+              print('PARTIDO', f['home']['name'], f['away']['name'], f['status'].get('scoreStr'), 'claves content:', list(g.keys()))
+              def walk(o, path=''):
+                  if isinstance(o, dict):
+                      t = str(o.get('title') or o.get('key') or '')
+                      if any(w in t.lower() for w in ('corner', 'yellow', 'red card', 'red_card')) and 'stats' in o: print('  ', path, '|', o.get('title'), '|', o.get('key'), '|', o.get('stats'))
+                      for k, v in o.items(): walk(v, path + '/' + str(k))
+                  elif isinstance(o, list):
+                      for i, v in enumerate(o[:60]): walk(v, path + '[' + str(i) + ']')
+              walk(g.get('stats'), 'stats')
           PY
