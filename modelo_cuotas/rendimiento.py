@@ -39,9 +39,20 @@ def main():
     try: hechos = json.load(open(RES, encoding='utf-8'))
     except Exception: hechos = {}
     app = json.load(open(DATOS, encoding='utf-8'))
+    try: ev = json.load(open(os.path.join(ROOT, 'envivo.json'), encoding='utf-8')).get('p', {})
+    except Exception: ev = {}
     for k, x in picks.items():
         if k in hechos: continue
-        for r in (app.get('ligas', {}).get(x['liga'], {}).get('res') or []):
+        lista = list(app.get('ligas', {}).get(x['liga'], {}).get('res') or [])
+        e = ev.get(k) or {}
+        g = re.match(r'^(\d+)\s*-\s*(\d+)$', str(e.get('sc') or ''))
+        if not any(r[1] == x['h'] and r[2] == x['a'] and r[0] >= x['d'] for r in lista) and e.get('e') == 'f' and g:
+            # marcador final del directo (FotMob): sirve para goles y resultado; córners y tarjetas quedan sin evaluar
+            hechos[k] = [[z[0], z[1], z[2], z[3], evaluar(z[0], x['h'], x['a'], [x['d'], x['h'], x['a'], int(g[1]), int(g[2])]), 1 if z[0] == x.get('top') else 0,
+                          1 if len(z) > 4 and z[4] and z[3] and 0.02 <= z[3] * z[4] - 1 <= 0.25 else 0] for z in x['ps']]
+            hechos[k] = [z for z in hechos[k] if z[4] is not None]
+            continue
+        for r in lista:
             if r[1] == x['h'] and r[2] == x['a'] and r[0] >= x['d']:
                 hechos[k] = [[z[0], z[1], z[2], z[3], evaluar(z[0], x['h'], x['a'], r), 1 if z[0] == x.get('top') else 0, 1 if len(z) > 4 and z[4] and z[3] and 0.02 <= z[3] * z[4] - 1 <= 0.25 else 0] for z in x['ps']]
                 hechos[k] = [z for z in hechos[k] if z[4] is not None]
