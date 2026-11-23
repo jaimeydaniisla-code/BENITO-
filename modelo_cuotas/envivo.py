@@ -42,6 +42,20 @@ def fm_get(u):
     return json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', h, re.S).group(1))['props']['pageProps']
 
 
+def estad(g):
+    """Córners y tarjetas (amarillas + rojas) del partido completo en FotMob: ([local, visitante], [local, visitante])."""
+    v = {}
+    for grp in (((g.get('stats') or {}).get('Periods') or {}).get('All') or {}).get('stats') or []:
+        for it in grp.get('stats') or []:
+            k, x = it.get('key'), it.get('stats')
+            if k in ('corners', 'yellow_cards', 'red_cards') and k not in v and isinstance(x, list) and len(x) == 2:
+                try: v[k] = [int(x[0]), int(x[1])]
+                except Exception: pass
+    cor = v.get('corners')
+    tar = [v['yellow_cards'][0] + v.get('red_cards', [0, 0])[0], v['yellow_cards'][1] + v.get('red_cards', [0, 0])[1]] if 'yellow_cards' in v else None
+    return cor, tar
+
+
 def alineacion(g, H, A):
     L = g.get('lineup') or {}
     if not (L.get('homeTeam') and L.get('awayTeam')): return None
@@ -163,6 +177,35 @@ def apuntar_picks(liga, m, hora):
                            ensure_ascii=False, separators=(',', ':')) + '\n')
 
 
+def rellenar(previo, ahora, maximo=8):
+    """Partidos ya terminados sin córners/tarjetas (p. ej. acabaron fuera de la vigilancia): se buscan en FotMob, como mucho 8 por pasada."""
+    P = previo.get('p') or {}
+    faltan = [q for q, e in P.items() if e.get('e') == 'f' and 'cor' not in e and q.split('|')[1] >= (ahora.date() - dt.timedelta(days=6)).isoformat()][:maximo]
+    if not faltan: return
+    cache, n = {}, 0
+    for q in faltan:
+        liga, d, H, A = q.split('|')
+        if liga not in LIGAS: continue
+        try:
+            if liga not in cache:
+                lid, slug = LIGAS[liga]; cache[liga] = fm_get(f'https://www.fotmob.com/leagues/{lid}/overview/{slug}')['fixtures']['allMatches']
+            kh, ka = clave(H), clave(A); best, f0 = 0, None
+            for x in cache[liga]:
+                if not x.get('status', {}).get('finished'): continue
+                if x['status']['utcTime'][:10] not in (d, (dt.date.fromisoformat(d) - dt.timedelta(days=1)).isoformat()): continue
+                sc = difflib.SequenceMatcher(None, kh, clave(x['home']['name'])).ratio() + difflib.SequenceMatcher(None, ka, clave(x['away']['name'])).ratio()
+                if sc > best: best, f0 = sc, x
+            if not f0 or best < 1.5: P[q]['cor'] = None; continue
+            cor, tar = estad(fm_get('https://www.fotmob.com' + f0['pageUrl'].split('#')[0])['content'])
+            P[q]['cor'], P[q]['tar'] = cor, tar; n += 1
+        except Exception as ex:
+            print('  AVISO rellenar', q, repr(ex)[:80])
+    if n:
+        previo['act'] = ahora.strftime('%d/%m %H:%M')
+        json.dump(previo, open(SALIDA, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+        print('Estadísticas finales añadidas a', n, 'partidos')
+
+
 def main():
     ahora = dt.datetime.now(MAD)
     app = json.load(open(DATOS, encoding='utf-8'))
@@ -178,10 +221,12 @@ def main():
                         cerca.setdefault(liga, []).append((m, ko))
     if os.environ.get('PRUEBA_AVISO'):
         print('Prueba de aviso enviada a', enviar(leer_avisos(), '⚽ Prueba de Benitooo', 'Si ves esto, los avisos funcionan. Te llegarán ~1 h antes de cada partido.', 'prueba'), 'móviles')
+    rellenar(previo, ahora)
     if not cerca:
         print('Sin partidos cerca de su hora: nada que hacer'); return
     ayer = (ahora.date() - dt.timedelta(days=1)).isoformat()
-    p = {k: dict(v) for k, v in (previo.get('p') or {}).items() if k.split('|')[1] >= ayer}   # se conserva el marcador final hasta el día siguiente
+    guarda = (ahora.date() - dt.timedelta(days=6)).isoformat()
+    p = {k: dict(v) for k, v in (previo.get('p') or {}).items() if k.split('|')[1] >= guarda}   # marcador final y estadísticas: 6 días (para resolver apuestas y medir picks)
     for liga, lst in cerca.items():
         lid, slug = LIGAS[liga]
         try: allm = fm_get(f'https://www.fotmob.com/leagues/{lid}/overview/{slug}')['fixtures']['allMatches']
@@ -211,6 +256,15 @@ def main():
                     if ref.get('text'): e['arb'] = ref['text']
                 except Exception as ex:
                     print('  AVISO partido:', m['h'], m['a'], repr(ex)[:80])
+            qq = f"{liga}|{m['d']}|{m['h']}|{m['a']}"
+            if st.get('finished') and 'cor' not in (p.get(qq) or {}):
+                try:   # córners y tarjetas finales (para resolver al momento sin esperar al CSV)
+                    g = fm_get('https://www.fotmob.com' + f['pageUrl'].split('#')[0])['content']
+                    cor, tar = estad(g)
+                    if cor: e['cor'] = cor
+                    if tar: e['tar'] = tar
+                except Exception as ex:
+                    print('  AVISO estadísticas:', m['h'], m['a'], repr(ex)[:80])
             if e: p.setdefault(f"{liga}|{m['d']}|{m['h']}|{m['a']}", {}).update(e)
     # Avisos ~1 h antes (se agrupan los partidos que empiezan a la misma hora)
     av = [k for k in previo.get('av', []) if k.split('|')[1] >= ayer]

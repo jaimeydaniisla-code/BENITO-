@@ -298,7 +298,7 @@ function avisosHoy() {
   L.forEach(function (x) { x.t = hora(x); }); L.sort(function (a, b) { return (a.z[1] + a.t) < (b.z[1] + b.t) ? -1 : 1; });
   var res = function (x, l) {
     var g = String(x.e.sc || '').match(/^(\d+)\s*-\s*(\d+)$/); if (x.e.e !== 'f' || !g || !l) return '';
-    var v = evalLeg(l.lab, x.z[2], x.z[3], [x.z[1], x.z[2], x.z[3], +g[1], +g[2]]);
+    var v = evalLeg(l.lab, x.z[2], x.z[3], [x.z[1], x.z[2], x.z[3], +g[1], +g[2]].concat(x.e.cor && x.e.tar ? [x.e.cor[0], x.e.cor[1], x.e.tar[0], x.e.tar[1]] : []));
     return v === true ? ' ✅' : v === false ? ' ❌' : v === 'N' ? ' ↩️' : '';
   };
   var h = '<section class="card" id="avisos"><h2><span class="tag">🔔 Avisos de hoy</span> picks guardados al avisar</h2>';
@@ -834,7 +834,7 @@ function resultadoDe(partido, id) {
   });
   if (!best || best[0] > iso) Object.keys(EV.p || {}).forEach(function (q) {   // marcador final del directo (FotMob) hasta que llegue el CSV completo
     var e = EV.p[q], z = q.split('|'), g = String(e.sc || '').match(/^(\d+)\s*-\s*(\d+)$/);
-    if (e.e === 'f' && g && z[2] === par[0] && z[3] === par[1] && z[1] >= iso && (!best || z[1] < best[0])) best = [z[1], z[2], z[3], +g[1], +g[2]];
+    if (e.e === 'f' && g && z[2] === par[0] && z[3] === par[1] && z[1] >= iso && (!best || z[1] < best[0])) best = [z[1], z[2], z[3], +g[1], +g[2]].concat(e.cor && e.tar ? [e.cor[0], e.cor[1], e.tar[0], e.tar[1]] : []);
   });
   return best;
 }
