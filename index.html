@@ -91,6 +91,7 @@ main{max-width:640px;margin:0 auto;padding:18px 14px 60px}
 .simple .tag{background:var(--grass)}
 .combi .tag{background:var(--hot)}
 .pick{display:flex;gap:12px;align-items:center}
+.esc{display:flex;flex-direction:column;gap:6px;margin:8px 0}.peld{display:flex;gap:10px;align-items:center;padding:8px 10px;border:2px solid var(--line);border-radius:12px;opacity:.75}.peld b{min-width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--line);font-weight:900}.peld.ok{border-color:#1a7f37;background:rgba(26,127,55,.08);opacity:1}.peld.ok b{background:#1a7f37;color:#fff}.peld.cur{border-color:#d4a017;background:linear-gradient(135deg,#fff8dc,#ffe08a);opacity:1;box-shadow:0 0 12px rgba(255,196,0,.5)}.peld.cur b{background:#d4a017;color:#1b1340}.peld.base{opacity:1;border-style:dashed}
 #tabs .rd{background:#1b1340;color:#ffd54a}#tabs .rd.on{background:#d4a017;color:#1b1340}
 .oro{background:linear-gradient(135deg,#fff8dc,#ffe08a)!important;border:2px solid #d4a017!important;border-radius:14px;padding:8px;box-shadow:0 0 0 3px rgba(212,160,23,.25),0 0 14px rgba(255,196,0,.55);animation:brillo 2.4s ease-in-out infinite}
 .pobre{opacity:.55;filter:grayscale(1);background:#eee!important;border-radius:12px}
@@ -236,7 +237,7 @@ function opciones() {
   document.getElementById('dat').textContent = M.datos || '—';
 }
 function setLiga(k, keep) {
-  if (k === 'registro' || k === 'radar' || k === 'directo') { st.liga = k; return; }
+  if (k === 'registro' || k === 'radar' || k === 'directo' || k === 'escalera') { st.liga = k; return; }
   var cur = keep && JOR[st.j] ? JOR[st.j].j : null;
   st.liga = k;
   if (k === 'todos') { JOR = armarTodos(); META = { act: (LIGAS.primera.meta || {}).act, datos: TODOS_DT }; setJ(0); opciones(); return; }
@@ -516,16 +517,18 @@ function renderTabs() {
   Object.keys(LIGAS).forEach(function (k) { t += '<button data-liga="' + k + '" class="' + (k === 'todos' ? 'td ' : '') + (st.liga === k ? 'on' : '') + '">' + LIGAS[k].nombre + '</button>'; });
   var RADAR_ON = false;   // radar en pausa (19/11): se reactiva poniendo true y el cron de radar.yml
   if (RADAR_ON) t += '<button data-liga="radar" class="rd' + (st.liga === 'radar' ? ' on' : '') + '">🎯 Radar</button>';
+  t += '<button data-liga="escalera" class="rd' + (st.liga === 'escalera' ? ' on' : '') + '">🪜 Escalera</button>';
   t += '<button data-liga="directo" class="rd' + (st.liga === 'directo' ? ' on' : '') + '">📡 Directo IA</button>';
   t += '<button data-liga="registro" class="rg' + (st.liga === 'registro' ? ' on' : '') + '">Registro</button>';
   document.getElementById('tabs').innerHTML = t;
 }
 function render() {
   renderTabs();
-  document.getElementById('app').classList.toggle('reg', st.liga === 'registro' || st.liga === 'radar' || st.liga === 'directo');
+  document.getElementById('app').classList.toggle('reg', st.liga === 'registro' || st.liga === 'radar' || st.liga === 'directo' || st.liga === 'escalera');
   if (st.liga === 'registro') { renderRegistro(); renderSlip(); return; }
   if (st.liga === 'radar') { renderRadar(); renderSlip(); return; }
   if (st.liga === 'directo') { renderDirectoIA(); renderSlip(); return; }
+  if (st.liga === 'escalera') { renderEscalera(); renderSlip(); return; }
   if (!DATA.length) {
     document.getElementById('picks').innerHTML = '<section class="card"><p class="empty">' + esc(LIGAS[st.liga].aviso || 'No hay partidos próximos publicados para esta liga. Se actualiza solo cada hora.') + '</p></section>';
     document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = ''; return;
@@ -772,6 +775,143 @@ function renderDirectoIA() {
     '<p><b>La idea de noviembre:</b> eliges un partido en directo (p. ej. Madrid–Barça) y el robot lo sigue cada 1–2 minutos con marcador, minuto, tiros, ocasiones (xG), posesión y expulsiones. Calcula, por ejemplo, «Madrid pierde 0–1 en el 60\', pero por cómo juega tiene un 38 % de no perder: si bwin paga 3,00 o más, hay valor».</p>' +
     '<p class="hint">Plan: a mediados de diciembre miramos si los picks de antes del partido tienen valor real. Si lo tienen, se monta primero en modo prueba (solo probabilidades, sin recomendar apostar) para ver si acierta lo que dice. Ojo: en directo bwin cobra más margen y ajusta la cuota en segundos, así que es lo más difícil de ganar.</p></section>';
 }
+// ======================= 🪜 MODO ESCALERA =======================
+// Una propuesta al día (simple o doble de partidos distintos), cuota total 1,40-1,60, cada selección con probabilidad real >= 75 %.
+// Se reinvierte todo el retorno en cada escalón. Estado compartido entre los dos móviles (va en el registro sincronizado).
+var ESCK = 'benitooo_esc', ESC_PMIN = 0.75, ESC_PTOT = 0.62, ESC_OMIN = 1.40, ESC_OMAX = 1.60;
+function escLoad() { try { return JSON.parse(localStorage.getItem(ESCK)) || {}; } catch (e) { return {}; } }
+function escSave(E, remoto) { if (!remoto) E.u = Date.now(); try { localStorage.setItem(ESCK, JSON.stringify(E)); } catch (e) {} if (!remoto) syncSoon(); }
+function hoyIso() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function escCandidatos() {
+  // todos los partidos de hoy de todas las ligas que aún no han empezado, con cuota bwin real
+  var hoy = hoyIso(), ahora = new Date(), L = [];
+  ['primera', 'segunda', 'premier', 'champions'].forEach(function (lg) {
+    ((LIGAS[lg] && LIGAS[lg].jor) || []).forEach(function (J) {
+      (J.ms || []).forEach(function (m) {
+        if (m.d !== hoy || !m.t || new Date(m.d + 'T' + m.t + ':00') <= new Date(ahora.getTime() + 20 * 60000)) return;
+        (m.s || []).forEach(function (s) {
+          var o = m.bw && m.bw[s[0]]; if (!(o > 1)) return;
+          var p = (m.pj && m.pj[s[0]]) || s[2];
+          if (p < ESC_PMIN || o * p - 1 <= -0.10) return;   // fuera cuotas pobres
+          L.push({ lg: lg, d: m.d, t: m.t, h: m.h, a: m.a, lab: s[0], cat: s[1], p: p, o: o, pin: !!(m.pj && m.pj[s[0]]) });
+        });
+      });
+    });
+  });
+  return L;
+}
+function escPropuesta() {
+  var L = escCandidatos(), best = null;
+  var consider = function (legs) {
+    var o = legs.reduce(function (a, x) { return a * x.o; }, 1), p = legs.reduce(function (a, x) { return a * x.p; }, 1);
+    if (o < ESC_OMIN || o > ESC_OMAX || p < ESC_PTOT) return;
+    if (!best || p > best.p) best = { legs: legs, o: Math.round(o * 100) / 100, p: p };
+  };
+  L.forEach(function (x) { consider([x]); });
+  L.sort(function (a, b) { return b.p - a.p; }); var T = L.slice(0, 60);
+  for (var i = 0; i < T.length; i++) for (var j = i + 1; j < T.length; j++) if (T[i].h !== T[j].h || T[i].a !== T[j].a) consider([T[i], T[j]]);
+  return best;
+}
+function escHoy(E) {
+  // la propuesta del día se congela la primera vez que se calcula (igual para los dos móviles)
+  var hoy = hoyIso(); E.dia = E.dia || {};
+  if (!E.dia[hoy]) { var pr = escPropuesta(); if (pr) { E.dia = {}; E.dia[hoy] = { legs: pr.legs, o: pr.o, p: pr.p, t: new Date().toTimeString().slice(0, 5) }; escSave(E); } }
+  return E.dia[hoy] || null;
+}
+function escResultado(pr) {   // null = pendiente · false = perdida · número = cuota cobrada (un «empate no válido» devuelto cuenta como 1)
+  var mult = 1;
+  for (var k = 0; k < pr.legs.length; k++) {
+    var l = pr.legs[k], res = resultadoDe(l.h + ' – ' + l.a, l.d);
+    if (!res) return null;
+    var v = evalLeg(l.lab, l.h, l.a, res); if (v === null) return null; if (v === false) return false;
+    mult *= v === 'N' ? 1 : l.o;
+  }
+  return mult;
+}
+function escActualizar(E) {
+  var R = E.reto; if (!R || R.fin) return false;
+  var c = false;
+  R.pasos.forEach(function (st_) {
+    if (st_.res) return;
+    var v = escResultado(st_.prop); if (v === null) return;
+    st_.res = v ? 'G' : 'P'; c = true;
+    if (v) { st_.cobro = Math.round(st_.apostado * v * 100) / 100; R.banca = st_.cobro; R.esc++; if (R.esc >= R.obj) escCerrar(E, 'completado'); }
+    else escCerrar(E, 'fallado');
+  });
+  if (c) escSave(E);
+  return c;
+}
+function escCerrar(E, como) {
+  var R = E.reto; R.fin = como; R.ffin = hoyIso();
+  var cobra = como === 'fallado' ? (R.asegurado || 0) : R.banca + (R.asegurado || 0);
+  E.hist = E.hist || []; E.hist.unshift({ f: R.fini, ff: R.ffin, ini: R.ini, obj: R.obj, llegó: R.esc, como: como, cobra: Math.round(cobra * 100) / 100, neto: Math.round((cobra - R.ini) * 100) / 100 });
+  E.reto = null;
+}
+function escAccion(a) {
+  var E = escLoad();
+  if (a === 'nuevo') {
+    var ini = parse(document.getElementById('escIni').value), obj = +document.getElementById('escObj').value;
+    if (!(ini > 0) || !(obj >= 2)) { toast('Pon la inversión inicial y los escalones'); return; }
+    E.reto = { ini: ini, obj: obj, banca: ini, esc: 0, pasos: [], fini: hoyIso(), asegurado: 0 }; escSave(E); render(); return;
+  }
+  var R = E.reto; if (!R) return;
+  if (a === 'apostada') {
+    var pr = escHoy(E); if (!pr) return;
+    if (R.pasos.some(function (p) { return p.f === hoyIso(); })) { toast('Ya está apuntada la de hoy'); return; }
+    R.pasos.push({ f: hoyIso(), prop: pr, apostado: R.banca }); escSave(E); toast('Escalón ' + (R.esc + 1) + ' apostado: ' + eur(R.banca)); render(); return;
+  }
+  if (a === 'plantarse') { if (confirm('¿Cerrar el reto y cobrar ' + eur(R.banca + (R.asegurado || 0)) + '?')) { escCerrar(E, 'plantado'); escSave(E); render(); } return; }
+  if (a === 'asegurar') { if (R.banca > R.ini && !R.asegurado) { R.asegurado = R.ini; R.banca = Math.round((R.banca - R.ini) * 100) / 100; escSave(E); toast('Inversión inicial guardada. Sigues solo con las ganancias.'); render(); } return; }
+  if (a === 'abandonar') { if (confirm('¿Abandonar el reto? Cuenta como plantado con lo que haya.')) { escCerrar(E, 'plantado'); escSave(E); render(); } }
+}
+function renderEscalera() {
+  var E = escLoad(); escActualizar(E); E = escLoad();
+  var R = E.reto, pr = escHoy(E), h = '';
+  h += '<section class="card"><h2><span class="tag">🪜 Modo Escalera</span> una apuesta segura al día</h2><p class="hint">Cada día, una simple o una doble de partidos distintos a cuota <b>1,40–1,60</b>, solo con selecciones de probabilidad real ≥ ' + Math.round(ESC_PMIN * 100) + ' % (Pinnacle sin margen cuando la hay). Se reinvierte todo lo ganado. Si ningún partido cumple, hoy no hay escalón.</p></section>';
+  // propuesta del día
+  h += '<section class="card"><h2><span class="tag">Hoy</span> ' + (pr ? 'propuesta del reto' : 'sin apuesta') + '</h2>';
+  if (!pr) h += '<p class="empty">🛑 Hoy no hay partidos seguros para el reto. Mejor no forzar.</p>';
+  else {
+    pr.legs.forEach(function (l) { h += '<div class="leg"><b>' + pct(l.p) + '</b><span>' + esc(l.lab) + '<em>' + esc(l.h + ' – ' + l.a) + ' · ' + esc(l.t) + (l.pin ? ' · ref. Pinnacle' : '') + '</em></span><span class="odd">' + num(l.o) + ' <small>bwin</small></span></div>'; });
+    h += '<div class="tot"><span>' + (pr.legs.length > 1 ? 'Las dos' : 'Simple') + '</span><b>' + pct(pr.p) + '</b><span class="odd">' + num(pr.o) + '</span></div><p class="hint">Calculada a las ' + esc(pr.t) + ' y fija para todo el día. Comprueba la cuota en bwin: si ha bajado de ' + num(ESC_OMIN) + ', mejor no.</p>';
+  }
+  h += '</section>';
+  // reto
+  h += '<section class="card"><h2><span class="tag">Mi reto</span> ' + (R ? 'escalón ' + (R.esc + 1) + ' de ' + R.obj : 'sin empezar') + '</h2>';
+  if (!R) {
+    h += '<div class="tt"><span>Inversión inicial (€):</span><input id="escIni" inputmode="decimal" placeholder="10" value="10"></div><div class="tt"><span>Escalones:</span><select id="escObj"><option>5</option><option selected>7</option><option>10</option></select></div>' +
+      '<button class="addb" data-esc="nuevo">🪜 Empezar reto</button><p class="hint">Probabilidad aproximada de completar todos los escalones con ~70 % cada uno: 5 → 17 %, 7 → 8 %, 10 → 3 %. Lo normal es caer antes: por eso a partir del escalón 3 conviene plantarse o guardar lo invertido.</p>';
+  } else {
+    var c = 1.5, pend = R.pasos.filter(function (p) { return !p.res; })[0];
+    h += '<div class="esc">';
+    for (var k = R.obj; k >= 1; k--) {
+      var pasoK = R.pasos.filter(function (p) { return p.res === 'G'; })[k - 1], hecho = k <= R.esc && !!pasoK, actual = k === R.esc + 1;
+      var apu = hecho ? pasoK.apostado : R.banca * Math.pow(c, k - 1 - R.esc), gana = hecho ? (pasoK.cobro || pasoK.apostado * pasoK.prop.o) : apu * c;
+      h += '<div class="peld' + (hecho ? ' ok' : actual ? ' cur' : '') + '"><b>' + k + '</b><span>' + (hecho ? '✅ ' + num(pasoK.prop.o) + ' · ' + eur(pasoK.apostado) + ' → ' + eur(gana) : actual ? (pend ? '⏳ En juego: ' + eur(pend.apostado) + ' a ' + num(pend.prop.o) + ' → ' + eur(pend.apostado * pend.prop.o) : R.pasos.some(function (p) { return p.f === hoyIso(); }) ? '👉 Próxima propuesta mañana: apostarás ' + eur(R.banca) : pr ? '👉 Hoy: apuesta ' + eur(R.banca) + ' a ' + num(pr.o) + ' → ' + eur(R.banca * pr.o) : '⏸ Hoy no hay escalón: espera a mañana con ' + eur(R.banca)) : '~' + eur(apu) + ' → ~' + eur(gana) + ' <small>(con cuota 1,50)</small>') + '</span></div>';
+    }
+    h += '<div class="peld base"><b>0</b><span>Inversión inicial ' + eur(R.ini) + (R.asegurado ? ' · 🔒 guardada ' + eur(R.asegurado) : '') + '</span></div></div>';
+    if (!pend && pr && !R.pasos.some(function (p) { return p.f === hoyIso(); })) h += '<button class="addb" data-esc="apostada">✔️ La he apostado en bwin (' + eur(R.banca) + ')</button>';
+    if (pend) h += '<p class="hint">Se resuelve sola al acabar el partido.</p>';
+    if (R.esc >= 2 && !pend) {
+      h += '<p class="nota">🏆 Ya has multiplicado tu inversión x' + num(R.banca / R.ini) + ' (' + eur(R.banca) + '). ¿Seguir arriesgándolo todo?</p>';
+      h += '<button class="addb" data-esc="plantarse">💰 Plantarse y cobrar ' + eur(R.banca + (R.asegurado || 0)) + '</button>';
+      if (!R.asegurado) h += '<button class="addb" style="background:var(--line);color:var(--ink)" data-esc="asegurar">🔒 Guardar los ' + eur(R.ini) + ' iniciales y seguir solo con las ganancias</button>';
+    }
+    h += '<p class="hint"><button class="lnk" data-esc="abandonar" style="background:none;border:0;color:var(--muted,#888);text-decoration:underline;padding:0">Abandonar el reto</button></p>';
+  }
+  h += '</section>';
+  // historial
+  var H = E.hist || [];
+  h += '<section class="card"><h2><span class="tag">Historial de retos</span> ' + H.length + '</h2>';
+  if (!H.length) h += '<p class="empty">Aún no hay retos terminados.</p>';
+  else {
+    var comp = H.filter(function (x) { return x.como === 'completado'; }).length, pl = H.filter(function (x) { return x.como === 'plantado'; }).length, net = H.reduce(function (a, x) { return a + x.neto; }, 0);
+    h += '<div class="rsum"><div>Completados<b>' + comp + '</b></div><div>Plantados<b>' + pl + '</b></div><div>Fallados<b>' + (H.length - comp - pl) + '</b></div><div>Balance<b class="' + (net >= 0 ? 'pos' : 'neg') + '">' + (net >= 0 ? '+' : '') + eur(net) + '</b></div></div>';
+    H.forEach(function (x) { h += '<div class="rrow"><b>' + esc(x.f) + '</b> · ' + eur(x.ini) + ' · ' + (x.como === 'fallado' ? '❌ cayó en el escalón ' + (x.llegó + 1) : x.como === 'completado' ? '🏆 completado (' + x.obj + ')' : '💰 plantado en el ' + x.llegó) + ' · <span class="' + (x.neto >= 0 ? 'pos' : 'neg') + '">' + (x.neto >= 0 ? '+' : '') + eur(x.neto) + '</span></div>'; });
+  }
+  h += '</section>';
+  document.getElementById('picks').innerHTML = h;
+}
 function renderRegistro() {
   var r = regLoad(), res = r.filter(function (x) { return x.res; }), h = syncCard() + avisosCard() + rendCard() + '<section class="card"><h2><span class="tag">Mi registro</span> ' + (st.sync ? 'compartido con tu compañero' : 'se guarda en este móvil') + '</h2>';
   var ok = res.filter(function (x) { return x.res === 'G'; }).length, vl = res.filter(function (x) { return x.res !== 'N'; }),
@@ -977,7 +1117,7 @@ function gh(url, opt) {
 }
 function docLocal() {
   var o = {}; Object.keys(st.oddsU).forEach(function (k) { o[k] = [st.odds[k] || 0, st.oddsU[k]]; });
-  return { reg: regAll(), odds: o, push: pushAll() };
+  return { reg: regAll(), odds: o, push: pushAll(), esc: escLoad() };
 }
 function mergeRemote(R) {
   var m = {}; regAll().forEach(function (x) { m[x.id] = x; });
@@ -985,6 +1125,7 @@ function mergeRemote(R) {
   var all = Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return a.id - b.id; });
   try { localStorage.setItem(REGK, JSON.stringify(all)); } catch (e) {}
   Object.keys(R.odds || {}).forEach(function (k) { var v = R.odds[k]; if ((v[1] || 0) > (st.oddsU[k] || 0)) { st.odds[k] = v[0]; st.oddsU[k] = v[1]; } });
+  if (R.esc && (R.esc.u || 0) > (escLoad().u || 0)) escSave(R.esc, true);
   var P = pushAll(); Object.keys(R.push || {}).forEach(function (k) { var v = R.push[k]; if (!P[k] || (v.u || 0) > (P[k].u || 0)) P[k] = v; }); pushSave(P);
   save0();
 }
@@ -1007,7 +1148,7 @@ function syncNow(manual) {
     localStorage.setItem(SYNCK, JSON.stringify(st.sync));
     return gistData(g).then(function (R) {
       mergeRemote(R);
-      var D = docLocal(), igual = JSON.stringify(D) === JSON.stringify({ reg: R.reg || [], odds: R.odds || {}, push: R.push || {} });
+      var D = docLocal(), igual = JSON.stringify(D) === JSON.stringify({ reg: R.reg || [], odds: R.odds || {}, push: R.push || {}, esc: R.esc || {} });
       if (igual) return;
       var o = {}; o[GFILE] = { content: JSON.stringify(D) };
       return gh('https://api.github.com/gists/' + st.sync.gid, { method: 'PATCH', body: JSON.stringify({ files: o }) });
@@ -1041,7 +1182,7 @@ function init() {
   if (st.sync) syncNow(false);
   setInterval(function () { if (!document.hidden) syncNow(false); }, 60000);
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-radar],[data-av],[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
+    var t = e.target.closest('[data-esc],[data-radar],[data-av],[data-sync],[data-add],[data-addx],[data-rm],[data-slip],[data-res],[data-csv],[data-liga],[data-cat],[data-open],[data-stake],[data-j],#enter,#refresh,#closeDlg,#copy');
     if (!t) return;
     if (t.dataset.av) { avisosAccion(t.dataset.av, t); return; }
     if (t.dataset.sync) {
@@ -1060,6 +1201,8 @@ function init() {
     else if (t.dataset.res) { var rr = t.dataset.res.split(','); regRes(+rr[0], rr[1]); }
     else if (t.dataset.csv) { regCsv(t); }
     else if (t.dataset.liga === 'registro') { st.liga = 'registro'; render(); window.scrollTo(0, 0); }
+    else if (t.dataset.liga === 'escalera') { st.liga = 'escalera'; render(); window.scrollTo(0, 0); }
+    else if (t.dataset.esc) { escAccion(t.dataset.esc); }
     else if (t.dataset.liga === 'directo') { st.liga = 'directo'; render(); window.scrollTo(0, 0); }
     else if (t.dataset.liga === 'radar') { st.liga = 'radar'; render(); cargarRadar(); window.scrollTo(0, 0); }
     else if (t.dataset.radar !== undefined) { addRadar(t.dataset.radar); render(); }
