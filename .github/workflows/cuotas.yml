@@ -22,6 +22,7 @@ jobs:
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
           CUOTAS_DIAS: ${{ github.event.schedule == '0 12 * * 6,0' && '1' || '4' }}
+          CUOTAS_PIN: '1'
           CUOTAS_HORAS: ${{ github.event.schedule == '0 12 * * 6,0' && '10' || '0' }}
           CUOTAS_MAXPET: ${{ github.event.schedule == '0 12 * * 6,0' && '20' || '40' }}
         run: python modelo_cuotas/generar_cuotas.py

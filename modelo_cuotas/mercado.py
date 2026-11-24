@@ -151,6 +151,10 @@ def ajustar(m, pmin=0.42, pmax=0.93):
     obj = objetivos(m)
     if obj is None: return False
     g0 = m.get('g') if (m.get('g') and None not in m['g']) else [1.4, 1.1]
+    if not m.get('mk') and 'm1x2' not in m and m.get('g') and None not in m['g']:
+        M0 = matrix(m['g'][0], m['g'][1])   # 1X2 de nuestro modelo (forma, xG, localía) antes de ajustar al mercado: segunda opinión
+        m['m1x2'] = [round(float(np.tril(M0, -1).sum()), 4), round(float(np.trace(M0)), 4), round(float(np.triu(M0, 1).sum()), 4)]
+    m['p1x2'] = [round(float(obj[0]), 4), round(float(obj[1]), 4), round(float(obj[2]), 4)]   # 1X2 justo del mercado (Pinnacle si lo hay)
     lam, err = ajustar_lambdas(obj, g0)
     if err > 0.03: return False  # el mercado no encaja en la matriz: mejor no tocar
     M = matrix(lam[0], lam[1])

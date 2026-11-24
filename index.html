@@ -374,30 +374,50 @@ function simples(all) {
   var rk = rkf;
   return all.filter(function (x) { return x.o >= st.min && !pobreEv(x); }).sort(function (a, b) { return rk(b) - rk(a) || b.f - a.f; });
 }
-function combinadas(all) {
-  var legs = all.filter(function (x) { return !pobreEv(x) && x.p >= 0.68 && x.o >= 1.08 && x.o < st.min && !((x.cat === 'cor' || x.cat === 'tar') && x.est); })
-    .sort(function (a, b) { return rkf(b) - rkf(a); });
-  var best = {};
-  legs.forEach(function (x) {
-    var k = x.i + x.cat;
-    if (!best[k] || best[k].length < 4) (best[k] = best[k] || []).push(x);
+// Combinadas seguras ~1,50: 2-3 selecciones de partidos distintos, cada una a cuota bwin real 1,10-1,40, total 1,45-1,70.
+// Se ordenan por probabilidad real conjunta (Pinnacle sin margen cuando la hay). Nunca dos del mismo partido (bwin no lo deja y se correlacionan).
+function pRef(x) { var D = DATA[x.i] || {}; return (D.pj && D.pj[x.lab]) || x.p; }
+// 1X2: probabilidad real = Pinnacle sin margen (o el mercado sin margen si aún no hay Pinnacle); nuestro modelo (forma, xG, localía) como segunda opinión
+function unoXdos() {
+  var out = [];
+  DATA.forEach(function (D, i) {
+    if (!D.bw || !D.p1x2) return;
+    [['Gana ' + D.h, 0, '1'], ['Empate', 1, 'X'], ['Gana ' + D.a, 2, '2']].forEach(function (z) {
+      var o = D.bw[z[0]], p = (D.pj && D.pj[z[0]]) || D.p1x2[z[1]], mod = D.m1x2 ? D.m1x2[z[1]] : null;
+      if (!(o > 1) || !p) return;
+      var ev = D.mkp ? o * p - 1 : null;
+      out.push({ i: i, lab: z[0], sig: z[2], cat: 'res', p: p, o: o, est: false, mod: mod, ev: ev, oro: ev !== null && ev >= 0.02 && ev <= 0.25, doble: ev !== null && ev >= 0.02 && mod !== null && mod >= p - 0.02 });
+    });
   });
+  var conf = out.filter(function (x) { return x.p >= 0.5; }).sort(function (a, b) { return b.p - a.p; }).slice(0, 6);
+  out.filter(function (x) { return x.oro && x.p >= 0.35 && conf.indexOf(x) < 0; }).sort(function (a, b) { return b.ev - a.ev; }).slice(0, 3).forEach(function (x) { conf.push(x); });
+  return conf;
+}
+function combinadas(all) {
+  var cand = all.filter(function (x) { return !x.est && !pobreEv(x) && x.o >= 1.10 && x.o <= 1.40 && pRef(x) >= 0.70; });
+  var por = {};
+  cand.forEach(function (x) { (por[x.i] = por[x.i] || []).push(x); });
   var L = [];
-  Object.keys(best).forEach(function (k) { L = L.concat(best[k]); });
-  var pairs = [];
+  Object.keys(por).forEach(function (k) { L = L.concat(por[k].sort(function (a, b) { return pRef(b) - pRef(a); }).slice(0, 3)); });
+  L.sort(function (a, b) { return pRef(b) - pRef(a); }); L = L.slice(0, 45);
+  var C = [], O = function (ls) { return ls.reduce(function (m, x) { return m * x.o; }, 1); }, P = function (ls) { return ls.reduce(function (m, x) { return m * pRef(x); }, 1); };
   for (var a = 0; a < L.length; a++) for (var b = a + 1; b < L.length; b++) {
     if (L[a].i === L[b].i) continue;
-    var o = L[a].o * L[b].o;
-    if (o < st.min) continue;
-    pairs.push({ a: L[a], b: L[b], p: L[a].p * L[b].p, o: Math.round(o * 100) / 100 });
+    var o2 = O([L[a], L[b]]);
+    if (o2 >= 1.45 && o2 <= 1.70) C.push([L[a], L[b]]);
+    if (o2 >= 1.45) continue;
+    for (var c = b + 1; c < L.length; c++) {
+      if (L[c].i === L[a].i || L[c].i === L[b].i) continue;
+      var o3 = o2 * L[c].o; if (o3 >= 1.45 && o3 <= 1.70) C.push([L[a], L[b], L[c]]);
+    }
   }
-  pairs.sort(function (x, y) { return y.p - x.p; });
-  var out = [], used = {};
-  pairs.forEach(function (q) {
-    if (out.length >= 3) return;
-    var ka = key(q.a.i, q.a.lab), kb = key(q.b.i, q.b.lab);
-    if (used[ka] || used[kb]) return;
-    used[ka] = used[kb] = 1;
+  C = C.map(function (ls) { var o = O(ls), p = P(ls); return { legs: ls, o: Math.round(o * 100) / 100, p: p, ev: o * p - 1 }; });
+  C.sort(function (x, y) { return y.p - x.p; });
+  var out = [], usos = {};
+  C.forEach(function (q) {
+    if (out.length >= 4) return;
+    if (q.legs.some(function (l) { return (usos[key(l.i, l.lab)] || 0) >= 1; })) return;   // combinadas variadas: cada selección en una sola
+    q.legs.forEach(function (l) { usos[key(l.i, l.lab)] = 1; });
     out.push(q);
   });
   return out;
@@ -509,8 +529,17 @@ function render() {
     document.getElementById('picks').innerHTML = '<section class="card"><p class="empty">' + esc(LIGAS[st.liga].aviso || 'No hay partidos próximos publicados para esta liga. Se actualiza solo cada hora.') + '</p></section>';
     document.getElementById('matches').innerHTML = ''; document.getElementById('chips').innerHTML = ''; return;
   }
-  var all = todas(), S = simples(all), C = combinadas(all), h = '';
-  st.last = { S: S, C: C, V: [], E: null };
+  var all = todas(), S = simples(all), C = combinadas(all), U = unoXdos(), h = '';
+  st.last = { S: S, C: C, V: [], E: null, U: U };
+  if (U.length) {
+    h += '<section class="card"><h2><span class="tag">1X2</span> los simples más fiables</h2>';
+    U.forEach(function (x, n) {
+      h += '<div class="leg' + (x.oro ? ' oro' : '') + '"><b>' + pct(x.p) + '</b><span>' + esc(x.sig) + ' · ' + esc(x.lab) + (x.doble ? ' <span class="joya">✅ doble confirmación</span>' : x.oro ? ' <span class="joya">💎 +' + Math.round(x.ev * 100) + ' %</span>' : '') +
+        '<em>' + esc(partido(x.i)) + ' · ' + cuando(DATA[x.i]) + '<br>cuota justa ' + num(1 / x.p) + (x.mod !== null ? ' · nuestro modelo ' + pct(x.mod) : '') + (DATA[x.i].mkp ? ' · ref. Pinnacle' : ' · ref. mercado (aún sin Pinnacle)') + '</em></span><span class="odd">' + num(x.o) + ' <small>bwin</small></span></div>' +
+        '<button class="addb' + (enSlip(key(x.i, x.lab)) ? ' on' : '') + '" data-addx="u:' + n + '">' + (enSlip(key(x.i, x.lab)) ? '✓ En mi apuesta' : '＋ Añadir') + '</button>';
+    });
+    h += '<p class="hint">Probabilidad real = Pinnacle sin margen (la más fiable). 💎 = bwin paga más que lo justo. ✅ doble confirmación = además nuestro modelo (forma, xG, localía) también lo ve. Nuestro modelo solo, sin el mercado, no se usa para marcar valor: en el backtest perdía.</p></section>';
+  }
   // simple
   h += '<section class="card simple"><h2><span class="tag">Apuesta simple</span> cuota ' + num(st.min) + ' o más</h2>';
   if (S.length) {
@@ -526,18 +555,21 @@ function render() {
   } else h += '<p class="empty">No hay ninguna selección con esa cuota en este filtro.</p>';
   h += '</section>';
   // combinada
-  h += '<section class="card combi"><h2><span class="tag">Combinada de dos</span> para llegar a ' + num(st.min) + '</h2>';
+  h += '<section class="card combi"><h2><span class="tag">Combinada segura</span> cuota 1,45 a 1,70</h2>';
   if (C.length) {
     C.forEach(function (q, n) {
       if (n === 1) h += '<details><summary>Otras combinadas</summary>';
       h += '<div class="combo' + (n ? ' small' : '') + '"><div class="legs">';
-      [q.a, q.b].forEach(function (l) {
-        h += '<div class="leg"><b>' + pct(l.p) + '</b><span>' + esc(l.lab) + '<em>' + esc(partido(l.i)) + ' · ' + cuando(DATA[l.i]) + '</em></span>' + chipCuota(l) + '</div>';
+      q.legs.forEach(function (l) {
+        h += '<div class="leg' + claseV(l) + '"><b>' + pct(pRef(l)) + '</b><span>' + esc(l.lab) + joya(l) + '<em>' + esc(partido(l.i)) + ' · ' + cuando(DATA[l.i]) + '</em></span>' + chipCuota(l) + '</div>';
       });
-      h += '</div><div class="tot"><span>Las dos a la vez</span><b>' + pct(q.p) + '</b><span class="odd">' + num(q.o) + '</span></div>' + (n ? '' : barra(q.p) + gana(q.o)) + '<button class="addb" data-addx="c:' + n + '">＋ Añadir las dos a mi apuesta</button></div>';
+      h += '</div><div class="tot"><span>' + (q.legs.length === 2 ? 'Las dos' : 'Las tres') + ' a la vez</span><b>' + pct(q.p) + '</b><span class="odd">' + num(q.o) + '</span></div>' +
+        '<p class="hint">Cuota justa ' + num(1 / q.p) + (q.ev >= 0.01 ? ' · <b class="pos">bwin paga más que lo justo (+' + Math.round(q.ev * 100) + ' %)</b>' : q.ev <= -0.06 ? ' · bwin se queda un ' + Math.round(-q.ev * 100) + ' % de margen' : '') + '</p>' +
+        (n ? '' : barra(q.p) + gana(q.o)) + '<button class="addb" data-addx="c:' + n + '">＋ Añadir ' + (q.legs.length === 2 ? 'las dos' : 'las tres') + ' a mi apuesta</button></div>';
     });
     if (C.length > 1) h += '</details>';
-  } else h += '<p class="empty">No hay dos selecciones seguras que lleguen a esa cuota en este filtro.</p>';
+    h += '<p class="hint">2 o 3 selecciones de partidos distintos, cada una a cuota bwin real entre 1,10 y 1,40. Probabilidad = la real (Pinnacle sin margen cuando la hay). Aun con 85 % de acierto, 3 de cada 20 fallan.</p>';
+  } else h += '<p class="empty">Ahora no hay 2-3 selecciones con cuota bwin real de 1,10 a 1,40 que sumen 1,45-1,70 en este filtro.</p>';
   h += '</section>';
   if (st.liga === 'todos') {
     var nom = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' }, bl = {};
@@ -1020,7 +1052,7 @@ function init() {
       else if (t.dataset.sync === 'salir') { st.sync = null; st.syncMsg = ''; try { localStorage.removeItem(SYNCK); } catch (x) {} render(); }
     }
     else if (t.dataset.add) { var ia = t.dataset.add.split(','), ii = +ia[0], ss = DATA[ii].s[+ia[1]]; var cc = cuota(ii, ss); addLeg({ i: ii, lab: ss[0], cat: ss[1], p: ss[2], o: cc.o, est: cc.est }); render(); }
-    else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 's' ? st.last.S[+pr[1]] : pr[0] === 'v' ? st.last.V[+pr[1]] : pr[0] === 'e' ? st.last.E : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' || pr[0] === 'v' ? [q] : pr[0] === 'e' ? q.legs : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
+    else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 's' ? st.last.S[+pr[1]] : pr[0] === 'u' ? st.last.U[+pr[1]] : pr[0] === 'v' ? st.last.V[+pr[1]] : pr[0] === 'e' ? st.last.E : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' || pr[0] === 'v' || pr[0] === 'u' ? [q] : pr[0] === 'e' || pr[0] === 'c' ? q.legs : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
     else if (t.dataset.rm !== undefined) { st.slip.splice(+t.dataset.rm, 1); render(); }
     else if (t.dataset.slip === 'clear') { st.slip = []; st.slipo = 0; render(); }
     else if (t.dataset.slip === 'save') { slipSave(); }
