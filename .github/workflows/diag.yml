@@ -21,5 +21,10 @@ jobs:
           for k, v in (D.get('push') or {}).items(): print('MOVIL', k, v.get('nom'), 'avisos', 'OFF' if v.get('off') or not v.get('sub') else 'ON', 'ligas', v.get('ligas'), 'ultimo cambio', t(v.get('u')))
           R = [x for x in D.get('reg', []) if not x.get('del')]
           print('APUESTAS', len(R), 'ultimas', [(x.get('f'), t(x.get('u'))) for x in sorted(R, key=lambda x: x.get('u') or 0)[-4:]])
-          print('BANCA', D.get('odds', {}).get('__bank'))
+          bal = st_ = 0
+          for x in sorted(R, key=lambda x: x['id']):
+              b = x['stake'] * (x['o'] - 1) if x.get('res') == 'G' else -x['stake'] if x.get('res') == 'P' else 0
+              if x.get('res') in ('G', 'P'): bal += b; st_ += x['stake']
+              print('FILA', x.get('f'), '|', ' + '.join(l['lab'] + ' (' + l.get('partido', '') + ')' for l in x.get('legs', []))[:150], '| cuota', x.get('o'), '| stake', x.get('stake'), '| res', x.get('res'))
+          print('BALANCE', round(bal, 2), 'APOSTADO', st_, 'BANCA', D.get('odds', {}).get('__bank'))
           PY
