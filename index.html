@@ -381,13 +381,12 @@ function pRef(x) { var D = DATA[x.i] || {}; return (D.pj && D.pj[x.lab]) || x.p;
 function unoXdos() {
   var out = [];
   DATA.forEach(function (D, i) {
-    if (!D.p1x2) return;
+    if (!D.bw || !D.p1x2) return;
     [['Gana ' + D.h, 0, '1'], ['Empate', 1, 'X'], ['Gana ' + D.a, 2, '2']].forEach(function (z) {
-      var o = D.bw && D.bw[z[0]], p = (D.pj && D.pj[z[0]]) || D.p1x2[z[1]], mod = D.m1x2 ? D.m1x2[z[1]] : null;
-      if (!p) return;
-      var real = o > 1, min = Math.round(100 * 1.02 / p) / 100;   // bwin no da su 1X2 al robot: cuota mínima a pedir en bwin para que tenga valor
-      var ev = real && D.mkp ? o * p - 1 : null, acuerdo = mod !== null && mod >= p - 0.02;
-      out.push({ i: i, lab: z[0], sig: z[2], cat: 'res', p: p, o: real ? o : min, est: !real, min: real ? null : min, mod: mod, ev: ev, oro: ev !== null && ev >= 0.02 && ev <= 0.25, doble: (ev === null || ev >= 0.02) && acuerdo && D.mkp });
+      var o = D.bw[z[0]], p = (D.pj && D.pj[z[0]]) || D.p1x2[z[1]], mod = D.m1x2 ? D.m1x2[z[1]] : null;
+      if (!(o > 1) || !p) return;
+      var ev = D.mkp ? o * p - 1 : null;
+      out.push({ i: i, lab: z[0], sig: z[2], cat: 'res', p: p, o: o, est: false, mod: mod, ev: ev, oro: ev !== null && ev >= 0.02 && ev <= 0.25, doble: ev !== null && ev >= 0.02 && mod !== null && mod >= p - 0.02 });
     });
   });
   var conf = out.filter(function (x) { return x.p >= 0.5; }).sort(function (a, b) { return b.p - a.p; }).slice(0, 6);
@@ -535,11 +534,11 @@ function render() {
   if (U.length) {
     h += '<section class="card"><h2><span class="tag">1X2</span> los simples más fiables</h2>';
     U.forEach(function (x, n) {
-      h += '<div class="leg' + (x.oro ? ' oro' : '') + '"><b>' + pct(x.p) + '</b><span>' + esc(x.sig) + ' · ' + esc(x.lab) + (x.oro && x.doble ? ' <span class="joya">💎 +' + Math.round(x.ev * 100) + ' % · ✅ doble confirmación</span>' : x.oro ? ' <span class="joya">💎 +' + Math.round(x.ev * 100) + ' %</span>' : x.doble ? ' <span class="joya">✅ modelo y Pinnacle de acuerdo</span>' : '') +
-        '<em>' + esc(partido(x.i)) + ' · ' + cuando(DATA[x.i]) + '<br>cuota justa ' + num(1 / x.p) + (x.mod !== null ? ' · nuestro modelo ' + pct(x.mod) : '') + (DATA[x.i].mkp ? ' · ref. Pinnacle' : ' · ref. mercado (aún sin Pinnacle)') + '</em></span><span class="odd">' + (x.min ? '≥ ' + num(x.min) + ' <small>pide en bwin</small>' : num(x.o) + ' <small>bwin</small>') + '</span></div>' +
+      h += '<div class="leg' + (x.oro ? ' oro' : '') + '"><b>' + pct(x.p) + '</b><span>' + esc(x.sig) + ' · ' + esc(x.lab) + (x.doble ? ' <span class="joya">✅ doble confirmación</span>' : x.oro ? ' <span class="joya">💎 +' + Math.round(x.ev * 100) + ' %</span>' : '') +
+        '<em>' + esc(partido(x.i)) + ' · ' + cuando(DATA[x.i]) + '<br>cuota justa ' + num(1 / x.p) + (x.mod !== null ? ' · nuestro modelo ' + pct(x.mod) : '') + (DATA[x.i].mkp ? ' · ref. Pinnacle' : ' · ref. mercado (aún sin Pinnacle)') + '</em></span><span class="odd">' + num(x.o) + ' <small>bwin</small></span></div>' +
         '<button class="addb' + (enSlip(key(x.i, x.lab)) ? ' on' : '') + '" data-addx="u:' + n + '">' + (enSlip(key(x.i, x.lab)) ? '✓ En mi apuesta' : '＋ Añadir') + '</button>';
     });
-    h += '<p class="hint">Probabilidad real = Pinnacle sin margen (la más fiable). bwin no pasa su 1X2 al robot: «≥ 1,75 pide en bwin» = solo tiene valor si bwin paga eso o más (escribe la cuota real al apuntar). 💎 = bwin paga más que lo justo. ✅ doble confirmación = además nuestro modelo (forma, xG, localía) también lo ve. Nuestro modelo solo, sin el mercado, no se usa para marcar valor: en el backtest perdía.</p></section>';
+    h += '<p class="hint">Probabilidad real = Pinnacle sin margen (la más fiable). 💎 = bwin paga más que lo justo. ✅ doble confirmación = además nuestro modelo (forma, xG, localía) también lo ve. Nuestro modelo solo, sin el mercado, no se usa para marcar valor: en el backtest perdía.</p></section>';
   }
   // simple
   h += '<section class="card simple"><h2><span class="tag">Apuesta simple</span> cuota ' + num(st.min) + ' o más</h2>';
