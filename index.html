@@ -288,6 +288,23 @@ function irAvisos() {
   if (st.liga !== 'todos') setLiga('todos', false);
   render(); var el = document.getElementById('avisos'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth' });
 }
+function cortar() {   // córners y tarjetas más probables (60-92 %), con cuota bwin real cuando la hay
+  var all = todas(), out = '';
+  [['cor', '📐 Córners'], ['tar', '🟨 Tarjetas']].forEach(function (z) {
+    var L = all.filter(function (x) { return x.cat === z[0] && x.p >= 0.6 && x.p <= 0.92 && x.o >= 1.20 && !pobreEv(x); });   // cuota mínima 1,20: lo de 1,01 no sirve para apostar
+    var porP = {}; L.forEach(function (x) { if (!porP[x.i] || (!x.est && porP[x.i].est) || ((!x.est) === (!porP[x.i].est) && x.p > porP[x.i].p)) porP[x.i] = x; });
+    L = Object.keys(porP).map(function (k) { return porP[k]; }).sort(function (a, b) { return (a.est - b.est) || (b.p - a.p); }).slice(0, 4);
+    if (!L.length) return;
+    st.last['k' + z[0]] = L;
+    out += '<section class="card"><h2><span class="tag">' + z[1] + '</span> los más probables</h2>';
+    L.forEach(function (x, n) {
+      out += '<div class="leg' + claseV(x) + '"><b>' + pct(x.p) + '</b><span>' + esc(x.lab) + joya(x) + '<em>' + esc(partido(x.i)) + ' · ' + cuando(DATA[x.i]) + '</em></span>' + chipCuota(x) + '</div>' +
+        '<button class="addb' + (enSlip(key(x.i, x.lab)) ? ' on' : '') + '" data-addx="k' + z[0] + ':' + n + '">' + (enSlip(key(x.i, x.lab)) ? '✓ En mi apuesta' : '＋ Añadir') + '</button>';
+    });
+    out += '<p class="hint">' + (z[0] === 'cor' ? 'Modelo de córners mezclado con la cuota de bwin cuando la hay.' : 'Modelo de tarjetas (bien calibrado en el backtest). bwin no da cuota de tarjetas al robot: mira la cuota real en bwin.') + '</p></section>';
+  });
+  return out;
+}
 function avisosHoy() {
   var hoy = new Date(), iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
   var ayer = new Date(hoy - 864e5), L = [];
@@ -307,7 +324,8 @@ function avisosHoy() {
     h += '<div class="leg' + (vl ? ' oro' : '') + '"><b>' + (pk ? pct(pk.p) : '—') + '</b><span>' + esc(x.z[2]) + ' – ' + esc(x.z[3]) + (x.e.e ? ' ' + insignia({ lg: x.z[0], d: x.z[1], h: x.z[2], a: x.z[3] }) : '') +
       '<em>' + (NL[x.z[0]] || '') + ' · ' + esc(x.t) + ' · aviso ' + esc(a.t) + ' · ' + (a.conf ? 'alineaciones confirmadas' : '⚠ alineaciones no oficiales') + '</em>' +
       (pk ? '<em>Pick: <b>' + esc(pk.lab) + '</b>' + (pk.o ? ' · bwin ' + num(pk.o) : ' · cuota estimada') + res(x, pk) + '</em>' : '') +
-      (vl ? '<em><span class="joya">💎 ' + esc(vl.lab) + ' · ' + num(vl.o) + ' · +' + Math.round(vl.ev * 100) + ' %</span>' + res(x, vl) + '</em>' : '') + '</span></div>';
+      (vl ? '<em><span class="joya">💎 ' + esc(vl.lab) + ' · ' + num(vl.o) + ' · +' + Math.round(vl.ev * 100) + ' %</span>' + res(x, vl) + '</em>' : '') +
+      [['📐', a.cor], ['🟨', a.tar]].map(function (z) { var c = z[1]; return c ? '<em>' + z[0] + ' <b>' + esc(c.lab) + '</b> · ' + pct(c.p) + (c.o ? ' · bwin ' + num(c.o) : ' · cuota estimada') + res(x, c) + '</em>' : ''; }).join('') + '</span></div>';
   });
   return h + '<p class="hint">Se quedan como estaban al llegar el aviso (con esas alineaciones y cuotas). Comprueba siempre la cuota real en bwin antes de apostar.</p></section>';
 }
@@ -566,6 +584,7 @@ function render() {
     } else h += '<p class="empty">Ahora no hay ningún pick con cuota bwin real por encima de la justa.</p>';
     h += '<p class="hint">💎 Dorado = bwin paga más que la cuota justa de Pinnacle (la referencia más fiable), también en córners y tarjetas. Gris = bwin paga un 10 % o más por debajo: mejor evitarlo. Lo normal es que haya pocos. Más de un 20-25 % de diferencia suele ser un error de datos, no un regalo: comprueba la cuota en bwin.</p></section>';
   }
+  h = cortar() + h;
   if (st.liga === 'todos') h = avisosHoy() + h;
   document.getElementById('picks').innerHTML = h;
   // partidos
@@ -1020,7 +1039,7 @@ function init() {
       else if (t.dataset.sync === 'salir') { st.sync = null; st.syncMsg = ''; try { localStorage.removeItem(SYNCK); } catch (x) {} render(); }
     }
     else if (t.dataset.add) { var ia = t.dataset.add.split(','), ii = +ia[0], ss = DATA[ii].s[+ia[1]]; var cc = cuota(ii, ss); addLeg({ i: ii, lab: ss[0], cat: ss[1], p: ss[2], o: cc.o, est: cc.est }); render(); }
-    else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 's' ? st.last.S[+pr[1]] : pr[0] === 'v' ? st.last.V[+pr[1]] : pr[0] === 'e' ? st.last.E : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' || pr[0] === 'v' ? [q] : pr[0] === 'e' ? q.legs : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
+    else if (t.dataset.addx) { var pr = t.dataset.addx.split(':'), q = pr[0] === 'kcor' || pr[0] === 'ktar' ? st.last[pr[0]][+pr[1]] : pr[0] === 's' ? st.last.S[+pr[1]] : pr[0] === 'v' ? st.last.V[+pr[1]] : pr[0] === 'e' ? st.last.E : st.last.C[+pr[1]]; if (q) { (pr[0] === 's' || pr[0] === 'v' || pr[0] === 'kcor' || pr[0] === 'ktar' ? [q] : pr[0] === 'e' ? q.legs : [q.a, q.b]).forEach(function (l) { if (!enSlip(key(l.i, l.lab))) addLeg(l); }); toast('Añadido a mi apuesta'); render(); } }
     else if (t.dataset.rm !== undefined) { st.slip.splice(+t.dataset.rm, 1); render(); }
     else if (t.dataset.slip === 'clear') { st.slip = []; st.slipo = 0; render(); }
     else if (t.dataset.slip === 'save') { slipSave(); }
