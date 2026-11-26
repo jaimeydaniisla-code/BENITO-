@@ -302,7 +302,7 @@ def main():
                 apuntar_picks(liga, m, ahora.isoformat(timespec='minutes'))
                 pk, vl = pick_aviso(m)
                 p.setdefault(q, {})['aviso'] = {'t': ahora.strftime('%H:%M'), 'conf': 1 if conf(q) else 0, 'ali': ((p.get(q) or {}).get('ali') or '').split(' · ')[0][:60],
-                                                'pick': pk, 'val': vl, 'cor': pick_cat(m, 'cor'), 'tar': pick_cat(m, 'tar')}
+                                                'arb': (p.get(q) or {}).get('arb'), 'pick': pk, 'val': vl, 'cor': pick_cat(m, 'cor'), 'tar': pick_cat(m, 'tar')}
         subs = leer_avisos()
         for hora, L in sorted(grupos.items()):
             t = hora[-5:]
@@ -311,7 +311,8 @@ def main():
                 if not conf(q): ali = '⚠ Alineaciones aún NO oficiales a 25 min'
                 tit = f"⚽ Empieza a las {t}: {m['h']} – {m['a']}"
                 vl = pick_aviso(m)[1]
-                cuerpo = f"{ali.split(' · ')[0][:70]}\nMejor pick: {mejor_pick(m)}" + (f"\n💎 Valor: {vl['lab']} a {str(vl['o']).replace('.', ',')} (+{round(vl['ev'] * 100)} %)" if vl else '') + ''.join(f"\n{e} {txt_cat(d)}" for e, d in (('📐', pick_cat(m, 'cor')), ('🟨', pick_cat(m, 'tar'))) if d) + "\nRevisa la cuota real en bwin antes de apostar."
+                arb = (p.get(q) or {}).get('arb')
+                cuerpo = f"{ali.split(' · ')[0][:70]}" + (f"\n👤 Árbitro: {arb[:40]}" if arb else '') + "\nMejor pick: {mejor_pick(m)}" + (f"\n💎 Valor: {vl['lab']} a {str(vl['o']).replace('.', ',')} (+{round(vl['ev'] * 100)} %)" if vl else '') + ''.join(f"\n{e} {txt_cat(d)}" for e, d in (('📐', pick_cat(m, 'cor')), ('🟨', pick_cat(m, 'tar'))) if d) + "\nRevisa la cuota real en bwin antes de apostar."
             else:
                 L.sort(key=lambda x: ['primera', 'champions', 'europa', 'premier', 'segunda'].index(x[0]) if x[0] in ('primera', 'champions', 'europa', 'premier', 'segunda') else 9)
                 tit = f"⚽ Empieza a las {t}: {L[0][1]['h']} – {L[0][1]['a']} y {len(L) - 1} más"
