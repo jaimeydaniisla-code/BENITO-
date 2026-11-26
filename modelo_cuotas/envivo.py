@@ -99,7 +99,9 @@ def enviar(subs, titulo, cuerpo, tag, ligas=None, url='./'):
     n = 0
     for k, v in subs.items():
         if v.get('off') or not v.get('sub') or not v.get('d'): continue
-        if ligas and not set(ligas) & set(v.get('ligas') or LIGAS): continue
+        sl = set(v.get('ligas') or LIGAS)
+        if 'champions' in sl: sl.add('europa')   # quien sigue la Champions recibe también la Europa League
+        if ligas and not set(ligas) & sl: continue
         try:
             webpush(subscription_info=v['sub'], data=json.dumps({'title': titulo, 'body': cuerpo, 'tag': tag, 'url': url}, ensure_ascii=False),
                     vapid_private_key=v['d'], vapid_claims={'sub': 'mailto:benitooo@users.noreply.github.com'}, ttl=3600)
