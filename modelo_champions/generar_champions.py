@@ -71,9 +71,13 @@ def lambdas(dif, mu, sel):
     return (mu + s) / 2, (mu - s) / 2
 
 
-def main():
+COMP = {'champions': (42, 'champions-league', 'Champions'), 'europa': (73, 'europa-league', 'Europa League')}
+
+
+def main(clave='champions'):
+    lid, slug, nombre = COMP[clave]
     ahora = dt.datetime.now(MAD)
-    allm = fm_get('https://www.fotmob.com/leagues/42/overview/champions-league')['fixtures']['allMatches']
+    allm = fm_get(f'https://www.fotmob.com/leagues/{lid}/overview/{slug}')['fixtures']['allMatches']
     def ko(f): return dt.datetime.fromisoformat(f['status']['utcTime'].replace('Z', '+00:00')).astimezone(MAD)
     fin = [f for f in allm if f['status'].get('finished') and f['status'].get('scoreStr')]
     goles = [sum(int(x) for x in re.findall(r'\d+', f['status']['scoreStr'])) for f in fin]
@@ -107,14 +111,14 @@ def main():
             ms.append(m)
         if ms: jor.append({'j': int(r) if r.isdigit() else r, 'ms': ms})
     if sin: print('AVISO sin Elo para:', sorted(sin))
-    aviso = ('Champions: sin cuotas de bwin las probabilidades salen de un Elo sin validar (poco fiables); con cuotas de bwin pasan a ser las del mercado. '
+    aviso = (nombre + ': sin cuotas de bwin las probabilidades salen de un Elo sin validar (poco fiables); con cuotas de bwin pasan a ser las del mercado. '
              'Sin córners ni tarjetas.' if clubs else 'Champions: no hay ratings (clubelo.com no responde) y aún no hay cuotas de bwin: solo calendario, resultados y directo.')
     app = json.load(open(DATOS, encoding='utf-8')); lig = app.setdefault('ligas', {})
-    lig['champions'] = {'nombre': 'Champions', 'jor': jor, 'res': res, 'aviso': aviso,
+    lig[clave] = {'nombre': nombre, 'jor': jor, 'res': res, 'aviso': aviso,
                         'meta': {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ('Elo ' + dt.date.fromisoformat(fecha).strftime('%d/%m') if fecha else 'FotMob')}}
     json.dump(app, open(DATOS, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
-    print('Champions:', sum(len(j['ms']) for j in jor), 'partidos en rondas', rondas, '| terminados', len(fin), '| goles/partido', round(sum(goles) / max(len(goles), 1), 2), '| mu', round(mu, 2), '| Elo', fecha)
+    print(nombre + ':', sum(len(j['ms']) for j in jor), 'partidos en rondas', rondas, '| terminados', len(fin), '| goles/partido', round(sum(goles) / max(len(goles), 1), 2), '| mu', round(mu, 2), '| Elo', fecha)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else 'champions')

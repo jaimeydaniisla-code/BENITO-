@@ -9,7 +9,7 @@ except Exception:
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 DATOS, SALIDA = os.path.join(ROOT, 'datos.json'), os.path.join(ROOT, 'envivo.json')
-LIGAS = {'primera': (87, 'laliga'), 'segunda': (140, 'laliga2'), 'premier': (47, 'premier-league'), 'champions': (42, 'champions-league')}
+LIGAS = {'primera': (87, 'laliga'), 'segunda': (140, 'laliga2'), 'premier': (47, 'premier-league'), 'champions': (42, 'champions-league'), 'europa': (73, 'europa-league')}
 ANTES, DESPUES = 100, 180   # minutos antes y después de la hora de inicio en los que se vigila un partido
 ALIAS = {'athletic club': 'athletic', 'athletic': 'ath bilbao', 'real betis': 'betis', 'celta vigo': 'celta', 'rayo vallecano': 'vallecano', 'rayo': 'vallecano',
          'atletico madrid': 'ath madrid', 'atletico': 'ath madrid', 'deportivo la coruna': 'la coruna', 'deportivo': 'la coruna', 'racing santander': 'santander', 'racing': 'santander',
@@ -311,7 +311,7 @@ def main():
                 vl = pick_aviso(m)[1]
                 cuerpo = f"{ali.split(' · ')[0][:70]}\nMejor pick: {mejor_pick(m)}" + (f"\n💎 Valor: {vl['lab']} a {str(vl['o']).replace('.', ',')} (+{round(vl['ev'] * 100)} %)" if vl else '') + ''.join(f"\n{e} {txt_cat(d)}" for e, d in (('📐', pick_cat(m, 'cor')), ('🟨', pick_cat(m, 'tar'))) if d) + "\nRevisa la cuota real en bwin antes de apostar."
             else:
-                L.sort(key=lambda x: ['primera', 'champions', 'premier', 'segunda'].index(x[0]) if x[0] in ('primera', 'champions', 'premier', 'segunda') else 9)
+                L.sort(key=lambda x: ['primera', 'champions', 'europa', 'premier', 'segunda'].index(x[0]) if x[0] in ('primera', 'champions', 'europa', 'premier', 'segunda') else 9)
                 tit = f"⚽ Empieza a las {t}: {L[0][1]['h']} – {L[0][1]['a']} y {len(L) - 1} más"
                 cuerpo = '\n'.join(f"{m['h']} – {m['a']}: {mejor_pick(m)}" + ''.join(f" · {e} {d['lab']} {round(d['p'] * 100)} %" for e, d in (('📐', pick_cat(m, 'cor')), ('🟨', pick_cat(m, 'tar'))) if d) for _, m, _ in L[:5]) + ('\nAlineaciones confirmadas. Picks guardados en la app (TODOS).' if all(conf(x[2]) for x in L) else '\n⚠ Alguna alineación aún no es oficial.')
             n = enviar(subs, tit, cuerpo, 'k' + hora, [x[0] for x in L], url='./#avisos') if subs else 0

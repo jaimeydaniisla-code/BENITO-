@@ -18,11 +18,11 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: Calendario de Champions
-        run: python modelo_champions/generar_champions.py
+        run: python modelo_champions/generar_champions.py && python modelo_champions/generar_champions.py europa
       - name: Pedir cuotas de bwin (solo Champions)
         env:
           ODDSPAPI_KEY: ${{ secrets.ODDSPAPI_KEY }}
-          CUOTAS_LIGAS: champions
+          CUOTAS_LIGAS: champions,europa
           CUOTAS_DIAS: '2'
           CUOTAS_MAXPET: '24'
         run: python modelo_cuotas/generar_cuotas.py

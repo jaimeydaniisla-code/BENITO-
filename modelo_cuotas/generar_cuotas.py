@@ -14,9 +14,9 @@ try:
     from zoneinfo import ZoneInfo; MAD = ZoneInfo('Europe/Madrid')
 except Exception:
     MAD = dt.timezone.utc
-TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17, 'champions': 7}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
+TORNEOS = {'primera': 8, 'segunda': 54, 'premier': 17, 'champions': 7, 'europa': 679}          # OddsPapi tournamentId (selecciones: se pide aparte con --selecciones ID)
 DIAS = int(os.environ.get('CUOTAS_DIAS', '4'))
-LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera,segunda,premier,champions').split(',') if x.strip() in TORNEOS]   # con el lote de OddsPapi (1 petición) caben todas las ligas
+LIGAS_PEDIR = [x for x in (os.environ.get('CUOTAS_LIGAS') or 'primera,segunda,premier,champions,europa').split(',') if x.strip() in TORNEOS]   # con el lote de OddsPapi (1 petición) caben todas las ligas
 MAXPET = int(os.environ.get('CUOTAS_MAXPET', '40'))
 PIN = os.environ.get('CUOTAS_PIN', '') == '1'   # pedir también Pinnacle (referencia de probabilidad; +1 petición)
 HORAS = float(os.environ.get('CUOTAS_HORAS', '0') or 0)       # >0: solo partidos que empiezan dentro de N horas (cuota casi de cierre)

@@ -199,6 +199,7 @@ var LIGAS = { todos: { nombre: 'TODOS', jor: [], meta: {} },
   segunda: { nombre: 'Segunda', jor: [], meta: {} },
   premier: { nombre: 'Premier', jor: [], meta: {} },
   champions: { nombre: 'Champions', jor: [], meta: {} },
+  europa: { nombre: 'Europa League', jor: [], meta: {} },
   selecciones: { nombre: 'Selecciones', jor: [], meta: {}, aviso: 'Selecciones: todavía no hay modelo ni calendario conectado.' } };
 var CATS = { todo: 'Todo', res: 'Resultado', gol: 'Goles', cor: 'Córners', tar: 'Tarjetas' };
 var FIAB = ['fiabilidad baja', 'fiabilidad baja-media', 'fiabilidad media'];
@@ -209,7 +210,7 @@ var DIASTODOS = 7, PRUD = [0.7, 0.85, 1];
 function armarTodos() {
   var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
   var lim = new Date(hoy.getTime() + DIASTODOS * 86400000), ms = [], dt = [];
-  ['primera', 'segunda', 'premier', 'champions', 'selecciones'].forEach(function (k) {
+  ['primera', 'segunda', 'premier', 'champions', 'europa', 'selecciones'].forEach(function (k) {
     var L = LIGAS[k]; if (!L) return;
     if (L.meta && L.meta.datos) dt.push(L.nombre + ' ' + L.meta.datos.slice(0, 5));
     (L.jor || []).forEach(function (J) {
@@ -310,7 +311,7 @@ function avisosHoy() {
   var ayer = new Date(hoy - 864e5), L = [];
   Object.keys(EV.p || {}).forEach(function (q) { var e = EV.p[q], z = q.split('|'); if (e.aviso && (z[1] === iso(hoy) || (z[1] === iso(ayer) && hoy.getHours() < 4))) L.push({ q: q, z: z, e: e }); });
   if (!L.length) return '';
-  var NL = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions' };
+  var NL = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', europa: 'Europa League' };
   var hora = function (x) { var d = null; ((LIGAS[x.z[0]] && LIGAS[x.z[0]].jor) || []).forEach(function (J) { J.ms.forEach(function (m) { if (m.d === x.z[1] && m.h === x.z[2] && m.a === x.z[3]) d = m; }); }); return d ? d.t : ''; };
   L.forEach(function (x) { x.t = hora(x); }); L.sort(function (a, b) { return (a.z[1] + a.t) < (b.z[1] + b.t) ? -1 : 1; });
   var res = function (x, l) {
@@ -558,7 +559,7 @@ function render() {
   } else h += '<p class="empty">No hay dos selecciones seguras que lleguen a esa cuota en este filtro.</p>';
   h += '</section>';
   if (st.liga === 'todos') {
-    var nom = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' }, bl = {};
+    var nom = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', europa: 'Europa League', selecciones: 'Selecciones' }, bl = {};
     S.forEach(function (x) { var g = DATA[x.i].lg; if (!bl[g]) bl[g] = x; });
     h += '<section class="card"><h2><span class="tag">Mejor de cada liga</span> cuota ' + num(st.min) + ' o más</h2>';
     Object.keys(nom).forEach(function (g) {
@@ -774,7 +775,7 @@ function renderRegistro() {
     var invertido = 0; vl.forEach(function (x) { invertido += x.res === 'N' ? 0 : x.stake; });
     h += '<div class="rrow"><b>Rentabilidad</b> · ' + (invertido ? (bal >= 0 ? '+' : '') + String(Math.round(1000 * bal / invertido) / 10).replace('.', ',') + ' % sobre ' + eur(invertido) + ' apostados' : '—') + '</div>';
     h += grafica(vl);
-    var pl = {}, NL = { radar: '🎯 Radar', primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', selecciones: 'Selecciones' };
+    var pl = {}, NL = { radar: '🎯 Radar', primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', europa: 'Europa League', selecciones: 'Selecciones' };
     vl.forEach(function (x) { var k = NL[x.liga] || x.liga || '—', o = pl[k] = pl[k] || { n: 0, g: 0, b: 0, s: 0 }; o.n++; o.s += x.stake; if (x.res === 'G') { o.g++; o.b += x.stake * (x.o - 1); } else o.b -= x.stake; });
     h += '<p class="hint" style="margin:8px 0 2px"><b>Por liga</b></p>';
     Object.keys(pl).forEach(function (k) { var o = pl[k]; h += '<div class="rrow"><b>' + k + '</b> · ' + o.g + '/' + o.n + ' · <span class="' + (o.b >= 0 ? 'pos' : 'neg') + '">' + (o.b >= 0 ? '+' : '') + eur(o.b) + ' (' + Math.round(100 * o.b / o.s) + ' %)</span></div>'; });
@@ -888,7 +889,7 @@ function regCsv(btn) {
 var SYNCK = 'benitooo_sync', GFILE = 'registro.json', GDESC = 'benitooo-registro';
 try { st.sync = JSON.parse(localStorage.getItem(SYNCK)); } catch (e) { st.sync = null; }
 // ---------- Avisos en el móvil (Web Push). El robot avisa ~1 h antes de cada partido con alineación y mejor pick ----------
-var PUSHK = 'benitooo_push', DEVK = 'benitooo_dev', LIGAS_AV = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions' };
+var PUSHK = 'benitooo_push', DEVK = 'benitooo_dev', LIGAS_AV = { primera: 'Primera', segunda: 'Segunda', premier: 'Premier', champions: 'Champions', europa: 'Europa League' };
 function pushAll() { try { return JSON.parse(localStorage.getItem(PUSHK)) || {}; } catch (e) { return {}; } }
 function pushSave(P) { try { localStorage.setItem(PUSHK, JSON.stringify(P)); } catch (e) {} }
 function devId() { var d = localStorage.getItem(DEVK); if (!d) { d = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); localStorage.setItem(DEVK, d); } return d; }

@@ -31,7 +31,7 @@ jobs:
       - name: Recalcular Selecciones
         run: python modelo_selecciones/generar_selecciones.py
       - name: Recalcular Champions
-        run: python modelo_champions/generar_champions.py
+        run: python modelo_champions/generar_champions.py && python modelo_champions/generar_champions.py europa
       - name: Estadísticas reales de cada equipo
         run: python modelo_cuotas/forma.py
       - name: Cuotas gratuitas de football-data (respaldo)
