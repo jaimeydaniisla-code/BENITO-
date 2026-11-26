@@ -112,7 +112,7 @@ def main(clave='champions'):
         if ms: jor.append({'j': int(r) if r.isdigit() else r, 'ms': ms})
     if sin: print('AVISO sin Elo para:', sorted(sin))
     aviso = (nombre + ': sin cuotas de bwin las probabilidades salen de un Elo sin validar (poco fiables); con cuotas de bwin pasan a ser las del mercado. '
-             'Sin córners ni tarjetas.' if clubs else 'Champions: no hay ratings (clubelo.com no responde) y aún no hay cuotas de bwin: solo calendario, resultados y directo.')
+             'Sin córners ni tarjetas.' if clubs else nombre + ': no hay ratings (clubelo.com no responde) y aún no hay cuotas de bwin: solo calendario, resultados y directo.')
     app = json.load(open(DATOS, encoding='utf-8')); lig = app.setdefault('ligas', {})
     lig[clave] = {'nombre': nombre, 'jor': jor, 'res': res, 'aviso': aviso,
                         'meta': {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ('Elo ' + dt.date.fromisoformat(fecha).strftime('%d/%m') if fecha else 'FotMob')}}
