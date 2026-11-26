@@ -584,7 +584,6 @@ function render() {
     } else h += '<p class="empty">Ahora no hay ningún pick con cuota bwin real por encima de la justa.</p>';
     h += '<p class="hint">💎 Dorado = bwin paga más que la cuota justa de Pinnacle (la referencia más fiable), también en córners y tarjetas. Gris = bwin paga un 10 % o más por debajo: mejor evitarlo. Lo normal es que haya pocos. Más de un 20-25 % de diferencia suele ser un error de datos, no un regalo: comprueba la cuota en bwin.</p></section>';
   }
-  h = cortar() + h;
   if (st.liga === 'todos') h = avisosHoy() + h;
   document.getElementById('picks').innerHTML = h;
   // partidos

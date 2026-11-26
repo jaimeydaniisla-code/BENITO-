@@ -280,12 +280,17 @@ def pedir():
     print(f'peticiones del mes: {cont[mes]}/{limite}')
 
 
+SIN_TARJETAS = {'segunda'}
+
+
 def aplicar():
     cu = json.load(open(CUOTAS, encoding='utf-8')) if os.path.exists(CUOTAS) else {}
     app = json.load(open(DATOS, encoding='utf-8')); k = aj = 0
     for liga, L in app.get('ligas', {}).items():
         for j in L['jor']:
             for m in j['ms']:
+                if liga in SIN_TARJETAS:   # bwin no ofrece apuestas de tarjetas en esta liga: no se pronostican
+                    m['s'] = [x for x in m.get('s') or [] if x[1] != 'tar']; m['notar'] = 1
                 v = cu.get(f"{liga}|{m['d']}|{m['h']}|{m['a']}")
                 if v:
                     m['bw'] = v['bw']; m['bwact'] = v['act']; k += 1
