@@ -1,17 +1,4 @@
 {
- "corners": {
-  "NLL_total_modelo": 2.6213,
-  "NLL_total_base": 2.6357,
-  "LL_O8.5_modelo": 0.6724,
-  "LL_O8.5_base": 0.6847,
-  "LL_O9.5_modelo": 0.6744,
-  "LL_O9.5_base": 0.689,
-  "LL_O10.5_modelo": 0.6355,
-  "LL_O10.5_base": 0.6459,
-  "MAE_total_modelo": 2.6841,
-  "partidos": 1260,
-  "media_obs": 9.3
- },
  "tarjetas": {
   "NLL_total_modelo": 2.1314,
   "NLL_total_base": 2.1626,
@@ -25,18 +12,40 @@
   "partidos": 1260,
   "media_obs": 4.05
  },
- "tarjetas_arbitro_False": {
-  "NLL_total_modelo": 2.1314,
+ "tarjetas_arbitro_reg5": {
+  "NLL_total_modelo": 2.1452,
   "NLL_total_base": 2.1626,
-  "LL_O3.5_modelo": 0.6628,
+  "LL_O3.5_modelo": 0.6738,
   "LL_O3.5_base": 0.6865,
-  "LL_O4.5_modelo": 0.6438,
+  "LL_O4.5_modelo": 0.6473,
   "LL_O4.5_base": 0.6724,
-  "LL_O5.5_modelo": 0.5271,
+  "LL_O5.5_modelo": 0.5293,
   "LL_O5.5_base": 0.5447,
-  "MAE_total_modelo": 1.6543
+  "MAE_total_modelo": 1.6586
  },
- "tarjetas_arbitro_True": {
+ "tarjetas_arbitro_reg10": {
+  "NLL_total_modelo": 2.1387,
+  "NLL_total_base": 2.1626,
+  "LL_O3.5_modelo": 0.6697,
+  "LL_O3.5_base": 0.6865,
+  "LL_O4.5_modelo": 0.6444,
+  "LL_O4.5_base": 0.6724,
+  "LL_O5.5_modelo": 0.5267,
+  "LL_O5.5_base": 0.5447,
+  "MAE_total_modelo": 1.6499
+ },
+ "tarjetas_arbitro_reg20": {
+  "NLL_total_modelo": 2.1336,
+  "NLL_total_base": 2.1626,
+  "LL_O3.5_modelo": 0.6662,
+  "LL_O3.5_base": 0.6865,
+  "LL_O4.5_modelo": 0.6425,
+  "LL_O4.5_base": 0.6724,
+  "LL_O5.5_modelo": 0.5249,
+  "LL_O5.5_base": 0.5447,
+  "MAE_total_modelo": 1.6446
+ },
+ "tarjetas_arbitro_reg40": {
   "NLL_total_modelo": 2.1306,
   "NLL_total_base": 2.1626,
   "LL_O3.5_modelo": 0.6638,
