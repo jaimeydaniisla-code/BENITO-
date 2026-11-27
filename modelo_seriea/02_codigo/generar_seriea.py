@@ -20,6 +20,7 @@ HIST = ['2021-22', '2022-23', '2023-24', '2024-25', '2025-26']
 
 
 def descargar_e0():
+    os.makedirs(os.path.dirname(E0_FILE), exist_ok=True)
     for t in HIST:   # histórico: una sola vez
         f = os.path.join(os.path.dirname(E0_FILE), f'I1_{t}.csv')
         if os.path.exists(f): continue
