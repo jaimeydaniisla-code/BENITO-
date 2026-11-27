@@ -6,9 +6,9 @@
   "LL_O3.5_base": 0.6865,
   "LL_O4.5_modelo": 0.6438,
   "LL_O4.5_base": 0.6724,
-  "LL_O5.5_modelo": 0.527,
+  "LL_O5.5_modelo": 0.5271,
   "LL_O5.5_base": 0.5447,
-  "MAE_total_modelo": 1.6542,
+  "MAE_total_modelo": 1.6543,
   "partidos": 1260,
   "media_obs": 4.05
  },
