@@ -33,7 +33,8 @@ def main():
         if k in por: return por[k]
         b = difflib.get_close_matches(k, list(por), n=1, cutoff=0.6)
         return por[b[0]] if b else None
-    prev = pd.read_csv(OUT) if os.path.exists(OUT) else pd.DataFrame(columns=['id', 'Date', 'HomeTeam', 'AwayTeam', 'Referee'])
+    prev = pd.read_csv(OUT, dtype={'id': str}) if os.path.exists(OUT) else pd.DataFrame(columns=['id', 'Date', 'HomeTeam', 'AwayTeam', 'Referee'])
+    prev = prev.sort_values('Referee', na_position='first').drop_duplicates('id', keep='last')
     hechos = set(prev[prev.Referee.notna()].id.astype(str));   # los que no tienen árbitro se vuelven a intentar
     filas = []; n = 0
     for t in TEMPORADAS:
@@ -45,14 +46,19 @@ def main():
             if not h or not a: continue
             try:
                 g = fm_get('https://www.fotmob.com' + f['pageUrl'].split('#')[0])['content']
-                ref = (((g.get('matchFacts') or {}).get('infoBox') or {}).get('Referee') or {}).get('text')
+                ib = (g.get('matchFacts') or {}).get('infoBox') or {}
+                ref = (ib.get('Referee') or {}).get('text')
+                if not ref and n < 3: print('SIN ÁRBITRO', h, a, list(ib)[:8], str(ib.get('Referee'))[:120])
             except Exception as e:
                 print('AVISO partido', h, a, repr(e)[:60]); ref = None
             n += 1
             d = dt.datetime.fromisoformat(f['status']['utcTime'].replace('Z', '+00:00')).astimezone(MAD).strftime('%Y-%m-%d')
             filas.append({'id': mid, 'Date': d, 'HomeTeam': h, 'AwayTeam': a, 'Referee': ref})
             time.sleep(0.25)
-    out = pd.concat([prev, pd.DataFrame(filas)], ignore_index=True).drop_duplicates('id', keep='last')
+    nuevo = pd.DataFrame(filas, columns=['id', 'Date', 'HomeTeam', 'AwayTeam', 'Referee'])
+    out = pd.concat([prev, nuevo], ignore_index=True)
+    out['id'] = out.id.astype(str)
+    out = out.sort_values('Referee', na_position='first').drop_duplicates('id', keep='last').sort_values('Date')
     out.to_csv(OUT, index=False)
     print(f'Árbitros: {len(out)} partidos ({len(filas)} nuevos, {out.Referee.notna().sum()} con árbitro, {out.Referee.nunique()} árbitros distintos)')
 
