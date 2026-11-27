@@ -14,10 +14,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Datos I1 y backtest sin mirar el futuro
+      - name: Datos I1, árbitros FotMob y backtest de tarjetas
         run: |
           python -c "import sys; sys.path.insert(0,'modelo_seriea/02_codigo'); import generar_seriea as g; g.descargar_e0()"
-          cd modelo_seriea/02_codigo && python backtest_seriea.py
+          cd modelo_seriea/02_codigo && python arbitros_fotmob.py && SOLO_TARJETAS=1 python backtest_seriea.py
       - name: Guardar
         run: |
           git config user.name "robot"; git config user.email "robot@users.noreply.github.com"

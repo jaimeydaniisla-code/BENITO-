@@ -163,7 +163,7 @@ def main():
         for r in [x for x in fx if x['ronda'] == ronda]:
             arb, ali = fm_detalle(r, ahora)
             try:
-                T, pick, info = ap.analizar(r['h'], r['a'], None, hoy)   # árbitro solo informativo (nombres de FotMob ≠ football-data)
+                T, pick, info = ap.analizar(r['h'], r['a'], arb, hoy)   # árbitro de FotMob: mismo origen que el historial (arbitros_fotmob.csv)
             except Exception as e:
                 print('AVISO modelo', r['h'], r['a'], repr(e)[:120]); continue
             narb += bool(arb); nali += bool(ali)

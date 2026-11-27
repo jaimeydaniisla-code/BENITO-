@@ -1,0 +1,60 @@
+"""Árbitro de cada partido de Serie A desde FotMob (football-data no lo trae en Italia).
+Guarda 01_datos/arbitros_fotmob.csv (Date, HomeTeam, AwayTeam con nombres de football-data, Referee).
+Incremental: solo pide los partidos que faltan (máx. MAXP por pasada)."""
+import os, sys, time, json, urllib.parse, datetime as dt
+import pandas as pd
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+from generar_seriea import fm_get, nz, ALIAS, MAD
+import difflib
+from data import load_e0
+OUT = os.path.join(HERE, '..', '01_datos', 'arbitros_fotmob.csv')
+TEMPORADAS = ['2023/2024', '2024/2025', '2025/2026', None]   # None = temporada actual
+MAXP = int(os.environ.get('ARB_MAXP', '1500'))
+
+
+def partidos(temp):
+    urls = ['https://www.fotmob.com/leagues/55/overview/serie'] if temp is None else \
+        [f'https://www.fotmob.com/leagues/55/overview/serie?season={urllib.parse.quote(temp)}', f'https://www.fotmob.com/leagues/55/fixtures/serie?season={urllib.parse.quote(temp)}']
+    for u in urls:
+        try:
+            pp = fm_get(u); fx = pp.get('fixtures') or {}
+            allm = fx.get('allMatches') or fx.get('allFixtures', {}).get('fixtures') or []
+            fin = [f for f in allm if (f.get('status') or {}).get('finished')]
+            if fin: print(temp or 'actual', u.split('/')[-1][:40], len(fin), 'terminados'); return fin
+        except Exception as e:
+            print('AVISO', u, repr(e)[:80])
+    return []
+
+
+def main():
+    hist = load_e0(); equipos = sorted(set(hist.HomeTeam) | set(hist.AwayTeam)); por = {nz(e): e for e in equipos}
+    def mapa(n):
+        k = ALIAS.get(nz(n), nz(n))
+        if k in por: return por[k]
+        b = difflib.get_close_matches(k, list(por), n=1, cutoff=0.6)
+        return por[b[0]] if b else None
+    prev = pd.read_csv(OUT) if os.path.exists(OUT) else pd.DataFrame(columns=['id', 'Date', 'HomeTeam', 'AwayTeam', 'Referee'])
+    hechos = set(prev.id.astype(str)); filas = []; n = 0
+    for t in TEMPORADAS:
+        for f in partidos(t):
+            mid = str(f.get('id'))
+            if mid in hechos or not f.get('pageUrl'): continue
+            if n >= MAXP: break
+            h, a = mapa(f['home']['name']), mapa(f['away']['name'])
+            if not h or not a: continue
+            try:
+                g = fm_get('https://www.fotmob.com' + f['pageUrl'].split('#')[0])['content']
+                ref = (((g.get('matchFacts') or {}).get('infoBox') or {}).get('Referee') or {}).get('text')
+            except Exception as e:
+                print('AVISO partido', h, a, repr(e)[:60]); ref = None
+            n += 1
+            d = dt.datetime.fromisoformat(f['status']['utcTime'].replace('Z', '+00:00')).astimezone(MAD).strftime('%Y-%m-%d')
+            filas.append({'id': mid, 'Date': d, 'HomeTeam': h, 'AwayTeam': a, 'Referee': ref})
+            time.sleep(0.25)
+    out = pd.concat([prev, pd.DataFrame(filas)], ignore_index=True).drop_duplicates('id', keep='last')
+    out.to_csv(OUT, index=False)
+    print(f'Árbitros: {len(out)} partidos ({len(filas)} nuevos, {out.Referee.notna().sum()} con árbitro, {out.Referee.nunique()} árbitros distintos)')
+
+
+if __name__ == '__main__':
+    main()

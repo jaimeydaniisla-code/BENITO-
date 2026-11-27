@@ -17,7 +17,15 @@ def load_e0():   # (nombre heredado de la Premier: aquí carga I1 de Serie A)
     df = pd.concat(al, ignore_index=True).sort_values(['Date', 'HomeTeam']).reset_index(drop=True)
     df['season'] = df.Date.apply(lambda x: x.year if x.month >= 7 else x.year - 1)
     df['res'] = np.select([df.FTHG > df.FTAG, df.FTHG == df.FTAG], [0, 1], 2)
-    return df.copy()
+    df = df.copy()
+    ARB = D + 'arbitros_fotmob.csv'   # árbitros sacados de FotMob (football-data no los trae en Italia)
+    if os.path.exists(ARB):
+        a = pd.read_csv(ARB).dropna(subset=['Referee'])
+        a['Date'] = pd.to_datetime(a.Date); a['season'] = a.Date.apply(lambda x: x.year if x.month >= 7 else x.year - 1)
+        a = a.drop_duplicates(['season', 'HomeTeam', 'AwayTeam'])[['season', 'HomeTeam', 'AwayTeam', 'Referee']]
+        df = df.drop(columns=['Referee']).merge(a, on=['season', 'HomeTeam', 'AwayTeam'], how='left')
+        df['Referee'] = df.Referee.fillna('sin dato')
+    return df
 
 
 def implied(df, h, d, a):

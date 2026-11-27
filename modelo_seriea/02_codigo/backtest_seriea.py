@@ -55,6 +55,11 @@ def main():
         e['media_obs'] = round(float(P.obs_tot.mean()), 2)
         res[nombre] = {k: (round(float(v), 4) if isinstance(v, (float, np.floating)) else v) for k, v in e.items()}
         print(nombre, res[nombre])
+    for ur in (False, True):   # tarjetas sin y con árbitro (historial de FotMob)
+        cfg = dict(CFG_TARJETAS, use_ref=ur); P = run(d, 'HK', 'AK', first=2023, **cfg); e = evaluate(P, [3.5, 4.5, 5.5])
+        res[f'tarjetas_arbitro_{ur}'] = {k: round(float(v), 4) for k, v in e.items()}; print('tarjetas con árbitro' if ur else 'tarjetas sin árbitro', res[f'tarjetas_arbitro_{ur}'])
+    print('partidos con árbitro conocido:', int((d.Referee != 'sin dato').sum()), 'de', len(d), '| árbitros', d.Referee.nunique())
+    if os.environ.get('SOLO_TARJETAS'): json.dump(res, open(os.path.join(OUT, 'backtest_arbitros.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1); return
     res['goles'] = goles(); print('goles', res['goles'])
     json.dump(res, open(os.path.join(OUT, 'backtest.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
