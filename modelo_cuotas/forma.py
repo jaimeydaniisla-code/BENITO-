@@ -7,7 +7,7 @@ warnings.filterwarnings('ignore')
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 DATOS = os.path.join(ROOT, 'datos.json')
 FILES = {'primera': ['modelo/01_datos/historico/SP1_*.csv', 'modelo/01_datos/SP1_*.csv'],
-         'premier': ['modelo_premier/01_datos/E0_*.csv'], 'segunda': ['modelo_segunda/01_datos/SP2_*.csv']}
+         'premier': ['modelo_premier/01_datos/E0_*.csv'], 'segunda': ['modelo_segunda/01_datos/SP2_*.csv'], 'seriea': ['modelo_seriea/01_datos/I1_*.csv']}
 ALIAS = {'athletic': 'ath bilbao', 'atletico': 'ath madrid', 'deportivo': 'la coruna', 'espanyol': 'espanol', 'racing': 'santander',
          'rayo': 'vallecano', 'real sociedad': 'sociedad', 'real sociedad b': 'sociedad b', 'sporting': 'sp gijon', 'nottm forest': "nott'm forest"}
 N = 6

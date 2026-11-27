@@ -5,7 +5,7 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from forma import buscar
 ROOT = os.path.abspath(os.path.join(HERE, '..')); DATOS = os.path.join(ROOT, 'datos.json')
-DIV = {'primera': 'SP1', 'segunda': 'SP2', 'premier': 'E0'}
+DIV = {'primera': 'SP1', 'segunda': 'SP2', 'premier': 'E0', 'seriea': 'I1'}
 
 
 def bajar():

@@ -1,0 +1,25 @@
+name: backtest-seriea
+on: workflow_dispatch
+permissions:
+  contents: write
+concurrency:
+  group: actualizar
+  cancel-in-progress: false
+jobs:
+  bt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Datos I1 y backtest sin mirar el futuro
+        run: |
+          python -c "import sys; sys.path.insert(0,'modelo_seriea/02_codigo'); import generar_seriea as g; g.descargar_e0()"
+          cd modelo_seriea/02_codigo && python backtest_seriea.py
+      - name: Guardar
+        run: |
+          git config user.name "robot"; git config user.email "robot@users.noreply.github.com"
+          git add modelo_seriea
+          git diff --staged --quiet || (git commit -m "Backtest Serie A" && git pull -q --rebase -X theirs origin main && git push)
