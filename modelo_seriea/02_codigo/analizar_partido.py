@@ -21,7 +21,7 @@ from countmodel import CountModel
 CUOTA_MIN = 1.50
 CFG_GOLES = dict(xi=0.008, reg=1.0, w=0.0, promo_att=-0.25, promo_def=0.25)
 CFG_CORNERS = dict(xi=0.001, reg_team=15, reg_ref=5, use_ref=False)
-CFG_TARJETAS = dict(xi=0.001, reg_team=5, reg_ref=40, use_ref=False)   # sin árbitro en los datos de Italia
+CFG_TARJETAS = dict(xi=0.001, reg_team=5, reg_ref=40, use_ref=True)   # árbitro de FotMob (backtest 27/11: mejora 4,5 y 5,5; reg 40 la mejor)
 PESO_MODELO_MEZCLA = 0.2
 
 FIAB = {'1X2': 'media (validado; no bate al mercado)', 'Doble oportunidad': 'media', 'Empate no válido': 'media',

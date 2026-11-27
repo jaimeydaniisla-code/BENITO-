@@ -8,7 +8,7 @@ from generar_seriea import fm_get, nz, ALIAS, MAD
 import difflib
 from data import load_e0
 OUT = os.path.join(HERE, '..', '01_datos', 'arbitros_fotmob.csv')
-TEMPORADAS = ['2023/2024', '2024/2025', '2025/2026', None]   # None = temporada actual
+TEMPORADAS = [None] if os.environ.get('ARB_SOLO_ACTUAL') else ['2023/2024', '2024/2025', '2025/2026', None]   # None = temporada actual
 MAXP = int(os.environ.get('ARB_MAXP', '1500'))
 
 
@@ -34,7 +34,8 @@ def main():
         b = difflib.get_close_matches(k, list(por), n=1, cutoff=0.6)
         return por[b[0]] if b else None
     prev = pd.read_csv(OUT) if os.path.exists(OUT) else pd.DataFrame(columns=['id', 'Date', 'HomeTeam', 'AwayTeam', 'Referee'])
-    hechos = set(prev.id.astype(str)); filas = []; n = 0
+    hechos = set(prev[prev.Referee.notna()].id.astype(str));   # los que no tienen árbitro se vuelven a intentar
+    filas = []; n = 0
     for t in TEMPORADAS:
         for f in partidos(t):
             mid = str(f.get('id'))

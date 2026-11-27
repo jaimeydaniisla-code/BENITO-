@@ -29,7 +29,7 @@ jobs:
       - name: Recalcular Premier
         run: python modelo_premier/02_codigo/generar_premier.py
       - name: Recalcular Serie A
-        run: python modelo_seriea/02_codigo/generar_seriea.py || echo 'AVISO Serie A falló'
+        run: (ARB_SOLO_ACTUAL=1 ARB_MAXP=15 python modelo_seriea/02_codigo/arbitros_fotmob.py || echo 'AVISO árbitros Serie A'); python modelo_seriea/02_codigo/generar_seriea.py || echo 'AVISO Serie A falló'
       - name: Recalcular Selecciones
         run: python modelo_selecciones/generar_selecciones.py
       - name: Recalcular Champions
