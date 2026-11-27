@@ -48,7 +48,7 @@ def main():
                 g = fm_get('https://www.fotmob.com' + f['pageUrl'].split('#')[0])['content']
                 ib = (g.get('matchFacts') or {}).get('infoBox') or {}
                 ref = (ib.get('Referee') or {}).get('text')
-                if not ref and n < 3: print('SIN ÁRBITRO', h, a, list(ib)[:8], str(ib.get('Referee'))[:120])
+                ref = ref or 'sin dato'   # FotMob no tiene árbitro en ~30 % de partidos antiguos: no se vuelve a pedir
             except Exception as e:
                 print('AVISO partido', h, a, repr(e)[:60]); ref = None
             n += 1
