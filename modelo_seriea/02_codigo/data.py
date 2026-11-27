@@ -12,7 +12,7 @@ def load_e0():   # (nombre heredado de la Premier: aquí carga I1 de Serie A)
         d = pd.read_csv(f, encoding='utf-8-sig')
         d = d.dropna(subset=['HomeTeam', 'FTHG'])
         d['Date'] = pd.to_datetime(d.Date, dayfirst=True)
-        if 'Referee' not in d: d['Referee'] = np.nan   # football-data no trae árbitro en Italia
+        if 'Referee' not in d: d['Referee'] = 'sin dato'   # football-data no trae árbitro en Italia (valor fijo: el modelo no lo usa)
         al.append(d)
     df = pd.concat(al, ignore_index=True).sort_values(['Date', 'HomeTeam']).reset_index(drop=True)
     df['season'] = df.Date.apply(lambda x: x.year if x.month >= 7 else x.year - 1)
