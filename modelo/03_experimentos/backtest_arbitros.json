@@ -1,0 +1,54 @@
+{
+ "sin_arbitro": {
+  "NLL_total_modelo": 2.277,
+  "NLL_total_base": 2.2907,
+  "LL_O3.5_modelo": 0.6266,
+  "LL_O3.5_base": 0.634,
+  "LL_O4.5_modelo": 0.6847,
+  "LL_O4.5_base": 0.6928,
+  "LL_O5.5_modelo": 0.637,
+  "LL_O5.5_base": 0.6469,
+  "LL_O6.5_modelo": 0.5277,
+  "LL_O6.5_base": 0.5375,
+  "MAE_total_modelo": 1.9444
+ },
+ "arbitro_reg20": {
+  "NLL_total_modelo": 2.2819,
+  "NLL_total_base": 2.2907,
+  "LL_O3.5_modelo": 0.6291,
+  "LL_O3.5_base": 0.634,
+  "LL_O4.5_modelo": 0.689,
+  "LL_O4.5_base": 0.6928,
+  "LL_O5.5_modelo": 0.6395,
+  "LL_O5.5_base": 0.6469,
+  "LL_O6.5_modelo": 0.5305,
+  "LL_O6.5_base": 0.5375,
+  "MAE_total_modelo": 1.9545
+ },
+ "arbitro_reg40": {
+  "NLL_total_modelo": 2.2794,
+  "NLL_total_base": 2.2907,
+  "LL_O3.5_modelo": 0.6279,
+  "LL_O3.5_base": 0.634,
+  "LL_O4.5_modelo": 0.6871,
+  "LL_O4.5_base": 0.6928,
+  "LL_O5.5_modelo": 0.6382,
+  "LL_O5.5_base": 0.6469,
+  "LL_O6.5_modelo": 0.529,
+  "LL_O6.5_base": 0.5375,
+  "MAE_total_modelo": 1.9505
+ },
+ "arbitro_reg80": {
+  "NLL_total_modelo": 2.2781,
+  "NLL_total_base": 2.2907,
+  "LL_O3.5_modelo": 0.6272,
+  "LL_O3.5_base": 0.634,
+  "LL_O4.5_modelo": 0.686,
+  "LL_O4.5_base": 0.6928,
+  "LL_O5.5_modelo": 0.6375,
+  "LL_O5.5_base": 0.6469,
+  "LL_O6.5_modelo": 0.5283,
+  "LL_O6.5_base": 0.5375,
+  "MAE_total_modelo": 1.9478
+ }
+}
