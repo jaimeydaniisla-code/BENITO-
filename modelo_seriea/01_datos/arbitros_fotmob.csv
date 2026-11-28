@@ -1,531 +1,531 @@
 id,Date,HomeTeam,AwayTeam,Referee
 4230531,2023-08-19,Empoli,Verona,
-4230533,2023-08-19,Inter,Monza,Livio Marinelli
-4230537,2023-08-19,Genoa,Fiorentina,Fabio Maresca
 4230532,2023-08-19,Frosinone,Napoli,Ermanno Feliciani
-4230539,2023-08-20,Lecce,Lazio,Matteo Marcenaro
+4230537,2023-08-19,Genoa,Fiorentina,Fabio Maresca
+4230533,2023-08-19,Inter,Monza,Livio Marinelli
 4230534,2023-08-20,Roma,Salernitana,Marco Di Bello
+4230539,2023-08-20,Lecce,Lazio,Matteo Marcenaro
 4230535,2023-08-20,Sassuolo,Atalanta,Valerio Crezzini
 4230538,2023-08-20,Udinese,Juventus,
 4230530,2023-08-21,Bologna,Milan,Juan Luca Sacchi
 4230536,2023-08-21,Torino,Cagliari,
-4230549,2023-08-26,Monza,Empoli,Matteo Marcenaro
-4230544,2023-08-26,Milan,Torino,
 4230547,2023-08-26,Frosinone,Atalanta,Livio Marinelli
+4230549,2023-08-26,Monza,Empoli,Matteo Marcenaro
 4230543,2023-08-26,Verona,Roma,
-4230545,2023-08-27,Napoli,Sassuolo,Marco Guida
+4230544,2023-08-26,Milan,Torino,
 4230542,2023-08-27,Fiorentina,Lecce,
+4230545,2023-08-27,Napoli,Sassuolo,Marco Guida
 4230550,2023-08-27,Lazio,Genoa,Ermanno Feliciani
 4230548,2023-08-27,Juventus,Bologna,
 4230541,2023-08-28,Cagliari,Inter,
 4230546,2023-08-28,Salernitana,Udinese,Francesco Cosso
 4230558,2023-09-01,Sassuolo,Verona,Livio Marinelli
 4230560,2023-09-01,Roma,Milan,
+4230551,2023-09-02,Atalanta,Monza,Claudio Giuseppe Allegretta
 4230552,2023-09-02,Bologna,Cagliari,Kevin Bonacina
 4230559,2023-09-02,Napoli,Lazio,Luca Pairetto
-4230551,2023-09-02,Atalanta,Monza,Claudio Giuseppe Allegretta
 4230556,2023-09-02,Udinese,Frosinone,
-4230555,2023-09-03,Inter,Fiorentina,Maurizio Mariani
 4230557,2023-09-03,Torino,Genoa,
+4230555,2023-09-03,Inter,Fiorentina,Maurizio Mariani
 4230553,2023-09-03,Empoli,Juventus,Francesco Fourneau
 4230554,2023-09-03,Lecce,Salernitana,Fabio Maresca
-4230565,2023-09-16,Juventus,Lazio,Davide Massa
 4230563,2023-09-16,Genoa,Napoli,Marco Di Bello
 4230564,2023-09-16,Inter,Milan,Marco Guida
+4230565,2023-09-16,Juventus,Lazio,Davide Massa
 4230561,2023-09-17,Cagliari,Udinese,Gianluca Manganiello
-4230570,2023-09-17,Monza,Lecce,Valerio Crezzini
-4230567,2023-09-17,Fiorentina,Atalanta,Federico La Penna
 4230569,2023-09-17,Roma,Empoli,Marco Di Bello
+4230567,2023-09-17,Fiorentina,Atalanta,Federico La Penna
+4230570,2023-09-17,Monza,Lecce,Valerio Crezzini
 4230562,2023-09-17,Frosinone,Sassuolo,Matteo Marchetti
-4230568,2023-09-18,Verona,Bologna,Giuseppe Mucera
 4230566,2023-09-18,Salernitana,Torino,Daniele Chiffi
-4230577,2023-09-22,Lecce,Genoa,Matteo Marchetti
+4230568,2023-09-18,Verona,Bologna,Giuseppe Mucera
 4230576,2023-09-22,Salernitana,Frosinone,
-4230574,2023-09-23,Lazio,Monza,Giuseppe Collu
+4230577,2023-09-22,Lecce,Genoa,Matteo Marchetti
 4230578,2023-09-23,Milan,Verona,Daniele Chiffi
 4230579,2023-09-23,Sassuolo,Juventus,
-4230573,2023-09-24,Empoli,Inter,Ermanno Feliciani
+4230574,2023-09-23,Lazio,Monza,Giuseppe Collu
 4230580,2023-09-24,Torino,Roma,
-4230575,2023-09-24,Udinese,Fiorentina,Federico La Penna
-4230571,2023-09-24,Atalanta,Cagliari,Alberto Arena
 4230572,2023-09-24,Bologna,Napoli,Kevin Bonacina
+4230575,2023-09-24,Udinese,Fiorentina,Federico La Penna
+4230573,2023-09-24,Empoli,Inter,Ermanno Feliciani
+4230571,2023-09-24,Atalanta,Cagliari,Alberto Arena
 4230585,2023-09-26,Juventus,Lecce,Fabio Maresca
-4230584,2023-09-27,Inter,Sassuolo,
-4230582,2023-09-27,Empoli,Salernitana,Maurizio Mariani
-4230588,2023-09-27,Verona,Atalanta,Giovanni Ayroldi
 4230586,2023-09-27,Lazio,Torino,Daniele Chiffi
+4230584,2023-09-27,Inter,Sassuolo,
 4230587,2023-09-27,Napoli,Udinese,
+4230588,2023-09-27,Verona,Atalanta,Giovanni Ayroldi
+4230582,2023-09-27,Empoli,Salernitana,Maurizio Mariani
 4230581,2023-09-27,Cagliari,Milan,Marco Di Bello
+4230589,2023-09-28,Monza,Bologna,Andrea Zanotti
 4230583,2023-09-28,Genoa,Roma,Rosario Abisso
 4230590,2023-09-28,Frosinone,Fiorentina,
-4230589,2023-09-28,Monza,Bologna,Andrea Zanotti
-4230599,2023-09-30,Milan,Lazio,Matteo Marcenaro
 4230593,2023-09-30,Lecce,Napoli,
+4230599,2023-09-30,Milan,Lazio,Matteo Marcenaro
 4230598,2023-09-30,Salernitana,Inter,Marco Piccinini
 4230591,2023-10-01,Atalanta,Juventus,Luca Zufferli
-4230595,2023-10-01,Roma,Frosinone,
 4230592,2023-10-01,Bologna,Empoli,Matteo Marcenaro
+4230595,2023-10-01,Roma,Frosinone,
 4230596,2023-10-01,Udinese,Genoa,
-4230594,2023-10-02,Fiorentina,Cagliari,
-4230600,2023-10-02,Sassuolo,Monza,
 4230597,2023-10-02,Torino,Verona,Kevin Bonacina
-4230606,2023-10-06,Lecce,Sassuolo,
+4230600,2023-10-02,Sassuolo,Monza,
+4230594,2023-10-02,Fiorentina,Cagliari,
 4230602,2023-10-06,Empoli,Udinese,Daniele Doveri
+4230606,2023-10-06,Lecce,Sassuolo,
+4230609,2023-10-07,Inter,Bologna,Daniele Doveri
 4230605,2023-10-07,Juventus,Torino,
 4230604,2023-10-07,Genoa,Milan,Davide Massa
-4230609,2023-10-07,Inter,Bologna,Daniele Doveri
-4230607,2023-10-08,Monza,Salernitana,Michael Fabbri
 4230608,2023-10-08,Lazio,Atalanta,
-4230603,2023-10-08,Frosinone,Verona,Federico La Penna
 4230601,2023-10-08,Cagliari,Roma,Ermanno Feliciani
+4230607,2023-10-08,Monza,Salernitana,Michael Fabbri
+4230603,2023-10-08,Frosinone,Verona,Federico La Penna
 4230610,2023-10-08,Napoli,Fiorentina,
 4230618,2023-10-21,Sassuolo,Lazio,Luca Zufferli
-4230613,2023-10-21,Verona,Napoli,Andrea Colombo
 4230616,2023-10-21,Torino,Inter,
+4230613,2023-10-21,Verona,Napoli,Andrea Colombo
 4230612,2023-10-22,Bologna,Frosinone,
+4230614,2023-10-22,Salernitana,Cagliari,Francesco Fourneau
 4230617,2023-10-22,Milan,Juventus,
 4230611,2023-10-22,Atalanta,Genoa,
 4230620,2023-10-22,Roma,Monza,Giuseppe Collu
-4230614,2023-10-22,Salernitana,Cagliari,Francesco Fourneau
 4230615,2023-10-23,Fiorentina,Empoli,Antonio Rapuano
 4230619,2023-10-23,Udinese,Lecce,Marco Guida
 4230622,2023-10-27,Genoa,Salernitana,Daniele Orsato
-4230629,2023-10-28,Juventus,Verona,Giovanni Ayroldi
 4230624,2023-10-28,Lecce,Torino,Ermanno Feliciani
+4230629,2023-10-28,Juventus,Verona,Giovanni Ayroldi
 4230627,2023-10-28,Sassuolo,Bologna,Marco Di Bello
 4230621,2023-10-29,Cagliari,Frosinone,Giovanni Ayroldi
 4230630,2023-10-29,Napoli,Milan,
-4230623,2023-10-29,Inter,Roma,Davide Massa
 4230625,2023-10-29,Monza,Udinese,Claudio Giuseppe Allegretta
-4230626,2023-10-30,Empoli,Atalanta,Maurizio Mariani
+4230623,2023-10-29,Inter,Roma,Davide Massa
 4230628,2023-10-30,Lazio,Fiorentina,
+4230626,2023-10-30,Empoli,Atalanta,Maurizio Mariani
 4230635,2023-11-03,Bologna,Lazio,
 4230639,2023-11-04,Milan,Udinese,Matteo Marcenaro
 4230642,2023-11-04,Salernitana,Napoli,Livio Marinelli
 4230634,2023-11-04,Atalanta,Inter,Fabio Maresca
-4230637,2023-11-05,Fiorentina,Juventus,Andrea Colombo
-4230641,2023-11-05,Roma,Lecce,Daniele Chiffi
-4230638,2023-11-05,Verona,Monza,Davide Massa
 4230636,2023-11-05,Cagliari,Genoa,
-4230643,2023-11-06,Torino,Sassuolo,
+4230641,2023-11-05,Roma,Lecce,Daniele Chiffi
+4230637,2023-11-05,Fiorentina,Juventus,Andrea Colombo
+4230638,2023-11-05,Verona,Monza,Davide Massa
 4230640,2023-11-06,Frosinone,Empoli,
-4230653,2023-11-10,Sassuolo,Salernitana,Antonio Rapuano
+4230643,2023-11-06,Torino,Sassuolo,
 4230644,2023-11-10,Genoa,Verona,Matteo Marchetti
-4230650,2023-11-11,Juventus,Cagliari,Matteo Marcenaro
+4230653,2023-11-10,Sassuolo,Salernitana,Antonio Rapuano
 4230646,2023-11-11,Lecce,Milan,Federico La Penna
 4230647,2023-11-11,Monza,Torino,Matteo Marchetti
-4230645,2023-11-12,Lazio,Roma,
+4230650,2023-11-11,Juventus,Cagliari,Matteo Marcenaro
 4230648,2023-11-12,Udinese,Atalanta,
 4230652,2023-11-12,Inter,Frosinone,
-4230651,2023-11-12,Napoli,Empoli,Michael Fabbri
 4230649,2023-11-12,Fiorentina,Bologna,
-4230661,2023-11-25,Milan,Fiorentina,
+4230651,2023-11-12,Napoli,Empoli,Michael Fabbri
+4230645,2023-11-12,Lazio,Roma,
 4230663,2023-11-25,Salernitana,Lazio,Luca Zufferli
+4230661,2023-11-25,Milan,Fiorentina,
 4230654,2023-11-25,Atalanta,Napoli,
-4230662,2023-11-26,Juventus,Inter,
-4230658,2023-11-26,Frosinone,Genoa,Antonio Rapuano
 4230660,2023-11-26,Roma,Udinese,Fabio Maresca
+4230662,2023-11-26,Juventus,Inter,
 4230656,2023-11-26,Cagliari,Monza,Andrea Calzavara
 4230657,2023-11-26,Empoli,Sassuolo,
+4230658,2023-11-26,Frosinone,Genoa,Antonio Rapuano
 4230659,2023-11-27,Verona,Lecce,Davide Massa
 4230655,2023-11-27,Bologna,Torino,Marco Guida
 4230672,2023-12-01,Monza,Juventus,
-4230667,2023-12-02,Lazio,Cagliari,Andrea Colombo
-4230669,2023-12-02,Milan,Frosinone,Luca Pairetto
 4230668,2023-12-02,Genoa,Empoli,Federico Dionisi
-4230671,2023-12-03,Napoli,Inter,
-4230666,2023-12-03,Lecce,Bologna,Luca Pairetto
-4230664,2023-12-03,Fiorentina,Salernitana,Matteo Marchetti
+4230669,2023-12-02,Milan,Frosinone,Luca Pairetto
+4230667,2023-12-02,Lazio,Cagliari,Andrea Colombo
 4230673,2023-12-03,Sassuolo,Roma,Marco Di Bello
 4230670,2023-12-03,Udinese,Verona,Gianluca Manganiello
+4230664,2023-12-03,Fiorentina,Salernitana,Matteo Marchetti
+4230671,2023-12-03,Napoli,Inter,
+4230666,2023-12-03,Lecce,Bologna,Luca Pairetto
 4230665,2023-12-04,Torino,Atalanta,
 4230680,2023-12-08,Juventus,Napoli,Simone Sozza
-4230678,2023-12-09,Verona,Lazio,Marco Guida
-4230674,2023-12-09,Atalanta,Milan,Daniele Chiffi
 4230679,2023-12-09,Inter,Udinese,Luca Pairetto
-4230682,2023-12-10,Roma,Fiorentina,Matteo Marcenaro
+4230674,2023-12-09,Atalanta,Milan,Daniele Chiffi
+4230678,2023-12-09,Verona,Lazio,Marco Guida
 4230677,2023-12-10,Frosinone,Torino,Giuseppe Mucera
 4230681,2023-12-10,Salernitana,Bologna,Ermanno Feliciani
+4230682,2023-12-10,Roma,Fiorentina,Matteo Marcenaro
 4230683,2023-12-10,Monza,Genoa,
 4230676,2023-12-11,Empoli,Lecce,Daniele Chiffi
 4230675,2023-12-11,Cagliari,Sassuolo,
 4230687,2023-12-15,Genoa,Juventus,Daniele Doveri
-4230689,2023-12-16,Napoli,Cagliari,
 4230691,2023-12-16,Lecce,Frosinone,Rosario Abisso
 4230690,2023-12-16,Torino,Empoli,Daniele Chiffi
-4230685,2023-12-17,Bologna,Roma,
-4230688,2023-12-17,Milan,Monza,
-4230692,2023-12-17,Lazio,Inter,
-4230686,2023-12-17,Fiorentina,Verona,Marco Guida
+4230689,2023-12-16,Napoli,Cagliari,
 4230693,2023-12-17,Udinese,Sassuolo,
+4230692,2023-12-17,Lazio,Inter,
+4230688,2023-12-17,Milan,Monza,
+4230686,2023-12-17,Fiorentina,Verona,Marco Guida
+4230685,2023-12-17,Bologna,Roma,
 4230684,2023-12-18,Atalanta,Salernitana,Ermanno Feliciani
+4230701,2023-12-22,Sassuolo,Genoa,Maria Ferrieri Caputi
+4230694,2023-12-22,Empoli,Lazio,Andrea Colombo
 4230702,2023-12-22,Salernitana,Milan,Davide Di Marco
 4230700,2023-12-22,Monza,Fiorentina,Daniele Doveri
-4230694,2023-12-22,Empoli,Lazio,Andrea Colombo
-4230701,2023-12-22,Sassuolo,Genoa,Maria Ferrieri Caputi
-4230699,2023-12-23,Verona,Cagliari,Andrea Zanotti
-4230696,2023-12-23,Inter,Lecce,
 4230703,2023-12-23,Roma,Napoli,Andrea Colombo
 4230695,2023-12-23,Frosinone,Juventus,Giovanni Ayroldi
 4230697,2023-12-23,Torino,Udinese,Valerio Crezzini
+4230699,2023-12-23,Verona,Cagliari,Andrea Zanotti
+4230696,2023-12-23,Inter,Lecce,
 4230698,2023-12-23,Bologna,Atalanta,
+4230707,2023-12-29,Genoa,Inter,Giovanni Ayroldi
+4230713,2023-12-29,Napoli,Monza,Giovanni Ayroldi
 4230706,2023-12-29,Fiorentina,Torino,Davide Massa
 4230712,2023-12-29,Lazio,Frosinone,
-4230713,2023-12-29,Napoli,Monza,Giovanni Ayroldi
-4230707,2023-12-29,Genoa,Inter,Giovanni Ayroldi
-4230709,2023-12-30,Juventus,Roma,
-4230705,2023-12-30,Cagliari,Empoli,Federico La Penna
-4230710,2023-12-30,Milan,Sassuolo,Francesco Fourneau
-4230711,2023-12-30,Udinese,Bologna,Livio Marinelli
 4230704,2023-12-30,Atalanta,Lecce,Mattia Drigo
+4230710,2023-12-30,Milan,Sassuolo,Francesco Fourneau
+4230705,2023-12-30,Cagliari,Empoli,Federico La Penna
+4230711,2023-12-30,Udinese,Bologna,Livio Marinelli
 4230708,2023-12-30,Verona,Salernitana,Marco Di Bello
+4230709,2023-12-30,Juventus,Roma,
 4230714,2024-01-05,Bologna,Genoa,
-4230716,2024-01-06,Frosinone,Monza,
 4230719,2024-01-06,Sassuolo,Fiorentina,Matteo Marcenaro
-4230720,2024-01-06,Inter,Verona,Andrea Calzavara
 4230718,2024-01-06,Lecce,Cagliari,Juan Luca Sacchi
-4230723,2024-01-07,Torino,Napoli,Marco Di Bello
-4230722,2024-01-07,Udinese,Lazio,Paride Tremolada
-4230715,2024-01-07,Empoli,Milan,Luca Pairetto
-4230717,2024-01-07,Roma,Atalanta,
+4230716,2024-01-06,Frosinone,Monza,
+4230720,2024-01-06,Inter,Verona,Andrea Calzavara
 4230721,2024-01-07,Salernitana,Juventus,Alberto Santoro
-4230732,2024-01-13,Verona,Empoli,
-4230733,2024-01-13,Monza,Inter,Livio Marinelli
+4230722,2024-01-07,Udinese,Lazio,Paride Tremolada
+4230717,2024-01-07,Roma,Atalanta,
+4230723,2024-01-07,Torino,Napoli,Marco Di Bello
+4230715,2024-01-07,Empoli,Milan,Luca Pairetto
 4230730,2024-01-13,Napoli,Salernitana,Livio Marinelli
+4230733,2024-01-13,Monza,Inter,Livio Marinelli
 4230726,2024-01-13,Genoa,Torino,
-4230728,2024-01-14,Lazio,Lecce,Matteo Marcenaro
+4230732,2024-01-13,Verona,Empoli,
 4230731,2024-01-14,Cagliari,Bologna,Kevin Bonacina
-4230725,2024-01-14,Fiorentina,Udinese,Federico La Penna
 4230729,2024-01-14,Milan,Roma,
+4230728,2024-01-14,Lazio,Lecce,Matteo Marcenaro
+4230725,2024-01-14,Fiorentina,Udinese,Federico La Penna
 4230724,2024-01-15,Atalanta,Frosinone,Livio Marinelli
 4230727,2024-01-16,Juventus,Sassuolo,
-4230742,2024-01-20,Udinese,Milan,Matteo Marcenaro
 4230739,2024-01-20,Roma,Verona,
+4230742,2024-01-20,Udinese,Milan,Matteo Marcenaro
 4230738,2024-01-21,Salernitana,Genoa,Daniele Orsato
-4230735,2024-01-21,Empoli,Monza,Matteo Marcenaro
 4230740,2024-01-21,Lecce,Juventus,Fabio Maresca
+4230735,2024-01-21,Empoli,Monza,Matteo Marcenaro
 4230737,2024-01-21,Frosinone,Cagliari,Giovanni Ayroldi
 4230745,2024-01-26,Cagliari,Torino,
-4230751,2024-01-27,Juventus,Empoli,Francesco Fourneau
-4230744,2024-01-27,Atalanta,Udinese,
 4230750,2024-01-27,Milan,Bologna,Juan Luca Sacchi
-4230748,2024-01-28,Lazio,Napoli,Luca Pairetto
-4230747,2024-01-28,Genoa,Lecce,Matteo Marchetti
-4230752,2024-01-28,Verona,Frosinone,Federico La Penna
+4230744,2024-01-27,Atalanta,Udinese,
+4230751,2024-01-27,Juventus,Empoli,Francesco Fourneau
 4230749,2024-01-28,Monza,Sassuolo,
 4230746,2024-01-28,Fiorentina,Inter,Maurizio Mariani
+4230747,2024-01-28,Genoa,Lecce,Matteo Marchetti
+4230752,2024-01-28,Verona,Frosinone,Federico La Penna
+4230748,2024-01-28,Lazio,Napoli,Luca Pairetto
 4230753,2024-01-29,Salernitana,Roma,Marco Di Bello
 4230760,2024-02-02,Lecce,Fiorentina,
-4230755,2024-02-03,Bologna,Sassuolo,Marco Di Bello
-4230757,2024-02-03,Frosinone,Milan,Luca Pairetto
-4230762,2024-02-03,Udinese,Monza,Claudio Giuseppe Allegretta
 4230756,2024-02-03,Empoli,Genoa,Federico Dionisi
-4230761,2024-02-04,Napoli,Verona,Andrea Colombo
+4230755,2024-02-03,Bologna,Sassuolo,Marco Di Bello
+4230762,2024-02-03,Udinese,Monza,Claudio Giuseppe Allegretta
+4230757,2024-02-03,Frosinone,Milan,Luca Pairetto
 4230763,2024-02-04,Torino,Salernitana,Daniele Chiffi
-4230758,2024-02-04,Inter,Juventus,
 4230754,2024-02-04,Atalanta,Lazio,
+4230758,2024-02-04,Inter,Juventus,
+4230761,2024-02-04,Napoli,Verona,Andrea Colombo
 4230759,2024-02-05,Roma,Cagliari,Ermanno Feliciani
 4230771,2024-02-09,Salernitana,Empoli,Maurizio Mariani
 4230765,2024-02-10,Cagliari,Lazio,Andrea Colombo
 4230773,2024-02-10,Roma,Inter,Davide Massa
 4230769,2024-02-10,Sassuolo,Torino,
 4230764,2024-02-11,Bologna,Lecce,Luca Pairetto
-4230768,2024-02-11,Milan,Napoli,
 4230766,2024-02-11,Fiorentina,Frosinone,
+4230768,2024-02-11,Milan,Napoli,
 4230770,2024-02-11,Genoa,Atalanta,
 4230772,2024-02-11,Monza,Verona,Davide Massa
 4230767,2024-02-12,Juventus,Udinese,
 4230734,2024-02-14,Bologna,Fiorentina,
-4230778,2024-02-16,Inter,Salernitana,Marco Piccinini
 4230782,2024-02-16,Torino,Lecce,Ermanno Feliciani
+4230778,2024-02-16,Inter,Salernitana,Marco Piccinini
 4230774,2024-02-17,Atalanta,Sassuolo,Valerio Crezzini
-4230781,2024-02-17,Napoli,Genoa,Marco Di Bello
 4230777,2024-02-17,Verona,Juventus,Giovanni Ayroldi
+4230781,2024-02-17,Napoli,Genoa,Marco Di Bello
 4230780,2024-02-18,Udinese,Cagliari,Gianluca Manganiello
-4230776,2024-02-18,Frosinone,Roma,
-4230783,2024-02-18,Monza,Milan,
-4230775,2024-02-18,Empoli,Fiorentina,Antonio Rapuano
 4230779,2024-02-18,Lazio,Bologna,
+4230775,2024-02-18,Empoli,Fiorentina,Antonio Rapuano
+4230783,2024-02-18,Monza,Milan,
+4230776,2024-02-18,Frosinone,Roma,
 4230741,2024-02-22,Torino,Lazio,Daniele Chiffi
 4230784,2024-02-23,Bologna,Verona,Giuseppe Mucera
 4230790,2024-02-24,Sassuolo,Empoli,
-4230787,2024-02-24,Genoa,Udinese,
 4230793,2024-02-24,Salernitana,Monza,Michael Fabbri
-4230792,2024-02-25,Lecce,Inter,
-4230789,2024-02-25,Milan,Atalanta,Daniele Chiffi
-4230791,2024-02-25,Juventus,Frosinone,Giovanni Ayroldi
+4230787,2024-02-24,Genoa,Udinese,
 4230785,2024-02-25,Cagliari,Napoli,
+4230792,2024-02-25,Lecce,Inter,
+4230791,2024-02-25,Juventus,Frosinone,Giovanni Ayroldi
+4230789,2024-02-25,Milan,Atalanta,Daniele Chiffi
 4230786,2024-02-26,Fiorentina,Lazio,
 4230788,2024-02-26,Roma,Torino,
 4230743,2024-02-28,Sassuolo,Napoli,Marco Guida
 4230736,2024-02-28,Inter,Atalanta,Fabio Maresca
 4230797,2024-03-01,Lazio,Milan,Matteo Marcenaro
 4230803,2024-03-02,Udinese,Salernitana,Francesco Cosso
-4230800,2024-03-02,Torino,Fiorentina,Davide Massa
 4230798,2024-03-02,Monza,Roma,Giuseppe Collu
-4230799,2024-03-03,Empoli,Cagliari,Federico La Penna
+4230800,2024-03-02,Torino,Fiorentina,Davide Massa
+4230802,2024-03-03,Napoli,Juventus,Simone Sozza
+4230795,2024-03-03,Frosinone,Lecce,Rosario Abisso
 4230794,2024-03-03,Atalanta,Bologna,
 4230796,2024-03-03,Verona,Sassuolo,Livio Marinelli
-4230795,2024-03-03,Frosinone,Lecce,Rosario Abisso
-4230802,2024-03-03,Napoli,Juventus,Simone Sozza
+4230799,2024-03-03,Empoli,Cagliari,Federico La Penna
 4230801,2024-03-04,Inter,Genoa,Giovanni Ayroldi
 4230813,2024-03-08,Napoli,Torino,Marco Di Bello
-4230804,2024-03-09,Bologna,Inter,Daniele Doveri
-4230819,2024-03-09,Sassuolo,Frosinone,Matteo Marchetti
-4230805,2024-03-09,Cagliari,Salernitana,Francesco Fourneau
 4230809,2024-03-09,Genoa,Monza,
-4230815,2024-03-10,Juventus,Atalanta,Luca Zufferli
+4230804,2024-03-09,Bologna,Inter,Daniele Doveri
+4230805,2024-03-09,Cagliari,Salernitana,Francesco Fourneau
+4230819,2024-03-09,Sassuolo,Frosinone,Matteo Marchetti
 4230817,2024-03-10,Milan,Empoli,Luca Pairetto
 4230806,2024-03-10,Fiorentina,Roma,Matteo Marcenaro
 4230821,2024-03-10,Lecce,Verona,Davide Massa
+4230815,2024-03-10,Juventus,Atalanta,Luca Zufferli
 4230811,2024-03-11,Lazio,Udinese,Paride Tremolada
 4230829,2024-03-15,Empoli,Bologna,Matteo Marcenaro
 4230832,2024-03-16,Salernitana,Lecce,Fabio Maresca
+4230825,2024-03-16,Frosinone,Lazio,
 4230830,2024-03-16,Monza,Cagliari,Andrea Calzavara
 4230833,2024-03-16,Udinese,Torino,Valerio Crezzini
-4230825,2024-03-16,Frosinone,Lazio,
-4230827,2024-03-17,Inter,Napoli,
 4230826,2024-03-17,Verona,Milan,Daniele Chiffi
 4230831,2024-03-17,Juventus,Genoa,Daniele Doveri
 4230828,2024-03-17,Roma,Sassuolo,Marco Di Bello
-4230839,2024-03-30,Napoli,Atalanta,
-4230836,2024-03-30,Fiorentina,Milan,
-4230841,2024-03-30,Genoa,Frosinone,Antonio Rapuano
+4230827,2024-03-17,Inter,Napoli,
 4230843,2024-03-30,Torino,Monza,Matteo Marchetti
+4230836,2024-03-30,Fiorentina,Milan,
 4230842,2024-03-30,Lazio,Juventus,Davide Massa
-4230834,2024-04-01,Bologna,Salernitana,Ermanno Feliciani
-4230838,2024-04-01,Sassuolo,Udinese,
+4230839,2024-03-30,Napoli,Atalanta,
+4230841,2024-03-30,Genoa,Frosinone,Antonio Rapuano
 4230835,2024-04-01,Cagliari,Verona,Andrea Zanotti
+4230834,2024-04-01,Bologna,Salernitana,Ermanno Feliciani
 4230840,2024-04-01,Inter,Empoli,Ermanno Feliciani
 4230837,2024-04-01,Lecce,Roma,Daniele Chiffi
+4230838,2024-04-01,Sassuolo,Udinese,
 4230810,2024-04-05,Salernitana,Sassuolo,Antonio Rapuano
 4230824,2024-04-06,Milan,Lecce,Federico La Penna
-4230822,2024-04-06,Roma,Lazio,
 4230807,2024-04-06,Empoli,Torino,Daniele Chiffi
+4230822,2024-04-06,Roma,Lazio,
 4230816,2024-04-07,Juventus,Fiorentina,Andrea Colombo
-4230808,2024-04-07,Monza,Napoli,Giovanni Ayroldi
-4230818,2024-04-07,Verona,Genoa,Matteo Marchetti
 4230812,2024-04-07,Cagliari,Atalanta,Alberto Arena
 4230814,2024-04-07,Frosinone,Bologna,
+4230818,2024-04-07,Verona,Genoa,Matteo Marchetti
+4230808,2024-04-07,Monza,Napoli,Giovanni Ayroldi
 4230820,2024-04-08,Udinese,Inter,Luca Pairetto
 4230847,2024-04-12,Lazio,Salernitana,Luca Zufferli
 4230849,2024-04-13,Lecce,Empoli,Daniele Chiffi
-4230851,2024-04-13,Torino,Juventus,
 4230845,2024-04-13,Bologna,Monza,Andrea Zanotti
-4230850,2024-04-14,Napoli,Frosinone,Ermanno Feliciani
+4230851,2024-04-13,Torino,Juventus,
 4230848,2024-04-14,Inter,Cagliari,
+4230850,2024-04-14,Napoli,Frosinone,Ermanno Feliciani
 4230852,2024-04-14,Sassuolo,Milan,Francesco Fourneau
 4230846,2024-04-15,Fiorentina,Genoa,Fabio Maresca
 4230844,2024-04-15,Atalanta,Verona,Giovanni Ayroldi
-4230856,2024-04-19,Genoa,Lazio,Ermanno Feliciani
 4230854,2024-04-19,Cagliari,Juventus,Matteo Marcenaro
-4230857,2024-04-20,Verona,Udinese,Gianluca Manganiello
+4230856,2024-04-19,Genoa,Lazio,Ermanno Feliciani
 4230855,2024-04-20,Empoli,Napoli,Michael Fabbri
+4230857,2024-04-20,Verona,Udinese,Gianluca Manganiello
 4230863,2024-04-21,Sassuolo,Lecce,
-4230860,2024-04-21,Salernitana,Fiorentina,Matteo Marchetti
-4230861,2024-04-21,Torino,Frosinone,Giuseppe Mucera
 4230858,2024-04-21,Monza,Atalanta,Claudio Giuseppe Allegretta
-4230862,2024-04-22,Milan,Inter,Marco Guida
+4230861,2024-04-21,Torino,Frosinone,Giuseppe Mucera
+4230860,2024-04-21,Salernitana,Fiorentina,Matteo Marchetti
 4230859,2024-04-22,Roma,Bologna,
+4230862,2024-04-22,Milan,Inter,Marco Guida
 4230853,2024-04-25,Udinese,Roma,Fabio Maresca
 4230867,2024-04-26,Frosinone,Salernitana,
-4230870,2024-04-27,Lecce,Monza,Valerio Crezzini
 4230869,2024-04-27,Juventus,Milan,
+4230870,2024-04-27,Lecce,Monza,Valerio Crezzini
 4230873,2024-04-27,Lazio,Verona,Marco Guida
-4230871,2024-04-28,Napoli,Roma,Andrea Colombo
 4230864,2024-04-28,Atalanta,Empoli,Maurizio Mariani
-4230868,2024-04-28,Inter,Torino,
 4230866,2024-04-28,Fiorentina,Sassuolo,Matteo Marcenaro
 4230865,2024-04-28,Bologna,Udinese,Livio Marinelli
+4230868,2024-04-28,Inter,Torino,
+4230871,2024-04-28,Napoli,Roma,Andrea Colombo
 4230872,2024-04-29,Genoa,Cagliari,
 4230877,2024-05-03,Torino,Bologna,Marco Guida
-4230882,2024-05-04,Monza,Lazio,Giuseppe Collu
 4230880,2024-05-04,Sassuolo,Inter,
-4230875,2024-05-05,Empoli,Frosinone,
-4230878,2024-05-05,Verona,Fiorentina,Marco Guida
+4230882,2024-05-04,Monza,Lazio,Giuseppe Collu
 4230881,2024-05-05,Roma,Juventus,
 4230879,2024-05-05,Milan,Genoa,Davide Massa
+4230878,2024-05-05,Verona,Fiorentina,Marco Guida
 4230874,2024-05-05,Cagliari,Lecce,Juan Luca Sacchi
+4230875,2024-05-05,Empoli,Frosinone,
 4230876,2024-05-06,Salernitana,Atalanta,Ermanno Feliciani
 4230883,2024-05-06,Udinese,Napoli,
 4230886,2024-05-10,Frosinone,Inter,
 4230892,2024-05-11,Milan,Cagliari,Marco Di Bello
 4230891,2024-05-11,Napoli,Bologna,Kevin Bonacina
-4230887,2024-05-12,Genoa,Sassuolo,Maria Ferrieri Caputi
-4230884,2024-05-12,Atalanta,Roma,
-4230893,2024-05-12,Lazio,Empoli,Andrea Colombo
 4230889,2024-05-12,Juventus,Salernitana,Alberto Santoro
 4230888,2024-05-12,Verona,Torino,Kevin Bonacina
+4230893,2024-05-12,Lazio,Empoli,Andrea Colombo
+4230887,2024-05-12,Genoa,Sassuolo,Maria Ferrieri Caputi
+4230884,2024-05-12,Atalanta,Roma,
 4230885,2024-05-13,Fiorentina,Monza,Daniele Doveri
 4230890,2024-05-13,Lecce,Udinese,Marco Guida
 4230895,2024-05-17,Fiorentina,Napoli,
-4230897,2024-05-18,Lecce,Atalanta,Mattia Drigo
 4230903,2024-05-18,Torino,Milan,
-4230898,2024-05-19,Sassuolo,Cagliari,
+4230897,2024-05-18,Lecce,Atalanta,Mattia Drigo
 4230899,2024-05-19,Udinese,Empoli,Daniele Doveri
-4230901,2024-05-19,Roma,Genoa,Rosario Abisso
-4230896,2024-05-19,Inter,Lazio,
 4230900,2024-05-19,Monza,Frosinone,
+4230896,2024-05-19,Inter,Lazio,
+4230901,2024-05-19,Roma,Genoa,Rosario Abisso
+4230898,2024-05-19,Sassuolo,Cagliari,
 4230902,2024-05-20,Salernitana,Verona,Marco Di Bello
 4230894,2024-05-20,Bologna,Juventus,
 4230905,2024-05-23,Cagliari,Fiorentina,
 4230912,2024-05-24,Genoa,Bologna,
-4230909,2024-05-25,Juventus,Monza,
 4230911,2024-05-25,Milan,Salernitana,Davide Di Marco
+4230909,2024-05-25,Juventus,Monza,
+4230910,2024-05-26,Lazio,Sassuolo,Luca Zufferli
+4230907,2024-05-26,Frosinone,Udinese,
+4230904,2024-05-26,Atalanta,Torino,
+4230906,2024-05-26,Empoli,Roma,Marco Di Bello
 4230908,2024-05-26,Verona,Inter,Andrea Calzavara
 4230913,2024-05-26,Napoli,Lecce,
-4230906,2024-05-26,Empoli,Roma,Marco Di Bello
-4230904,2024-05-26,Atalanta,Torino,
-4230907,2024-05-26,Frosinone,Udinese,
-4230910,2024-05-26,Lazio,Sassuolo,Luca Zufferli
 4230823,2024-06-02,Atalanta,Fiorentina,Federico La Penna
-4535247,2024-08-17,Genoa,Inter,Giovanni Ayroldi
-4535253,2024-08-17,Parma,Fiorentina,
-4535252,2024-08-17,Milan,Torino,
 4535246,2024-08-17,Empoli,Monza,Matteo Marcenaro
+4535247,2024-08-17,Genoa,Inter,Giovanni Ayroldi
+4535252,2024-08-17,Milan,Torino,
+4535253,2024-08-17,Parma,Fiorentina,
 4535248,2024-08-18,Verona,Napoli,Andrea Colombo
-4535250,2024-08-18,Lazio,Venezia,
-4535245,2024-08-18,Cagliari,Roma,Ermanno Feliciani
 4535244,2024-08-18,Bologna,Udinese,Livio Marinelli
-4535251,2024-08-19,Lecce,Atalanta,Mattia Drigo
+4535245,2024-08-18,Cagliari,Roma,Ermanno Feliciani
+4535250,2024-08-18,Lazio,Venezia,
 4535249,2024-08-19,Juventus,Como,Maurizio Mariani
-4535264,2024-08-24,Monza,Genoa,
-4535263,2024-08-24,Inter,Lecce,
+4535251,2024-08-19,Lecce,Atalanta,Mattia Drigo
 4535269,2024-08-24,Udinese,Lazio,Paride Tremolada
+4535264,2024-08-24,Monza,Genoa,
 4535266,2024-08-24,Parma,Milan,
-4535267,2024-08-25,Roma,Empoli,Marco Di Bello
-4535261,2024-08-25,Fiorentina,Venezia,Francesco Fourneau
+4535263,2024-08-24,Inter,Lecce,
 4535265,2024-08-25,Napoli,Bologna,Kevin Bonacina
+4535261,2024-08-25,Fiorentina,Venezia,Francesco Fourneau
+4535267,2024-08-25,Roma,Empoli,Marco Di Bello
 4535268,2024-08-25,Torino,Atalanta,
 4535262,2024-08-26,Verona,Juventus,Giovanni Ayroldi
 4535260,2024-08-26,Cagliari,Como,Andrea Calzavara
-4535279,2024-08-30,Venezia,Torino,
 4535273,2024-08-30,Inter,Atalanta,Fabio Maresca
-4535277,2024-08-31,Napoli,Parma,
+4535279,2024-08-30,Venezia,Torino,
 4535275,2024-08-31,Lazio,Milan,Matteo Marcenaro
 4535270,2024-08-31,Bologna,Empoli,Matteo Marcenaro
+4535277,2024-08-31,Napoli,Parma,
 4535276,2024-08-31,Lecce,Cagliari,Juan Luca Sacchi
-4535278,2024-09-01,Udinese,Como,Alberto Arena
 4535274,2024-09-01,Juventus,Roma,
-4535272,2024-09-01,Genoa,Verona,Matteo Marchetti
 4535271,2024-09-01,Fiorentina,Monza,Daniele Doveri
-4535283,2024-09-14,Empoli,Juventus,Francesco Fourneau
+4535272,2024-09-01,Genoa,Verona,Matteo Marchetti
+4535278,2024-09-01,Udinese,Como,Alberto Arena
 4535286,2024-09-14,Milan,Venezia,Gianluca Manganiello
 4535282,2024-09-14,Como,Bologna,
-4535281,2024-09-15,Cagliari,Napoli,
-4535284,2024-09-15,Genoa,Roma,Rosario Abisso
-4535289,2024-09-15,Torino,Lecce,Ermanno Feliciani
+4535283,2024-09-14,Empoli,Juventus,Francesco Fourneau
 4535280,2024-09-15,Atalanta,Fiorentina,Federico La Penna
 4535287,2024-09-15,Monza,Inter,Livio Marinelli
+4535289,2024-09-15,Torino,Lecce,Ermanno Feliciani
+4535281,2024-09-15,Cagliari,Napoli,
+4535284,2024-09-15,Genoa,Roma,Rosario Abisso
 4535288,2024-09-16,Parma,Udinese,Davide Massa
 4535285,2024-09-16,Lazio,Verona,Marco Guida
-4535293,2024-09-20,Verona,Torino,Kevin Bonacina
 4535291,2024-09-20,Cagliari,Empoli,Federico La Penna
-4535295,2024-09-21,Juventus,Napoli,Simone Sozza
+4535293,2024-09-20,Verona,Torino,Kevin Bonacina
 4535299,2024-09-21,Venezia,Genoa,Simone Sozza
 4535296,2024-09-21,Lecce,Parma,
-4535294,2024-09-22,Inter,Milan,Marco Guida
-4535292,2024-09-22,Fiorentina,Lazio,
+4535295,2024-09-21,Juventus,Napoli,Simone Sozza
 4535298,2024-09-22,Roma,Udinese,Fabio Maresca
+4535292,2024-09-22,Fiorentina,Lazio,
+4535294,2024-09-22,Inter,Milan,Marco Guida
 4535297,2024-09-22,Monza,Bologna,Andrea Zanotti
 4535290,2024-09-24,Atalanta,Como,
 4535304,2024-09-27,Milan,Lecce,Federico La Penna
 4535300,2024-09-28,Bologna,Atalanta,
-4535309,2024-09-28,Udinese,Inter,Luca Pairetto
 4535303,2024-09-28,Genoa,Juventus,Daniele Doveri
-4535307,2024-09-29,Roma,Venezia,
+4535309,2024-09-28,Udinese,Inter,Luca Pairetto
 4535302,2024-09-29,Empoli,Fiorentina,Antonio Rapuano
-4535305,2024-09-29,Napoli,Monza,Giovanni Ayroldi
+4535307,2024-09-29,Roma,Venezia,
 4535301,2024-09-29,Como,Verona,Marco Di Bello
 4535308,2024-09-29,Torino,Lazio,Daniele Chiffi
+4535305,2024-09-29,Napoli,Monza,Giovanni Ayroldi
 4535306,2024-09-30,Parma,Cagliari,
 4535353,2024-10-04,Verona,Venezia,Andrea Calzavara
 4535358,2024-10-04,Napoli,Como,
-4535359,2024-10-05,Udinese,Lecce,Marco Guida
 4535354,2024-10-05,Inter,Torino,
+4535359,2024-10-05,Udinese,Lecce,Marco Guida
 4535350,2024-10-05,Atalanta,Genoa,
-4535355,2024-10-06,Juventus,Cagliari,Matteo Marcenaro
-4535357,2024-10-06,Monza,Roma,Giuseppe Collu
-4535356,2024-10-06,Lazio,Empoli,Andrea Colombo
-4535352,2024-10-06,Fiorentina,Milan,
 4535351,2024-10-06,Bologna,Parma,Luca Zufferli
-4535361,2024-10-19,Como,Parma,Giuseppe Mucera
+4535357,2024-10-06,Monza,Roma,Giuseppe Collu
+4535352,2024-10-06,Fiorentina,Milan,
+4535355,2024-10-06,Juventus,Cagliari,Matteo Marcenaro
+4535356,2024-10-06,Lazio,Empoli,Andrea Colombo
 4535363,2024-10-19,Genoa,Bologna,
-4535367,2024-10-19,Milan,Udinese,Matteo Marcenaro
 4535365,2024-10-19,Juventus,Lazio,Davide Massa
-4535368,2024-10-20,Roma,Inter,Davide Massa
-4535366,2024-10-20,Lecce,Fiorentina,
-4535360,2024-10-20,Cagliari,Torino,
+4535361,2024-10-19,Como,Parma,Giuseppe Mucera
+4535367,2024-10-19,Milan,Udinese,Matteo Marcenaro
 4535369,2024-10-20,Venezia,Atalanta,Paride Tremolada
 4535362,2024-10-20,Empoli,Napoli,Michael Fabbri
+4535366,2024-10-20,Lecce,Fiorentina,
+4535360,2024-10-20,Cagliari,Torino,
+4535368,2024-10-20,Roma,Inter,Davide Massa
 4535364,2024-10-21,Verona,Monza,Davide Massa
 4535418,2024-10-25,Torino,Como,Giuseppe Collu
 4535419,2024-10-25,Udinese,Cagliari,Gianluca Manganiello
 4535416,2024-10-26,Napoli,Lecce,
 4535410,2024-10-26,Atalanta,Verona,Giovanni Ayroldi
-4535413,2024-10-27,Inter,Juventus,
-4535417,2024-10-27,Parma,Empoli,Michael Fabbri
-4535415,2024-10-27,Monza,Venezia,
-4535414,2024-10-27,Lazio,Genoa,Ermanno Feliciani
 4535412,2024-10-27,Fiorentina,Roma,Matteo Marcenaro
+4535414,2024-10-27,Lazio,Genoa,Ermanno Feliciani
+4535415,2024-10-27,Monza,Venezia,
+4535417,2024-10-27,Parma,Empoli,Michael Fabbri
+4535413,2024-10-27,Inter,Juventus,
+4535421,2024-10-29,Cagliari,Bologna,Kevin Bonacina
 4535427,2024-10-29,Milan,Napoli,
 4535426,2024-10-29,Lecce,Verona,Davide Massa
-4535421,2024-10-29,Cagliari,Bologna,Kevin Bonacina
-4535423,2024-10-30,Empoli,Inter,Ermanno Feliciani
-4535429,2024-10-30,Venezia,Udinese,Juan Luca Sacchi
 4535420,2024-10-30,Atalanta,Monza,Claudio Giuseppe Allegretta
+4535423,2024-10-30,Empoli,Inter,Ermanno Feliciani
 4535425,2024-10-30,Juventus,Parma,Francesco Fourneau
+4535429,2024-10-30,Venezia,Udinese,Juan Luca Sacchi
+4535422,2024-10-31,Como,Lazio,
 4535424,2024-10-31,Genoa,Fiorentina,Fabio Maresca
 4535428,2024-10-31,Roma,Torino,
-4535422,2024-10-31,Como,Lazio,
 4535370,2024-11-02,Bologna,Lecce,Luca Pairetto
-4535375,2024-11-02,Monza,Milan,
 4535379,2024-11-02,Udinese,Juventus,
-4535372,2024-11-03,Verona,Roma,
+4535375,2024-11-02,Monza,Milan,
 4535376,2024-11-03,Napoli,Atalanta,
-4535378,2024-11-03,Torino,Fiorentina,Davide Massa
+4535372,2024-11-03,Verona,Roma,
 4535373,2024-11-03,Inter,Venezia,Luca Pairetto
+4535378,2024-11-03,Torino,Fiorentina,Davide Massa
 4535377,2024-11-04,Parma,Genoa,
 4535374,2024-11-04,Lazio,Cagliari,Andrea Colombo
 4535371,2024-11-04,Empoli,Como,Maurizio Mariani
 4535383,2024-11-07,Genoa,Como,Marco Guida
 4535386,2024-11-08,Lecce,Empoli,Daniele Chiffi
-4535385,2024-11-09,Juventus,Torino,
-4535381,2024-11-09,Cagliari,Milan,Marco Di Bello
 4535389,2024-11-09,Venezia,Parma,
-4535382,2024-11-10,Fiorentina,Verona,Marco Guida
+4535381,2024-11-09,Cagliari,Milan,Marco Di Bello
+4535385,2024-11-09,Juventus,Torino,
 4535387,2024-11-10,Monza,Lazio,Giuseppe Collu
 4535388,2024-11-10,Roma,Bologna,
-4535384,2024-11-10,Inter,Napoli,
+4535382,2024-11-10,Fiorentina,Verona,Marco Guida
 4535380,2024-11-10,Atalanta,Udinese,
-4535397,2024-11-23,Parma,Atalanta,Valerio Crezzini
+4535384,2024-11-10,Inter,Napoli,
 4535393,2024-11-23,Verona,Inter,Andrea Calzavara
 4535395,2024-11-23,Milan,Juventus,
+4535397,2024-11-23,Parma,Atalanta,Valerio Crezzini
 4535396,2024-11-24,Napoli,Roma,Andrea Colombo
 4535398,2024-11-24,Torino,Monza,Matteo Marchetti
-4535390,2024-11-24,Como,Fiorentina,Marco Di Bello
-4535394,2024-11-24,Lazio,Bologna,
 4535392,2024-11-24,Genoa,Cagliari,
+4535394,2024-11-24,Lazio,Bologna,
+4535390,2024-11-24,Como,Fiorentina,Marco Di Bello
 4535399,2024-11-25,Venezia,Lecce,Antonio Rapuano
 4535391,2024-11-25,Empoli,Udinese,Daniele Doveri
 4535401,2024-11-29,Cagliari,Verona,Andrea Zanotti
 4535405,2024-11-30,Milan,Empoli,Luca Pairetto
-4535402,2024-11-30,Como,Monza,
 4535400,2024-11-30,Bologna,Venezia,Andrea Colombo
-4535409,2024-12-01,Udinese,Genoa,
+4535402,2024-11-30,Como,Monza,
 4535404,2024-12-01,Lecce,Juventus,Fabio Maresca
-4535406,2024-12-01,Parma,Lazio,Alberto Arena
+4535409,2024-12-01,Udinese,Genoa,
 4535408,2024-12-01,Torino,Napoli,Marco Di Bello
+4535406,2024-12-01,Parma,Lazio,Alberto Arena
 4535407,2024-12-02,Roma,Atalanta,
 4535532,2024-12-06,Atalanta,Milan,Daniele Chiffi
 4535536,2024-12-06,Inter,Parma,Kevin Bonacina
-4535537,2024-12-07,Juventus,Bologna,
 4535540,2024-12-07,Roma,Lecce,Daniele Chiffi
 4535534,2024-12-07,Genoa,Torino,
-4535541,2024-12-08,Venezia,Como,Maria Ferrieri Caputi
-4535539,2024-12-08,Napoli,Lazio,Luca Pairetto
+4535537,2024-12-07,Juventus,Bologna,
 4535533,2024-12-08,Fiorentina,Cagliari,
 4535535,2024-12-08,Verona,Empoli,
+4535539,2024-12-08,Napoli,Lazio,Luca Pairetto
+4535541,2024-12-08,Venezia,Como,Maria Ferrieri Caputi
 4535538,2024-12-09,Monza,Udinese,Claudio Giuseppe Allegretta
 4535545,2024-12-13,Empoli,Torino,Daniele Chiffi
 4535546,2024-12-14,Juventus,Venezia,Alberto Arena
@@ -533,149 +533,149 @@ id,Date,HomeTeam,AwayTeam,Referee
 4535551,2024-12-14,Udinese,Napoli,
 4535544,2024-12-15,Como,Roma,Michael Fabbri
 4535542,2024-12-15,Bologna,Fiorentina,
-4535550,2024-12-15,Parma,Verona,Luca Pairetto
 4535549,2024-12-15,Milan,Genoa,Davide Massa
+4535550,2024-12-15,Parma,Verona,Luca Pairetto
 4535548,2024-12-15,Lecce,Monza,Valerio Crezzini
 4535547,2024-12-16,Lazio,Inter,
 4535555,2024-12-20,Verona,Milan,Daniele Chiffi
 4535557,2024-12-21,Lecce,Lazio,Matteo Marcenaro
-4535560,2024-12-21,Torino,Bologna,Marco Guida
 4535554,2024-12-21,Genoa,Napoli,Marco Di Bello
-4535558,2024-12-22,Monza,Juventus,
+4535560,2024-12-21,Torino,Bologna,Marco Guida
 4535552,2024-12-22,Atalanta,Empoli,Maurizio Mariani
 4535561,2024-12-22,Venezia,Cagliari,
+4535558,2024-12-22,Monza,Juventus,
 4535559,2024-12-22,Roma,Parma,Simone Sozza
 4535556,2024-12-23,Inter,Como,Daniele Chiffi
 4535553,2024-12-23,Fiorentina,Udinese,Federico La Penna
-4535567,2024-12-28,Lazio,Atalanta,
-4535570,2024-12-28,Parma,Monza,Federico La Penna
 4535565,2024-12-28,Empoli,Genoa,Federico Dionisi
 4535563,2024-12-28,Cagliari,Inter,
+4535567,2024-12-28,Lazio,Atalanta,
+4535570,2024-12-28,Parma,Monza,Federico La Penna
 4535571,2024-12-29,Udinese,Torino,Valerio Crezzini
-4535568,2024-12-29,Milan,Roma,
-4535569,2024-12-29,Napoli,Venezia,Juan Luca Sacchi
 4535566,2024-12-29,Juventus,Fiorentina,Andrea Colombo
-4535562,2024-12-30,Bologna,Verona,Giuseppe Mucera
+4535569,2024-12-29,Napoli,Venezia,Juan Luca Sacchi
+4535568,2024-12-29,Milan,Roma,
 4535564,2024-12-30,Como,Lecce,
+4535562,2024-12-30,Bologna,Verona,Giuseppe Mucera
 4535581,2025-01-04,Venezia,Empoli,Mario Perri
-4535574,2025-01-04,Fiorentina,Napoli,
 4535575,2025-01-04,Verona,Udinese,Gianluca Manganiello
+4535574,2025-01-04,Fiorentina,Napoli,
 4535577,2025-01-05,Lecce,Genoa,Matteo Marchetti
 4535579,2025-01-05,Roma,Lazio,
-4535578,2025-01-05,Monza,Cagliari,Andrea Calzavara
 4535580,2025-01-05,Torino,Parma,Giovanni Ayroldi
+4535578,2025-01-05,Monza,Cagliari,Andrea Calzavara
 4535313,2025-01-10,Lazio,Como,
-4535317,2025-01-11,Torino,Juventus,
-4535318,2025-01-11,Udinese,Atalanta,
 4535311,2025-01-11,Empoli,Lecce,Daniele Chiffi
 4535314,2025-01-11,Milan,Cagliari,Marco Di Bello
-4535310,2025-01-12,Bologna,Roma,
+4535317,2025-01-11,Torino,Juventus,
+4535318,2025-01-11,Udinese,Atalanta,
 4535312,2025-01-12,Genoa,Parma,
 4535316,2025-01-12,Napoli,Verona,Andrea Colombo
+4535310,2025-01-12,Bologna,Roma,
 4535319,2025-01-12,Venezia,Inter,Luca Pairetto
 4535315,2025-01-13,Monza,Fiorentina,Daniele Doveri
-4535572,2025-01-14,Atalanta,Juventus,Luca Zufferli
 4535573,2025-01-14,Como,Milan,
+4535572,2025-01-14,Atalanta,Juventus,Luca Zufferli
 4535576,2025-01-15,Inter,Bologna,Daniele Doveri
 4535329,2025-01-17,Roma,Genoa,Rosario Abisso
+4535327,2025-01-18,Juventus,Milan,
 4535321,2025-01-18,Bologna,Monza,Andrea Zanotti
 4535320,2025-01-18,Atalanta,Napoli,
-4535327,2025-01-18,Juventus,Milan,
-4535325,2025-01-19,Verona,Lazio,Marco Guida
-4535328,2025-01-19,Parma,Venezia,
 4535322,2025-01-19,Cagliari,Lecce,Juan Luca Sacchi
-4535326,2025-01-19,Inter,Empoli,Ermanno Feliciani
 4535324,2025-01-19,Fiorentina,Torino,Davide Massa
+4535325,2025-01-19,Verona,Lazio,Marco Guida
+4535326,2025-01-19,Inter,Empoli,Ermanno Feliciani
+4535328,2025-01-19,Parma,Venezia,
 4535323,2025-01-20,Como,Udinese,Alberto Arena
 4535337,2025-01-24,Torino,Cagliari,
-4535331,2025-01-25,Empoli,Bologna,Matteo Marcenaro
-4535336,2025-01-25,Napoli,Juventus,Simone Sozza
 4535330,2025-01-25,Como,Atalanta,
+4535336,2025-01-25,Napoli,Juventus,Simone Sozza
+4535331,2025-01-25,Empoli,Bologna,Matteo Marcenaro
 4535334,2025-01-26,Lecce,Inter,
-4535338,2025-01-26,Udinese,Roma,Fabio Maresca
 4535335,2025-01-26,Milan,Parma,
+4535338,2025-01-26,Udinese,Roma,Fabio Maresca
 4535333,2025-01-26,Lazio,Fiorentina,
-4535332,2025-01-27,Genoa,Monza,
 4535339,2025-01-27,Venezia,Verona,Andrea Calzavara
+4535332,2025-01-27,Genoa,Monza,
 4535347,2025-01-31,Parma,Lecce,
-4535346,2025-02-01,Monza,Verona,Davide Massa
-4535349,2025-02-01,Udinese,Venezia,Juan Luca Sacchi
-4535341,2025-02-01,Bologna,Como,
 4535340,2025-02-01,Atalanta,Torino,
+4535349,2025-02-01,Udinese,Venezia,Juan Luca Sacchi
+4535346,2025-02-01,Monza,Verona,Davide Massa
+4535341,2025-02-01,Bologna,Como,
 4535348,2025-02-02,Roma,Napoli,Andrea Colombo
 4535344,2025-02-02,Juventus,Empoli,Francesco Fourneau
-4535343,2025-02-02,Fiorentina,Genoa,Fabio Maresca
 4535345,2025-02-02,Milan,Inter,Marco Guida
+4535343,2025-02-02,Fiorentina,Genoa,Fabio Maresca
 4535342,2025-02-03,Cagliari,Lazio,Andrea Colombo
 4535403,2025-02-06,Fiorentina,Inter,Maurizio Mariani
 4535431,2025-02-07,Como,Juventus,Maurizio Mariani
-4535432,2025-02-08,Empoli,Milan,Luca Pairetto
-4535433,2025-02-08,Verona,Atalanta,Giovanni Ayroldi
 4535437,2025-02-08,Torino,Genoa,
+4535433,2025-02-08,Verona,Atalanta,Giovanni Ayroldi
+4535432,2025-02-08,Empoli,Milan,Luca Pairetto
+4535439,2025-02-09,Lazio,Monza,Giuseppe Collu
 4535438,2025-02-09,Venezia,Roma,
+4535435,2025-02-09,Lecce,Bologna,Luca Pairetto
 4535430,2025-02-09,Cagliari,Parma,
 4535436,2025-02-09,Napoli,Udinese,
-4535435,2025-02-09,Lecce,Bologna,Luca Pairetto
-4535439,2025-02-09,Lazio,Monza,Giuseppe Collu
 4535434,2025-02-10,Inter,Fiorentina,Maurizio Mariani
 4535440,2025-02-14,Bologna,Torino,Marco Guida
 4535444,2025-02-15,Lazio,Napoli,Luca Pairetto
-4535449,2025-02-15,Atalanta,Cagliari,Alberto Arena
 4535445,2025-02-15,Milan,Verona,Daniele Chiffi
-4535448,2025-02-16,Udinese,Empoli,Daniele Doveri
+4535449,2025-02-15,Atalanta,Cagliari,Alberto Arena
 4535447,2025-02-16,Parma,Roma,Simone Sozza
-4535443,2025-02-16,Juventus,Inter,
-4535441,2025-02-16,Fiorentina,Como,Marco Di Bello
 4535446,2025-02-16,Monza,Lecce,Valerio Crezzini
+4535441,2025-02-16,Fiorentina,Como,Marco Di Bello
+4535443,2025-02-16,Juventus,Inter,
+4535448,2025-02-16,Udinese,Empoli,Daniele Doveri
 4535442,2025-02-17,Genoa,Venezia,Simone Sozza
 4535455,2025-02-21,Lecce,Udinese,Marco Guida
-4535456,2025-02-22,Parma,Bologna,Luca Zufferli
 4535459,2025-02-22,Venezia,Lazio,
 4535454,2025-02-22,Inter,Genoa,Giovanni Ayroldi
+4535456,2025-02-22,Parma,Bologna,Luca Zufferli
 4535458,2025-02-22,Torino,Milan,
-4535453,2025-02-23,Verona,Fiorentina,Marco Guida
 4535451,2025-02-23,Como,Napoli,
+4535453,2025-02-23,Verona,Fiorentina,Marco Guida
 4535452,2025-02-23,Empoli,Atalanta,Maurizio Mariani
 4535450,2025-02-23,Cagliari,Juventus,Matteo Marcenaro
 4535457,2025-02-24,Roma,Monza,Giuseppe Collu
 4535411,2025-02-27,Bologna,Milan,Juan Luca Sacchi
 4535462,2025-02-28,Fiorentina,Lecce,
 4535467,2025-03-01,Napoli,Inter,
-4535469,2025-03-01,Udinese,Parma,Davide Massa
 4535460,2025-03-01,Atalanta,Venezia,Paride Tremolada
+4535469,2025-03-01,Udinese,Parma,Davide Massa
 4535461,2025-03-02,Bologna,Cagliari,Kevin Bonacina
-4535468,2025-03-02,Roma,Como,Michael Fabbri
+4535465,2025-03-02,Milan,Lazio,Matteo Marcenaro
 4535466,2025-03-02,Monza,Torino,Matteo Marchetti
 4535463,2025-03-02,Genoa,Empoli,Federico Dionisi
-4535465,2025-03-02,Milan,Lazio,Matteo Marcenaro
+4535468,2025-03-02,Roma,Como,Michael Fabbri
 4535464,2025-03-03,Juventus,Verona,Giovanni Ayroldi
 4535470,2025-03-07,Cagliari,Genoa,
-4535477,2025-03-08,Lecce,Milan,Federico La Penna
-4535471,2025-03-08,Como,Venezia,Maria Ferrieri Caputi
 4535474,2025-03-08,Inter,Monza,Livio Marinelli
+4535477,2025-03-08,Lecce,Milan,Federico La Penna
 4535479,2025-03-08,Parma,Torino,Giovanni Ayroldi
-4535475,2025-03-09,Juventus,Atalanta,Luca Zufferli
-4535472,2025-03-09,Empoli,Roma,Marco Di Bello
+4535471,2025-03-08,Como,Venezia,Maria Ferrieri Caputi
 4535473,2025-03-09,Verona,Bologna,Giuseppe Mucera
 4535478,2025-03-09,Napoli,Fiorentina,
+4535472,2025-03-09,Empoli,Roma,Marco Di Bello
+4535475,2025-03-09,Juventus,Atalanta,Luca Zufferli
 4535476,2025-03-10,Lazio,Udinese,Paride Tremolada
 4535485,2025-03-14,Genoa,Lecce,Matteo Marchetti
+4535486,2025-03-15,Milan,Como,
 4535487,2025-03-15,Monza,Parma,Federico La Penna
 4535490,2025-03-15,Udinese,Verona,Gianluca Manganiello
 4535489,2025-03-15,Torino,Empoli,Daniele Chiffi
-4535486,2025-03-15,Milan,Como,
 4535484,2025-03-16,Fiorentina,Juventus,Andrea Colombo
 4535483,2025-03-16,Bologna,Lazio,
-4535482,2025-03-16,Atalanta,Inter,Fabio Maresca
-4535491,2025-03-16,Venezia,Napoli,Juan Luca Sacchi
 4535488,2025-03-16,Roma,Cagliari,Ermanno Feliciani
-4535499,2025-03-29,Lecce,Roma,Daniele Chiffi
-4535493,2025-03-29,Como,Empoli,Maurizio Mariani
+4535491,2025-03-16,Venezia,Napoli,Juan Luca Sacchi
+4535482,2025-03-16,Atalanta,Inter,Fabio Maresca
 4535501,2025-03-29,Venezia,Bologna,Andrea Colombo
 4535497,2025-03-29,Juventus,Genoa,Daniele Doveri
-4535494,2025-03-30,Fiorentina,Atalanta,Federico La Penna
-4535500,2025-03-30,Napoli,Milan,
+4535499,2025-03-29,Lecce,Roma,Daniele Chiffi
+4535493,2025-03-29,Como,Empoli,Maurizio Mariani
 4535492,2025-03-30,Cagliari,Monza,Andrea Calzavara
+4535500,2025-03-30,Napoli,Milan,
+4535494,2025-03-30,Fiorentina,Atalanta,Federico La Penna
 4535496,2025-03-30,Inter,Udinese,Luca Pairetto
 4535498,2025-03-31,Lazio,Torino,Daniele Chiffi
 4535495,2025-03-31,Verona,Parma,Luca Pairetto
@@ -683,130 +683,130 @@ id,Date,HomeTeam,AwayTeam,Referee
 4535509,2025-04-05,Parma,Inter,Kevin Bonacina
 4535507,2025-04-05,Milan,Fiorentina,
 4535508,2025-04-05,Monza,Como,
-4535510,2025-04-06,Roma,Juventus,
-4535511,2025-04-06,Torino,Verona,Kevin Bonacina
-4535504,2025-04-06,Empoli,Cagliari,Federico La Penna
-4535502,2025-04-06,Atalanta,Lazio,
 4535506,2025-04-06,Lecce,Venezia,Antonio Rapuano
+4535504,2025-04-06,Empoli,Cagliari,Federico La Penna
+4535511,2025-04-06,Torino,Verona,Kevin Bonacina
+4535502,2025-04-06,Atalanta,Lazio,
+4535510,2025-04-06,Roma,Juventus,
 4535503,2025-04-07,Bologna,Napoli,Kevin Bonacina
 4535520,2025-04-11,Udinese,Milan,Matteo Marcenaro
+4535521,2025-04-12,Venezia,Monza,
 4535517,2025-04-12,Juventus,Lecce,Fabio Maresca
 4535516,2025-04-12,Inter,Cagliari,
-4535521,2025-04-12,Venezia,Monza,
-4535514,2025-04-13,Fiorentina,Parma,
-4535518,2025-04-13,Lazio,Roma,
-4535515,2025-04-13,Verona,Genoa,Matteo Marchetti
 4535512,2025-04-13,Atalanta,Bologna,
+4535514,2025-04-13,Fiorentina,Parma,
+4535515,2025-04-13,Verona,Genoa,Matteo Marchetti
 4535513,2025-04-13,Como,Torino,Giuseppe Collu
+4535518,2025-04-13,Lazio,Roma,
 4535519,2025-04-14,Napoli,Empoli,Michael Fabbri
-4535528,2025-04-19,Monza,Napoli,Giovanni Ayroldi
 4535530,2025-04-19,Roma,Verona,
 4535526,2025-04-19,Lecce,Como,
+4535528,2025-04-19,Monza,Napoli,Giovanni Ayroldi
 4535527,2025-04-20,Milan,Atalanta,Daniele Chiffi
 4535524,2025-04-20,Empoli,Venezia,Mario Perri
 4535522,2025-04-20,Bologna,Inter,Daniele Doveri
 4535531,2025-04-23,Torino,Udinese,Valerio Crezzini
-4535523,2025-04-23,Cagliari,Fiorentina,
-4535525,2025-04-23,Genoa,Lazio,Ermanno Feliciani
 4535529,2025-04-23,Parma,Juventus,Francesco Fourneau
-4535587,2025-04-27,Juventus,Monza,
-4535589,2025-04-27,Napoli,Torino,Marco Di Bello
-4535584,2025-04-27,Fiorentina,Empoli,Antonio Rapuano
-4535583,2025-04-27,Como,Genoa,Marco Guida
-4535582,2025-04-27,Atalanta,Lecce,Mattia Drigo
-4535586,2025-04-27,Inter,Roma,Davide Massa
+4535525,2025-04-23,Genoa,Lazio,Ermanno Feliciani
+4535523,2025-04-23,Cagliari,Fiorentina,
 4535591,2025-04-27,Venezia,Milan,Gianluca Manganiello
-4535585,2025-04-28,Verona,Cagliari,Andrea Zanotti
+4535583,2025-04-27,Como,Genoa,Marco Guida
+4535584,2025-04-27,Fiorentina,Empoli,Antonio Rapuano
+4535586,2025-04-27,Inter,Roma,Davide Massa
+4535582,2025-04-27,Atalanta,Lecce,Mattia Drigo
+4535589,2025-04-27,Napoli,Torino,Marco Di Bello
+4535587,2025-04-27,Juventus,Monza,
 4535588,2025-04-28,Lazio,Parma,Alberto Arena
 4535590,2025-04-28,Udinese,Bologna,Livio Marinelli
+4535585,2025-04-28,Verona,Cagliari,Andrea Zanotti
 4535621,2025-05-02,Torino,Venezia,
 4535619,2025-05-03,Parma,Como,Giuseppe Mucera
 4535617,2025-05-03,Lecce,Napoli,
 4535613,2025-05-03,Cagliari,Udinese,Gianluca Manganiello
 4535616,2025-05-03,Inter,Verona,Andrea Calzavara
 4535618,2025-05-04,Monza,Atalanta,Claudio Giuseppe Allegretta
+4535612,2025-05-04,Bologna,Juventus,
 4535620,2025-05-04,Roma,Fiorentina,Matteo Marcenaro
 4535614,2025-05-04,Empoli,Lazio,Andrea Colombo
-4535612,2025-05-04,Bologna,Juventus,
 4535615,2025-05-05,Genoa,Milan,Davide Massa
 4535627,2025-05-09,Milan,Bologna,Juan Luca Sacchi
-4535626,2025-05-10,Lazio,Juventus,Davide Massa
 4535624,2025-05-10,Empoli,Parma,Michael Fabbri
 4535623,2025-05-10,Como,Cagliari,Andrea Calzavara
+4535626,2025-05-10,Lazio,Juventus,Davide Massa
 4535630,2025-05-11,Udinese,Monza,Claudio Giuseppe Allegretta
 4535625,2025-05-11,Verona,Lecce,Davide Massa
-4535628,2025-05-11,Napoli,Genoa,Marco Di Bello
 4535629,2025-05-11,Torino,Inter,
-4535631,2025-05-12,Venezia,Fiorentina,Francesco Fourneau
+4535628,2025-05-11,Napoli,Genoa,Marco Di Bello
 4535622,2025-05-12,Atalanta,Roma,
+4535631,2025-05-12,Venezia,Fiorentina,Francesco Fourneau
 4535594,2025-05-17,Genoa,Atalanta,
-4535599,2025-05-18,Monza,Empoli,Matteo Marcenaro
-4535595,2025-05-18,Verona,Como,Marco Di Bello
-4535601,2025-05-18,Roma,Milan,
-4535593,2025-05-18,Fiorentina,Bologna,
-4535598,2025-05-18,Lecce,Torino,Ermanno Feliciani
-4535600,2025-05-18,Parma,Napoli,
 4535597,2025-05-18,Juventus,Udinese,
-4535596,2025-05-18,Inter,Lazio,
+4535599,2025-05-18,Monza,Empoli,Matteo Marcenaro
+4535598,2025-05-18,Lecce,Torino,Ermanno Feliciani
+4535601,2025-05-18,Roma,Milan,
+4535595,2025-05-18,Verona,Como,Marco Di Bello
 4535592,2025-05-18,Cagliari,Venezia,
-4535604,2025-05-23,Como,Inter,Daniele Chiffi
+4535593,2025-05-18,Fiorentina,Bologna,
+4535600,2025-05-18,Parma,Napoli,
+4535596,2025-05-18,Inter,Lazio,
 4535608,2025-05-23,Napoli,Cagliari,
-4535607,2025-05-24,Milan,Monza,
+4535604,2025-05-23,Como,Inter,Daniele Chiffi
 4535603,2025-05-24,Bologna,Genoa,
-4535610,2025-05-25,Udinese,Fiorentina,Federico La Penna
-4535605,2025-05-25,Empoli,Verona,
+4535607,2025-05-24,Milan,Monza,
+4535611,2025-05-25,Venezia,Juventus,Alberto Arena
 4535609,2025-05-25,Torino,Roma,
+4535605,2025-05-25,Empoli,Verona,
+4535610,2025-05-25,Udinese,Fiorentina,Federico La Penna
 4535606,2025-05-25,Lazio,Lecce,Matteo Marcenaro
 4535602,2025-05-25,Atalanta,Parma,Valerio Crezzini
-4535611,2025-05-25,Venezia,Juventus,Alberto Arena
-4803040,2025-08-23,Genoa,Lecce,Matteo Marchetti
 4803045,2025-08-23,Sassuolo,Napoli,Marco Guida
 4803044,2025-08-23,Roma,Bologna,
 4803043,2025-08-23,Milan,Cremonese,Davide Massa
-4803042,2025-08-24,Juventus,Parma,Francesco Fourneau
-4803037,2025-08-24,Atalanta,Pisa,Matteo Marchetti
-4803039,2025-08-24,Como,Lazio,
+4803040,2025-08-23,Genoa,Lecce,Matteo Marchetti
 4803038,2025-08-24,Cagliari,Fiorentina,
+4803039,2025-08-24,Como,Lazio,
+4803037,2025-08-24,Atalanta,Pisa,Matteo Marchetti
+4803042,2025-08-24,Juventus,Parma,Francesco Fourneau
 4803041,2025-08-25,Inter,Torino,
 4803046,2025-08-25,Udinese,Verona,Gianluca Manganiello
 4803048,2025-08-29,Cremonese,Sassuolo,Giuseppe Collu
 4803052,2025-08-29,Lecce,Milan,Federico La Penna
-4803054,2025-08-30,Parma,Atalanta,Valerio Crezzini
-4803053,2025-08-30,Napoli,Cagliari,
-4803055,2025-08-30,Pisa,Roma,Ermanno Feliciani
 4803047,2025-08-30,Bologna,Como,
-4803049,2025-08-31,Genoa,Juventus,Daniele Doveri
+4803055,2025-08-30,Pisa,Roma,Ermanno Feliciani
+4803053,2025-08-30,Napoli,Cagliari,
+4803054,2025-08-30,Parma,Atalanta,Valerio Crezzini
+4803056,2025-08-31,Torino,Fiorentina,Davide Massa
 4803051,2025-08-31,Lazio,Verona,Marco Guida
 4803050,2025-08-31,Inter,Udinese,Luca Pairetto
-4803056,2025-08-31,Torino,Fiorentina,Davide Massa
+4803049,2025-08-31,Genoa,Juventus,Daniele Doveri
 4803058,2025-09-13,Cagliari,Parma,
 4803061,2025-09-13,Juventus,Inter,
 4803060,2025-09-13,Fiorentina,Napoli,
-4803064,2025-09-14,Roma,Torino,
 4803063,2025-09-14,Pisa,Udinese,Giovanni Ayroldi
-4803057,2025-09-14,Atalanta,Lecce,Mattia Drigo
-4803062,2025-09-14,Milan,Bologna,Juan Luca Sacchi
 4803065,2025-09-14,Sassuolo,Lazio,Luca Zufferli
-4803059,2025-09-15,Como,Genoa,Marco Guida
+4803064,2025-09-14,Roma,Torino,
+4803062,2025-09-14,Milan,Bologna,Juan Luca Sacchi
+4803057,2025-09-14,Atalanta,Lecce,Mattia Drigo
 4803066,2025-09-15,Verona,Cremonese,
+4803059,2025-09-15,Como,Genoa,Marco Guida
 4803076,2025-09-19,Lecce,Cagliari,Juan Luca Sacchi
-4803070,2025-09-20,Verona,Juventus,Giovanni Ayroldi
-4803071,2025-09-20,Bologna,Genoa,
 4803069,2025-09-20,Udinese,Milan,Matteo Marcenaro
-4803073,2025-09-21,Fiorentina,Como,Marco Di Bello
+4803071,2025-09-20,Bologna,Genoa,
+4803070,2025-09-20,Verona,Juventus,Giovanni Ayroldi
+4803068,2025-09-21,Torino,Atalanta,
 4803072,2025-09-21,Cremonese,Parma,Kevin Bonacina
+4803073,2025-09-21,Fiorentina,Como,Marco Di Bello
 4803074,2025-09-21,Inter,Sassuolo,
 4803075,2025-09-21,Lazio,Roma,
-4803068,2025-09-21,Torino,Atalanta,
 4803077,2025-09-22,Napoli,Pisa,Francesco Fourneau
-4803081,2025-09-27,Juventus,Atalanta,Luca Zufferli
 4803078,2025-09-27,Cagliari,Inter,
+4803081,2025-09-27,Juventus,Atalanta,Luca Zufferli
 4803079,2025-09-27,Como,Cremonese,
-4803083,2025-09-28,Milan,Napoli,
-4803086,2025-09-28,Roma,Verona,
 4803085,2025-09-28,Pisa,Fiorentina,Livio Marinelli
-4803087,2025-09-28,Sassuolo,Udinese,
 4803082,2025-09-28,Lecce,Bologna,Luca Pairetto
+4803083,2025-09-28,Milan,Napoli,
+4803087,2025-09-28,Sassuolo,Udinese,
+4803086,2025-09-28,Roma,Verona,
 4803080,2025-09-29,Genoa,Lazio,Ermanno Feliciani
 4803084,2025-09-29,Parma,Torino,Giovanni Ayroldi
 4803097,2025-10-03,Verona,Sassuolo,Livio Marinelli
@@ -815,448 +815,448 @@ id,Date,HomeTeam,AwayTeam,Referee
 4803088,2025-10-04,Atalanta,Como,
 4803093,2025-10-04,Lazio,Torino,Daniele Chiffi
 4803090,2025-10-05,Fiorentina,Roma,Matteo Marcenaro
-4803092,2025-10-05,Juventus,Milan,
 4803089,2025-10-05,Bologna,Pisa,Ermanno Feliciani
 4803094,2025-10-05,Napoli,Genoa,Marco Di Bello
+4803092,2025-10-05,Juventus,Milan,
 4803096,2025-10-05,Udinese,Cagliari,Gianluca Manganiello
 4803106,2025-10-18,Roma,Inter,Davide Massa
 4803105,2025-10-18,Pisa,Verona,Niccolò Turrini
-4803103,2025-10-18,Lecce,Sassuolo,
 4803107,2025-10-18,Torino,Napoli,Marco Di Bello
-4803100,2025-10-19,Como,Juventus,Maurizio Mariani
-4803098,2025-10-19,Atalanta,Lazio,
-4803102,2025-10-19,Genoa,Parma,
-4803099,2025-10-19,Cagliari,Bologna,Kevin Bonacina
+4803103,2025-10-18,Lecce,Sassuolo,
 4803104,2025-10-19,Milan,Fiorentina,
+4803102,2025-10-19,Genoa,Parma,
+4803098,2025-10-19,Atalanta,Lazio,
+4803099,2025-10-19,Cagliari,Bologna,Kevin Bonacina
+4803100,2025-10-19,Como,Juventus,Maurizio Mariani
 4803101,2025-10-20,Cremonese,Udinese,Gianluca Manganiello
 4803113,2025-10-24,Milan,Pisa,Michael Fabbri
-4803114,2025-10-25,Napoli,Inter,
-4803110,2025-10-25,Cremonese,Atalanta,Marco Piccinini
 4803115,2025-10-25,Parma,Como,Giuseppe Mucera
+4803110,2025-10-25,Cremonese,Atalanta,Marco Piccinini
+4803114,2025-10-25,Napoli,Inter,
 4803108,2025-10-25,Udinese,Lecce,Marco Guida
-4803111,2025-10-26,Fiorentina,Bologna,
-4803117,2025-10-26,Torino,Genoa,
-4803112,2025-10-26,Lazio,Juventus,Davide Massa
-4803109,2025-10-26,Verona,Cagliari,Andrea Zanotti
 4803116,2025-10-26,Sassuolo,Roma,Marco Di Bello
+4803109,2025-10-26,Verona,Cagliari,Andrea Zanotti
+4803117,2025-10-26,Torino,Genoa,
+4803111,2025-10-26,Fiorentina,Bologna,
+4803112,2025-10-26,Lazio,Juventus,Davide Massa
 4803118,2025-10-28,Atalanta,Milan,Daniele Chiffi
 4803125,2025-10-28,Lecce,Napoli,
-4803119,2025-10-29,Bologna,Torino,Marco Guida
-4803122,2025-10-29,Genoa,Cremonese,Simone Sozza
 4803124,2025-10-29,Juventus,Udinese,
-4803123,2025-10-29,Inter,Fiorentina,Maurizio Mariani
 4803121,2025-10-29,Como,Verona,Marco Di Bello
+4803123,2025-10-29,Inter,Fiorentina,Maurizio Mariani
 4803127,2025-10-29,Roma,Parma,Simone Sozza
+4803122,2025-10-29,Genoa,Cremonese,Simone Sozza
+4803119,2025-10-29,Bologna,Torino,Marco Guida
 4803120,2025-10-30,Cagliari,Sassuolo,
 4803126,2025-10-30,Pisa,Lazio,Maria Sole Ferrieri Caputi
-4803132,2025-11-01,Napoli,Como,
 4803136,2025-11-01,Udinese,Atalanta,
+4803132,2025-11-01,Napoli,Como,
 4803128,2025-11-01,Cremonese,Juventus,Gabriele Restaldo
-4803137,2025-11-02,Verona,Inter,Andrea Calzavara
-4803133,2025-11-02,Parma,Bologna,Luca Zufferli
 4803135,2025-11-02,Torino,Pisa,Luca Zufferli
-4803131,2025-11-02,Milan,Roma,
 4803129,2025-11-02,Fiorentina,Lecce,
+4803131,2025-11-02,Milan,Roma,
+4803133,2025-11-02,Parma,Bologna,Luca Zufferli
+4803137,2025-11-02,Verona,Inter,Andrea Calzavara
 4803134,2025-11-03,Sassuolo,Genoa,Maria Ferrieri Caputi
 4803130,2025-11-03,Lazio,Cagliari,Andrea Colombo
 4803146,2025-11-07,Pisa,Cremonese,Marco Di Loreto
-4803140,2025-11-08,Como,Cagliari,Andrea Calzavara
-4803143,2025-11-08,Juventus,Torino,
 4803144,2025-11-08,Lecce,Verona,Davide Massa
+4803143,2025-11-08,Juventus,Torino,
+4803140,2025-11-08,Como,Cagliari,Andrea Calzavara
 4803145,2025-11-08,Parma,Milan,
-4803141,2025-11-09,Genoa,Fiorentina,Fabio Maresca
-4803142,2025-11-09,Inter,Lazio,
 4803138,2025-11-09,Atalanta,Sassuolo,Valerio Crezzini
 4803139,2025-11-09,Bologna,Napoli,Kevin Bonacina
 4803147,2025-11-09,Roma,Udinese,Fabio Maresca
-4803154,2025-11-22,Napoli,Atalanta,
-4803149,2025-11-22,Cagliari,Genoa,
-4803151,2025-11-22,Fiorentina,Juventus,Andrea Colombo
+4803141,2025-11-09,Genoa,Fiorentina,Fabio Maresca
+4803142,2025-11-09,Inter,Lazio,
 4803157,2025-11-22,Udinese,Bologna,Livio Marinelli
-4803148,2025-11-23,Verona,Parma,Luca Pairetto
+4803151,2025-11-22,Fiorentina,Juventus,Andrea Colombo
+4803149,2025-11-22,Cagliari,Genoa,
+4803154,2025-11-22,Napoli,Atalanta,
 4803153,2025-11-23,Lazio,Lecce,Matteo Marcenaro
-4803150,2025-11-23,Cremonese,Roma,Marco Di Bello
 4803152,2025-11-23,Inter,Milan,Marco Guida
+4803150,2025-11-23,Cremonese,Roma,Marco Di Bello
+4803148,2025-11-23,Verona,Parma,Luca Pairetto
 4803156,2025-11-24,Torino,Como,Giuseppe Collu
 4803155,2025-11-24,Sassuolo,Pisa,Alberto Ruben Arena
 4803160,2025-11-28,Como,Sassuolo,Davide Di Marco
-4803165,2025-11-29,Parma,Udinese,Davide Massa
 4803164,2025-11-29,Milan,Lazio,Matteo Marcenaro
-4803162,2025-11-29,Juventus,Cagliari,Matteo Marcenaro
+4803165,2025-11-29,Parma,Udinese,Davide Massa
 4803161,2025-11-29,Genoa,Verona,Matteo Marchetti
+4803162,2025-11-29,Juventus,Cagliari,Matteo Marcenaro
+4803166,2025-11-30,Pisa,Inter,Matteo Marcenaro
 4803163,2025-11-30,Lecce,Torino,Ermanno Feliciani
 4803158,2025-11-30,Atalanta,Fiorentina,Federico La Penna
 4803167,2025-11-30,Roma,Napoli,Andrea Colombo
-4803166,2025-11-30,Pisa,Inter,Matteo Marcenaro
 4803159,2025-12-01,Bologna,Cremonese,Rosario Abisso
+4803174,2025-12-06,Sassuolo,Fiorentina,Matteo Marcenaro
 4803177,2025-12-06,Verona,Atalanta,Giovanni Ayroldi
 4803170,2025-12-06,Inter,Como,Daniele Chiffi
-4803174,2025-12-06,Sassuolo,Fiorentina,Matteo Marcenaro
+4803168,2025-12-07,Cagliari,Roma,Ermanno Feliciani
 4803171,2025-12-07,Lazio,Bologna,
 4803172,2025-12-07,Napoli,Juventus,Simone Sozza
 4803169,2025-12-07,Cremonese,Lecce,Simone Sozza
-4803168,2025-12-07,Cagliari,Roma,Ermanno Feliciani
+4803173,2025-12-08,Pisa,Parma,Andrea Calzavara
 4803176,2025-12-08,Udinese,Genoa,
 4803175,2025-12-08,Torino,Milan,
-4803173,2025-12-08,Pisa,Parma,Andrea Calzavara
 4803182,2025-12-12,Lecce,Pisa,Marco Guida
-4803184,2025-12-13,Parma,Lazio,Alberto Arena
-4803178,2025-12-13,Atalanta,Cagliari,Alberto Arena
 4803186,2025-12-13,Torino,Cremonese,Michael Fabbri
+4803178,2025-12-13,Atalanta,Cagliari,Alberto Arena
+4803184,2025-12-13,Parma,Lazio,Alberto Arena
+4803183,2025-12-14,Milan,Sassuolo,Francesco Fourneau
+4803187,2025-12-14,Udinese,Napoli,
+4803180,2025-12-14,Fiorentina,Verona,Marco Guida
 4803181,2025-12-14,Genoa,Inter,Giovanni Ayroldi
 4803179,2025-12-14,Bologna,Juventus,
-4803187,2025-12-14,Udinese,Napoli,
-4803183,2025-12-14,Milan,Sassuolo,Francesco Fourneau
-4803180,2025-12-14,Fiorentina,Verona,Marco Guida
 4803185,2025-12-15,Roma,Como,Michael Fabbri
 4803193,2025-12-20,Juventus,Roma,
 4803194,2025-12-20,Lazio,Cremonese,Daniele Chiffi
+4803190,2025-12-21,Fiorentina,Udinese,Federico La Penna
+4803188,2025-12-21,Cagliari,Pisa,Federico La Penna
 4803191,2025-12-21,Genoa,Atalanta,
 4803196,2025-12-21,Sassuolo,Torino,
-4803188,2025-12-21,Cagliari,Pisa,Federico La Penna
-4803190,2025-12-21,Fiorentina,Udinese,Federico La Penna
-4803200,2025-12-27,Lecce,Como,
 4803203,2025-12-27,Pisa,Juventus,Juan Luca Sacchi
-4803202,2025-12-27,Parma,Fiorentina,
-4803205,2025-12-27,Torino,Cagliari,
 4803206,2025-12-27,Udinese,Lazio,Paride Tremolada
+4803205,2025-12-27,Torino,Cagliari,
+4803202,2025-12-27,Parma,Fiorentina,
+4803200,2025-12-27,Lecce,Como,
 4803201,2025-12-28,Milan,Verona,Daniele Chiffi
 4803199,2025-12-28,Cremonese,Napoli,Daniele Doveri
 4803198,2025-12-28,Bologna,Sassuolo,Marco Di Bello
 4803207,2025-12-28,Atalanta,Inter,Fabio Maresca
 4803204,2025-12-29,Roma,Genoa,Rosario Abisso
 4803209,2026-01-02,Cagliari,Milan,Marco Di Bello
-4803208,2026-01-03,Atalanta,Roma,
 4803210,2026-01-03,Como,Udinese,Alberto Arena
-4803212,2026-01-03,Genoa,Pisa,Valerio Crezzini
+4803208,2026-01-03,Atalanta,Roma,
 4803214,2026-01-03,Juventus,Lecce,Fabio Maresca
 4803216,2026-01-03,Sassuolo,Parma,
-4803211,2026-01-04,Fiorentina,Cremonese,Marco Di Bello
+4803212,2026-01-03,Genoa,Pisa,Valerio Crezzini
 4803215,2026-01-04,Lazio,Napoli,Luca Pairetto
+4803211,2026-01-04,Fiorentina,Cremonese,Marco Di Bello
 4803217,2026-01-04,Verona,Torino,Kevin Bonacina
 4803213,2026-01-04,Inter,Bologna,Daniele Doveri
 4803221,2026-01-06,Lecce,Roma,Daniele Chiffi
 4803226,2026-01-06,Sassuolo,Juventus,
 4803225,2026-01-06,Pisa,Como,Luca Pairetto
-4803223,2026-01-07,Napoli,Verona,Andrea Colombo
-4803218,2026-01-07,Bologna,Atalanta,
-4803220,2026-01-07,Lazio,Fiorentina,
-4803224,2026-01-07,Parma,Inter,Kevin Bonacina
 4803227,2026-01-07,Torino,Udinese,Valerio Crezzini
+4803224,2026-01-07,Parma,Inter,Kevin Bonacina
+4803218,2026-01-07,Bologna,Atalanta,
+4803223,2026-01-07,Napoli,Verona,Andrea Colombo
+4803220,2026-01-07,Lazio,Fiorentina,
 4803222,2026-01-08,Milan,Genoa,Davide Massa
 4803219,2026-01-08,Cremonese,Cagliari,Daniele Doveri
+4803236,2026-01-10,Udinese,Pisa,Giovanni Ayroldi
+4803228,2026-01-10,Atalanta,Torino,
 4803235,2026-01-10,Roma,Sassuolo,Marco Di Bello
 4803229,2026-01-10,Como,Bologna,
-4803228,2026-01-10,Atalanta,Torino,
-4803236,2026-01-10,Udinese,Pisa,Giovanni Ayroldi
-4803234,2026-01-11,Lecce,Parma,
-4803232,2026-01-11,Inter,Napoli,
 4803237,2026-01-11,Verona,Lazio,Marco Guida
+4803232,2026-01-11,Inter,Napoli,
+4803234,2026-01-11,Lecce,Parma,
 4803230,2026-01-11,Fiorentina,Milan,
-4803231,2026-01-12,Genoa,Cagliari,
 4803233,2026-01-12,Juventus,Cremonese,Gabriele Restaldo
-4803195,2026-01-14,Napoli,Parma,
+4803231,2026-01-12,Genoa,Cagliari,
 4803192,2026-01-14,Inter,Lecce,
-4803197,2026-01-15,Verona,Bologna,Giuseppe Mucera
+4803195,2026-01-14,Napoli,Parma,
 4803189,2026-01-15,Como,Milan,
+4803197,2026-01-15,Verona,Bologna,Giuseppe Mucera
 4803243,2026-01-16,Pisa,Atalanta,Matteo Marchetti
-4803247,2026-01-17,Cagliari,Juventus,Matteo Marcenaro
 4803245,2026-01-17,Udinese,Inter,Luca Pairetto
+4803247,2026-01-17,Cagliari,Juventus,Matteo Marcenaro
 4803241,2026-01-17,Napoli,Sassuolo,Marco Guida
 4803242,2026-01-18,Parma,Genoa,
 4803244,2026-01-18,Torino,Roma,
-4803246,2026-01-18,Bologna,Fiorentina,
 4803240,2026-01-18,Milan,Lecce,Federico La Penna
-4803239,2026-01-19,Lazio,Como,
+4803246,2026-01-18,Bologna,Fiorentina,
 4803238,2026-01-19,Cremonese,Verona,
+4803239,2026-01-19,Lazio,Como,
 4803252,2026-01-23,Inter,Pisa,Matteo Marcenaro
-4803249,2026-01-24,Como,Torino,Giuseppe Collu
 4803250,2026-01-24,Fiorentina,Cagliari,
+4803249,2026-01-24,Como,Torino,Giuseppe Collu
 4803254,2026-01-24,Lecce,Lazio,Matteo Marcenaro
-4803255,2026-01-25,Roma,Milan,
-4803256,2026-01-25,Sassuolo,Cremonese,Giuseppe Collu
 4803251,2026-01-25,Genoa,Bologna,
+4803256,2026-01-25,Sassuolo,Cremonese,Giuseppe Collu
+4803255,2026-01-25,Roma,Milan,
 4803253,2026-01-25,Juventus,Napoli,Simone Sozza
 4803248,2026-01-25,Atalanta,Parma,Valerio Crezzini
 4803257,2026-01-26,Verona,Udinese,Gianluca Manganiello
 4803262,2026-01-30,Lazio,Genoa,Ermanno Feliciani
-4803263,2026-01-31,Napoli,Fiorentina,
-4803259,2026-01-31,Cagliari,Verona,Andrea Zanotti
 4803265,2026-01-31,Pisa,Sassuolo,Alberto Ruben Arena
-4803261,2026-02-01,Cremonese,Inter,Davide Massa
-4803264,2026-02-01,Parma,Juventus,Francesco Fourneau
+4803259,2026-01-31,Cagliari,Verona,Andrea Zanotti
+4803263,2026-01-31,Napoli,Fiorentina,
 4803260,2026-02-01,Como,Atalanta,
+4803264,2026-02-01,Parma,Juventus,Francesco Fourneau
+4803261,2026-02-01,Cremonese,Inter,Davide Massa
 4803266,2026-02-01,Torino,Lecce,Ermanno Feliciani
 4803267,2026-02-02,Udinese,Roma,Fabio Maresca
 4803258,2026-02-03,Bologna,Milan,Juan Luca Sacchi
 4803268,2026-02-06,Verona,Pisa,Niccolò Turrini
 4803273,2026-02-07,Fiorentina,Torino,Davide Massa
 4803274,2026-02-07,Genoa,Napoli,Marco Di Bello
-4803272,2026-02-08,Bologna,Parma,Luca Zufferli
-4803275,2026-02-08,Juventus,Lazio,Davide Massa
 4803276,2026-02-08,Lecce,Udinese,Marco Guida
+4803275,2026-02-08,Juventus,Lazio,Davide Massa
 4803269,2026-02-08,Sassuolo,Inter,
+4803272,2026-02-08,Bologna,Parma,Luca Zufferli
 4803271,2026-02-09,Atalanta,Cremonese,Marco Piccinini
 4803270,2026-02-09,Roma,Cagliari,Ermanno Feliciani
 4803285,2026-02-13,Pisa,Milan,Michael Fabbri
-4803279,2026-02-14,Como,Fiorentina,Marco Di Bello
 4803282,2026-02-14,Lazio,Atalanta,
 4803281,2026-02-14,Inter,Juventus,
-4803283,2026-02-15,Napoli,Roma,Andrea Colombo
+4803279,2026-02-14,Como,Fiorentina,Marco Di Bello
+4803286,2026-02-15,Torino,Bologna,Marco Guida
+4803287,2026-02-15,Udinese,Sassuolo,
 4803280,2026-02-15,Cremonese,Genoa,Simone Sozza
 4803284,2026-02-15,Parma,Verona,Luca Pairetto
-4803287,2026-02-15,Udinese,Sassuolo,
-4803286,2026-02-15,Torino,Bologna,Marco Guida
+4803283,2026-02-15,Napoli,Roma,Andrea Colombo
 4803278,2026-02-16,Cagliari,Lecce,Juan Luca Sacchi
 4803277,2026-02-18,Milan,Como,
 4803297,2026-02-20,Sassuolo,Verona,Livio Marinelli
 4803294,2026-02-21,Lecce,Inter,
 4803290,2026-02-21,Cagliari,Lazio,Andrea Colombo
 4803293,2026-02-21,Juventus,Como,Maurizio Mariani
-4803296,2026-02-22,Roma,Cremonese,Marco Di Bello
 4803292,2026-02-22,Genoa,Torino,
 4803288,2026-02-22,Atalanta,Napoli,
 4803295,2026-02-22,Milan,Parma,
-4803291,2026-02-23,Fiorentina,Pisa,Livio Marinelli
+4803296,2026-02-22,Roma,Cremonese,Marco Di Bello
 4803289,2026-02-23,Bologna,Udinese,Livio Marinelli
+4803291,2026-02-23,Fiorentina,Pisa,Livio Marinelli
 4803300,2026-02-27,Parma,Cagliari,
-4803307,2026-02-28,Como,Lecce,
 4803299,2026-02-28,Inter,Genoa,Giovanni Ayroldi
+4803307,2026-02-28,Como,Lecce,
 4803303,2026-02-28,Verona,Napoli,Andrea Colombo
-4803305,2026-03-01,Torino,Lazio,Daniele Chiffi
-4803302,2026-03-01,Roma,Juventus,
 4803298,2026-03-01,Cremonese,Milan,Davide Massa
+4803305,2026-03-01,Torino,Lazio,Daniele Chiffi
 4803306,2026-03-01,Sassuolo,Atalanta,Valerio Crezzini
-4803301,2026-03-02,Pisa,Bologna,Ermanno Feliciani
+4803302,2026-03-01,Roma,Juventus,
 4803304,2026-03-02,Udinese,Fiorentina,Federico La Penna
+4803301,2026-03-02,Pisa,Bologna,Ermanno Feliciani
 4803308,2026-03-06,Napoli,Torino,Marco Di Bello
 4803313,2026-03-07,Juventus,Pisa,Juan Luca Sacchi
 4803310,2026-03-07,Cagliari,Como,Andrea Calzavara
 4803309,2026-03-07,Atalanta,Udinese,
 4803312,2026-03-08,Genoa,Roma,Rosario Abisso
-4803316,2026-03-08,Milan,Inter,Marco Guida
 4803311,2026-03-08,Fiorentina,Parma,
 4803317,2026-03-08,Bologna,Verona,Giuseppe Mucera
+4803316,2026-03-08,Milan,Inter,Marco Guida
 4803315,2026-03-08,Lecce,Cremonese,Simone Sozza
 4803314,2026-03-09,Lazio,Sassuolo,Luca Zufferli
 4803325,2026-03-13,Torino,Parma,Giovanni Ayroldi
-4803322,2026-03-14,Napoli,Lecce,
 4803326,2026-03-14,Udinese,Juventus,
 4803320,2026-03-14,Inter,Atalanta,Fabio Maresca
+4803322,2026-03-14,Napoli,Lecce,
 4803327,2026-03-15,Verona,Genoa,Matteo Marchetti
+4803321,2026-03-15,Lazio,Milan,Matteo Marcenaro
 4803323,2026-03-15,Pisa,Cagliari,Federico La Penna
 4803318,2026-03-15,Como,Roma,Michael Fabbri
 4803324,2026-03-15,Sassuolo,Bologna,Marco Di Bello
-4803321,2026-03-15,Lazio,Milan,Matteo Marcenaro
 4803319,2026-03-16,Cremonese,Fiorentina,Marco Di Bello
-4803333,2026-03-20,Genoa,Udinese,
 4803330,2026-03-20,Cagliari,Napoli,
+4803333,2026-03-20,Genoa,Udinese,
+4803334,2026-03-21,Juventus,Sassuolo,
 4803336,2026-03-21,Parma,Cremonese,Kevin Bonacina
 4803335,2026-03-21,Milan,Torino,
-4803334,2026-03-21,Juventus,Sassuolo,
-4803337,2026-03-22,Roma,Lecce,Daniele Chiffi
-4803331,2026-03-22,Como,Pisa,Luca Pairetto
 4803332,2026-03-22,Fiorentina,Inter,Maurizio Mariani
-4803328,2026-03-22,Atalanta,Verona,Giovanni Ayroldi
 4803329,2026-03-22,Bologna,Lazio,
+4803337,2026-03-22,Roma,Lecce,Daniele Chiffi
+4803328,2026-03-22,Atalanta,Verona,Giovanni Ayroldi
+4803331,2026-03-22,Como,Pisa,Luca Pairetto
 4803341,2026-04-04,Lazio,Parma,Alberto Arena
 4803345,2026-04-04,Sassuolo,Cagliari,
 4803347,2026-04-04,Verona,Fiorentina,Marco Guida
 4803338,2026-04-05,Cremonese,Bologna,Rosario Abisso
 4803344,2026-04-05,Pisa,Torino,Luca Zufferli
 4803339,2026-04-05,Inter,Roma,Davide Massa
+4803343,2026-04-06,Napoli,Milan,
 4803342,2026-04-06,Lecce,Atalanta,Mattia Drigo
 4803346,2026-04-06,Udinese,Como,Alberto Arena
-4803343,2026-04-06,Napoli,Milan,
 4803340,2026-04-06,Juventus,Genoa,Daniele Doveri
 4803356,2026-04-10,Roma,Pisa,Ermanno Feliciani
-4803354,2026-04-11,Milan,Udinese,Matteo Marcenaro
 4803348,2026-04-11,Atalanta,Juventus,Luca Zufferli
+4803354,2026-04-11,Milan,Udinese,Matteo Marcenaro
 4803357,2026-04-11,Torino,Verona,Kevin Bonacina
 4803350,2026-04-11,Cagliari,Cremonese,Daniele Doveri
 4803349,2026-04-12,Bologna,Lecce,Luca Pairetto
-4803351,2026-04-12,Como,Inter,Daniele Chiffi
-4803355,2026-04-12,Parma,Napoli,
 4803353,2026-04-12,Genoa,Sassuolo,Maria Ferrieri Caputi
+4803355,2026-04-12,Parma,Napoli,
+4803351,2026-04-12,Como,Inter,Daniele Chiffi
 4803352,2026-04-13,Fiorentina,Lazio,
-4803358,2026-04-17,Inter,Cagliari,
 4803364,2026-04-17,Sassuolo,Como,Davide Di Marco
+4803358,2026-04-17,Inter,Cagliari,
 4803363,2026-04-18,Roma,Atalanta,
 4803361,2026-04-18,Napoli,Lazio,Luca Pairetto
 4803365,2026-04-18,Udinese,Parma,Davide Massa
-4803366,2026-04-19,Verona,Milan,Daniele Chiffi
 4803362,2026-04-19,Pisa,Genoa,Valerio Crezzini
+4803366,2026-04-19,Verona,Milan,Daniele Chiffi
 4803367,2026-04-19,Cremonese,Torino,Michael Fabbri
 4803359,2026-04-19,Juventus,Bologna,
 4803360,2026-04-20,Lecce,Fiorentina,
 4803374,2026-04-24,Napoli,Cremonese,Daniele Doveri
-4803375,2026-04-25,Parma,Pisa,Andrea Calzavara
 4803368,2026-04-25,Bologna,Roma,
+4803375,2026-04-25,Parma,Pisa,Andrea Calzavara
 4803377,2026-04-25,Verona,Lecce,Davide Massa
-4803373,2026-04-26,Milan,Juventus,
 4803376,2026-04-26,Torino,Inter,
 4803371,2026-04-26,Genoa,Como,Marco Guida
+4803373,2026-04-26,Milan,Juventus,
 4803370,2026-04-26,Fiorentina,Sassuolo,Matteo Marcenaro
 4803372,2026-04-27,Lazio,Udinese,Paride Tremolada
 4803369,2026-04-27,Cagliari,Atalanta,Alberto Arena
 4803384,2026-05-01,Pisa,Lecce,Marco Guida
-4803387,2026-05-02,Udinese,Torino,Valerio Crezzini
 4803378,2026-05-02,Atalanta,Genoa,
 4803380,2026-05-02,Como,Napoli,
-4803382,2026-05-03,Inter,Parma,Kevin Bonacina
-4803386,2026-05-03,Sassuolo,Milan,Francesco Fourneau
-4803379,2026-05-03,Bologna,Cagliari,Kevin Bonacina
+4803387,2026-05-02,Udinese,Torino,Valerio Crezzini
 4803383,2026-05-03,Juventus,Verona,Giovanni Ayroldi
+4803382,2026-05-03,Inter,Parma,Kevin Bonacina
+4803379,2026-05-03,Bologna,Cagliari,Kevin Bonacina
+4803386,2026-05-03,Sassuolo,Milan,Francesco Fourneau
 4803385,2026-05-04,Roma,Fiorentina,Matteo Marcenaro
 4803381,2026-05-04,Cremonese,Lazio,Daniele Chiffi
 4803397,2026-05-08,Torino,Sassuolo,
-4803393,2026-05-09,Lecce,Juventus,Fabio Maresca
-4803392,2026-05-09,Lazio,Inter,
 4803389,2026-05-09,Cagliari,Udinese,Gianluca Manganiello
-4803394,2026-05-10,Milan,Atalanta,Daniele Chiffi
+4803392,2026-05-09,Lazio,Inter,
+4803393,2026-05-09,Lecce,Juventus,Fabio Maresca
 4803390,2026-05-10,Cremonese,Pisa,Marco Di Loreto
-4803396,2026-05-10,Parma,Roma,Simone Sozza
-4803391,2026-05-10,Fiorentina,Genoa,Fabio Maresca
 4803388,2026-05-10,Verona,Como,Marco Di Bello
+4803396,2026-05-10,Parma,Roma,Simone Sozza
+4803394,2026-05-10,Milan,Atalanta,Daniele Chiffi
+4803391,2026-05-10,Fiorentina,Genoa,Fabio Maresca
 4803395,2026-05-11,Napoli,Bologna,Kevin Bonacina
-4803403,2026-05-17,Juventus,Fiorentina,Andrea Colombo
-4803400,2026-05-17,Como,Parma,Giuseppe Mucera
 4803404,2026-05-17,Pisa,Napoli,Francesco Fourneau
-4803398,2026-05-17,Atalanta,Bologna,
 4803406,2026-05-17,Sassuolo,Lecce,
 4803399,2026-05-17,Cagliari,Torino,
+4803405,2026-05-17,Roma,Lazio,
+4803403,2026-05-17,Juventus,Fiorentina,Andrea Colombo
 4803401,2026-05-17,Genoa,Milan,Davide Massa
+4803398,2026-05-17,Atalanta,Bologna,
+4803400,2026-05-17,Como,Parma,Giuseppe Mucera
 4803407,2026-05-17,Udinese,Cremonese,Gianluca Manganiello
 4803402,2026-05-17,Inter,Verona,Andrea Calzavara
-4803405,2026-05-17,Roma,Lazio,
 4803410,2026-05-22,Fiorentina,Atalanta,Federico La Penna
 4803411,2026-05-23,Lazio,Pisa,Maria Sole Ferrieri Caputi
 4803408,2026-05-23,Bologna,Inter,Daniele Doveri
+4803415,2026-05-24,Parma,Sassuolo,
+4803412,2026-05-24,Lecce,Genoa,Matteo Marchetti
 4803414,2026-05-24,Napoli,Udinese,
 4803416,2026-05-24,Torino,Juventus,
 4803413,2026-05-24,Milan,Cagliari,Marco Di Bello
-4803417,2026-05-24,Verona,Roma,
 4803409,2026-05-24,Cremonese,Como,
-4803412,2026-05-24,Lecce,Genoa,Matteo Marchetti
-4803415,2026-05-24,Parma,Sassuolo,
-5749644,2026-08-22,Genoa,Napoli,Marco Di Bello
-5749646,2026-08-22,Parma,Cagliari,sin dato
+4803417,2026-05-24,Verona,Roma,
 5749645,2026-08-22,Inter,Monza,Livio Marinelli
+5749646,2026-08-22,Parma,Cagliari,sin dato
+5749644,2026-08-22,Genoa,Napoli,Marco Di Bello
 5749648,2026-08-22,Udinese,Como,Alberto Arena
-5749649,2026-08-23,Venezia,Lecce,Antonio Rapuano
-5749643,2026-08-23,Frosinone,Juventus,Giovanni Ayroldi
 5749641,2026-08-23,Atalanta,Sassuolo,Valerio Crezzini
+5749643,2026-08-23,Frosinone,Juventus,Giovanni Ayroldi
 5749647,2026-08-23,Torino,Milan,sin dato
+5749649,2026-08-23,Venezia,Lecce,Antonio Rapuano
 5749640,2026-08-24,Roma,Fiorentina,Matteo Marcenaro
 5749642,2026-08-24,Bologna,Lazio,sin dato
 5749650,2026-08-28,Milan,Venezia,Gianluca Manganiello
-5749657,2026-08-29,Monza,Udinese,Claudio Giuseppe Allegretta
-5749659,2026-08-29,Sassuolo,Torino,sin dato
-5749653,2026-08-29,Fiorentina,Frosinone,sin dato
 5749654,2026-08-29,Juventus,Parma,Francesco Fourneau
-5749652,2026-08-30,Cagliari,Inter,sin dato
-5749655,2026-08-30,Lazio,Genoa,Ermanno Feliciani
+5749653,2026-08-29,Fiorentina,Frosinone,sin dato
+5749659,2026-08-29,Sassuolo,Torino,sin dato
+5749657,2026-08-29,Monza,Udinese,Claudio Giuseppe Allegretta
 5749658,2026-08-30,Napoli,Como,sin dato
-5749651,2026-08-31,Atalanta,Bologna,sin dato
+5749655,2026-08-30,Lazio,Genoa,Ermanno Feliciani
+5749652,2026-08-30,Cagliari,Inter,sin dato
 5749656,2026-08-31,Lecce,Roma,Daniele Chiffi
+5749651,2026-08-31,Atalanta,Bologna,sin dato
 5749665,2026-09-04,Genoa,Como,Marco Guida
-5749666,2026-09-05,Inter,Napoli,sin dato
 5749660,2026-09-05,Roma,Atalanta,sin dato
 5749663,2026-09-05,Fiorentina,Torino,Davide Massa
-5749661,2026-09-06,Bologna,Sassuolo,Marco Di Bello
-5749664,2026-09-06,Frosinone,Venezia,sin dato
-5749667,2026-09-06,Juventus,Milan,sin dato
+5749666,2026-09-05,Inter,Napoli,sin dato
 5749668,2026-09-06,Parma,Monza,Federico La Penna
+5749661,2026-09-06,Bologna,Sassuolo,Marco Di Bello
+5749667,2026-09-06,Juventus,Milan,sin dato
+5749664,2026-09-06,Frosinone,Venezia,sin dato
 5749669,2026-09-07,Udinese,Lazio,Paride Tremolada
 5749662,2026-09-07,Cagliari,Lecce,Juan Luca Sacchi
 5749679,2026-09-11,Venezia,Fiorentina,Francesco Fourneau
-5749674,2026-09-12,Lazio,Milan,Matteo Marcenaro
-5749672,2026-09-12,Genoa,Frosinone,Antonio Rapuano
 5749670,2026-09-12,Atalanta,Cagliari,Alberto Arena
-5749676,2026-09-13,Napoli,Bologna,Kevin Bonacina
+5749672,2026-09-12,Genoa,Frosinone,Antonio Rapuano
+5749674,2026-09-12,Lazio,Milan,Matteo Marcenaro
 5749677,2026-09-13,Sassuolo,Juventus,sin dato
+5749676,2026-09-13,Napoli,Bologna,Kevin Bonacina
 5749675,2026-09-13,Lecce,Monza,Valerio Crezzini
-5749671,2026-09-14,Como,Parma,Giuseppe Mucera
-5749673,2026-09-14,Inter,Udinese,Luca Pairetto
 5749678,2026-09-14,Torino,Roma,sin dato
+5749673,2026-09-14,Inter,Udinese,Luca Pairetto
+5749671,2026-09-14,Como,Parma,Giuseppe Mucera
 5749686,2026-09-18,Monza,Sassuolo,sin dato
 5749689,2026-09-19,Venezia,Lazio,sin dato
+5749681,2026-09-19,Roma,Inter,Davide Massa
 5749682,2026-09-19,Bologna,Torino,Marco Guida
 5749688,2026-09-19,Udinese,Cagliari,Gianluca Manganiello
-5749681,2026-09-19,Roma,Inter,Davide Massa
 5749683,2026-09-20,Fiorentina,Napoli,sin dato
-5749685,2026-09-20,Juventus,Atalanta,Luca Zufferli
 5749687,2026-09-20,Parma,Genoa,sin dato
-5749684,2026-09-20,Frosinone,Como,Daniele Chiffi
 5749680,2026-09-20,Milan,Lecce,Federico La Penna
-5749693,2026-10-10,Genoa,Fiorentina,Fabio Maresca
+5749684,2026-09-20,Frosinone,Como,Daniele Chiffi
+5749685,2026-09-20,Juventus,Atalanta,Luca Zufferli
 5749697,2026-10-10,Napoli,Frosinone,Ermanno Feliciani
+5749693,2026-10-10,Genoa,Fiorentina,Fabio Maresca
 5749694,2026-10-10,Inter,Parma,Kevin Bonacina
+5749692,2026-10-11,Como,Roma,Michael Fabbri
 5749698,2026-10-11,Sassuolo,Milan,Francesco Fourneau
 5749695,2026-10-11,Lazio,Monza,Giuseppe Collu
 5749691,2026-10-11,Cagliari,Juventus,Matteo Marcenaro
 5749696,2026-10-11,Lecce,Bologna,Luca Pairetto
-5749692,2026-10-11,Como,Roma,Michael Fabbri
 5749699,2026-10-12,Torino,Udinese,Valerio Crezzini
 5749690,2026-10-12,Atalanta,Venezia,Paride Tremolada
 5749704,2026-10-16,Frosinone,Sassuolo,Matteo Marchetti
-5749702,2026-10-17,Bologna,Inter,Daniele Doveri
 5749709,2026-10-17,Venezia,Napoli,Juan Luca Sacchi
+5749702,2026-10-17,Bologna,Inter,Daniele Doveri
 5749701,2026-10-17,Roma,Genoa,Rosario Abisso
-5749705,2026-10-18,Juventus,Lazio,Davide Massa
 5749708,2026-10-18,Udinese,Lecce,Marco Guida
 5749703,2026-10-18,Fiorentina,Como,Marco Di Bello
+5749705,2026-10-18,Juventus,Lazio,Davide Massa
 5749700,2026-10-18,Milan,Atalanta,Daniele Chiffi
 5749706,2026-10-19,Monza,Cagliari,Andrea Calzavara
 5749707,2026-10-19,Parma,Torino,Giovanni Ayroldi
 5749718,2026-10-23,Torino,Monza,Matteo Marchetti
-5749717,2026-10-24,Napoli,Roma,Andrea Colombo
-5749712,2026-10-24,Como,Sassuolo,Davide Di Marco
-5749715,2026-10-24,Lazio,Parma,Alberto Arena
 5749711,2026-10-24,Cagliari,Bologna,Kevin Bonacina
-5749719,2026-10-25,Udinese,Milan,Matteo Marcenaro
+5749715,2026-10-24,Lazio,Parma,Alberto Arena
+5749712,2026-10-24,Como,Sassuolo,Davide Di Marco
+5749717,2026-10-24,Napoli,Roma,Andrea Colombo
 5749716,2026-10-25,Lecce,Juventus,Fabio Maresca
 5749714,2026-10-25,Inter,Fiorentina,Maurizio Mariani
-5749713,2026-10-25,Genoa,Venezia,Simone Sozza
 5749710,2026-10-25,Atalanta,Frosinone,Livio Marinelli
+5749713,2026-10-25,Genoa,Venezia,Simone Sozza
+5749719,2026-10-25,Udinese,Milan,Matteo Marcenaro
+5749728,2026-10-27,Torino,Como,Giuseppe Collu
 5749727,2026-10-27,Sassuolo,Lazio,Luca Zufferli
 5749721,2026-10-27,Roma,Cagliari,Ermanno Feliciani
-5749728,2026-10-27,Torino,Como,Giuseppe Collu
-5749726,2026-10-28,Parma,Udinese,Davide Massa
 5749729,2026-10-28,Venezia,Inter,Luca Pairetto
 5749720,2026-10-28,Milan,Bologna,Juan Luca Sacchi
 5749725,2026-10-28,Monza,Napoli,Giovanni Ayroldi
+5749726,2026-10-28,Parma,Udinese,Davide Massa
 5749724,2026-10-28,Genoa,Juventus,Daniele Doveri
 5749722,2026-10-29,Fiorentina,Atalanta,Federico La Penna
 5749723,2026-10-29,Frosinone,Lecce,Rosario Abisso
-5749739,2026-10-31,Udinese,Roma,Fabio Maresca
-5749732,2026-10-31,Bologna,Monza,Andrea Zanotti
 5749730,2026-10-31,Milan,Inter,Marco Guida
-5749733,2026-11-01,Como,Venezia,Maria Ferrieri Caputi
+5749732,2026-10-31,Bologna,Monza,Andrea Zanotti
+5749739,2026-10-31,Udinese,Roma,Fabio Maresca
+5749735,2026-11-01,Juventus,Napoli,Simone Sozza
 5749737,2026-11-01,Lecce,Genoa,Matteo Marchetti
+5749733,2026-11-01,Como,Venezia,Maria Ferrieri Caputi
 5749736,2026-11-01,Lazio,Cagliari,Andrea Colombo
 5749734,2026-11-01,Frosinone,Torino,Giuseppe Mucera
-5749735,2026-11-01,Juventus,Napoli,Simone Sozza
-5749738,2026-11-02,Sassuolo,Fiorentina,Matteo Marcenaro
 5749731,2026-11-02,Atalanta,Parma,Valerio Crezzini
+5749738,2026-11-02,Sassuolo,Fiorentina,Matteo Marcenaro
 5749749,2026-11-06,Venezia,Udinese,Juan Luca Sacchi
-5749748,2026-11-07,Torino,Lecce,Ermanno Feliciani
 5749747,2026-11-07,Parma,Bologna,Luca Zufferli
-5749740,2026-11-07,Roma,Sassuolo,Marco Di Bello
 5749741,2026-11-07,Cagliari,Frosinone,Giovanni Ayroldi
-5749742,2026-11-08,Fiorentina,Juventus,Andrea Colombo
+5749748,2026-11-07,Torino,Lecce,Ermanno Feliciani
+5749740,2026-11-07,Roma,Sassuolo,Marco Di Bello
 5749745,2026-11-08,Monza,Atalanta,Claudio Giuseppe Allegretta
-5749744,2026-11-08,Inter,Como,Daniele Chiffi
-5749746,2026-11-08,Napoli,Lazio,Luca Pairetto
 5749743,2026-11-08,Genoa,Milan,Davide Massa
+5749744,2026-11-08,Inter,Como,Daniele Chiffi
+5749742,2026-11-08,Fiorentina,Juventus,Andrea Colombo
+5749746,2026-11-08,Napoli,Lazio,Luca Pairetto
 5749755,2026-11-21,Lazio,Lecce,Matteo Marcenaro
-5749753,2026-11-21,Como,Cagliari,Andrea Calzavara
 5749757,2026-11-21,Napoli,Torino,Marco Di Bello
 5749758,2026-11-21,Parma,Roma,Simone Sozza
-5749750,2026-11-22,Milan,Frosinone,Luca Pairetto
+5749753,2026-11-21,Como,Cagliari,Andrea Calzavara
+5749752,2026-11-22,Bologna,Udinese,Livio Marinelli
 5749754,2026-11-22,Juventus,Venezia,Alberto Arena
 5749751,2026-11-22,Atalanta,Inter,Fabio Maresca
+5749750,2026-11-22,Milan,Frosinone,Luca Pairetto
 5749759,2026-11-22,Sassuolo,Genoa,Maria Ferrieri Caputi
-5749752,2026-11-22,Bologna,Udinese,Livio Marinelli
 5749756,2026-11-23,Monza,Fiorentina,Daniele Doveri
 5749769,2026-11-27,Venezia,Bologna,Andrea Colombo
