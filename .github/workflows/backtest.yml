@@ -17,9 +17,10 @@ jobs:
       - name: Datos I1, árbitros FotMob y backtest de tarjetas
         run: |
           python -c "import sys; sys.path.insert(0,'modelo_seriea/02_codigo'); import generar_seriea as g; g.descargar_e0()"
-          cd modelo_seriea/02_codigo && python arbitros_fotmob.py && SOLO_TARJETAS=1 python backtest_seriea.py
+          (cd modelo_seriea/02_codigo && python arbitros_fotmob.py)
+          cd modelo/02_codigo && python arbitros_fotmob.py && python backtest_arbitros.py
       - name: Guardar
         run: |
           git config user.name "robot"; git config user.email "robot@users.noreply.github.com"
-          git add modelo_seriea
+          git add modelo_seriea modelo/01_datos/arbitros_fotmob.csv modelo/03_experimentos
           git diff --staged --quiet || (git commit -m "Backtest Serie A" && git pull -q --rebase -X theirs origin main && git push)

@@ -25,7 +25,16 @@ def _load(div):
 
 
 def load_sp1():
-    return _load('SP1')
+    df = _load('SP1')
+    ARB = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '01_datos', 'arbitros_fotmob.csv')
+    if os.path.exists(ARB):   # árbitros sacados de FotMob (football-data no los trae en España)
+        a = pd.read_csv(ARB)
+        a = a[a.Referee.notna() & (a.Referee != 'sin dato')]
+        temp = lambda x: x.dt.year.where(x.dt.month >= 7, x.dt.year - 1)
+        a['tt'] = temp(pd.to_datetime(a.Date)); df['tt'] = temp(df.Date)
+        df = df.merge(a[['tt', 'HomeTeam', 'AwayTeam', 'Referee']].drop_duplicates(['tt', 'HomeTeam', 'AwayTeam']),
+                      on=['tt', 'HomeTeam', 'AwayTeam'], how='left').drop(columns='tt')
+    return df
 
 
 def load_sp2():

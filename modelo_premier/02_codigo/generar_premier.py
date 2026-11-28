@@ -132,6 +132,16 @@ def main():
     ahora = dt.datetime.now(MAD); hoy = pd.Timestamp(ahora.date())
     app = json.load(open(DATOS, encoding='utf-8')); lig = app.setdefault('ligas', {})
     hist = ap.load_matches(); ult = hist.Date.max()
+    refs = set(hist.Referee.dropna()) if 'Referee' in hist else set()
+
+    def ref_fd(n):   # FotMob 'Michael Oliver' -> football-data 'M Oliver' (mismo árbitro en el historial)
+        if not n: return None
+        w = unicodedata.normalize('NFKD', n).encode('ascii', 'ignore').decode().split()
+        if len(w) < 2: return None
+        for c in (f'{w[0][0]} {" ".join(w[1:])}', f'{w[0][0]} {w[-1]}'):
+            if c in refs: return c
+        b = [r for r in refs if r.split()[-1].lower() == w[-1].lower()]
+        return b[0] if len(b) == 1 else None
     equipos = sorted(set(hist.HomeTeam) | set(hist.AwayTeam))
     meta = {'act': ahora.strftime('%d/%m/%Y %H:%M'), 'datos': ult.strftime('%d/%m/%Y')}
     try:
@@ -149,7 +159,7 @@ def main():
         for r in [x for x in fx if x['ronda'] == ronda]:
             arb, ali = fm_detalle(r, ahora)
             try:
-                T, pick, info = ap.analizar(r['h'], r['a'], None, hoy)   # árbitro solo informativo (nombres de FotMob ≠ football-data)
+                T, pick, info = ap.analizar(r['h'], r['a'], ref_fd(arb), hoy)   # árbitro de FotMob traducido al formato de football-data
             except Exception as e:
                 print('AVISO modelo', r['h'], r['a'], repr(e)[:120]); continue
             narb += bool(arb); nali += bool(ali)
