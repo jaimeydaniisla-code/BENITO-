@@ -28,7 +28,10 @@ def partidos(temp):
 
 def main():
     hist = load_sp1(); equipos = sorted(set(hist.HomeTeam) | set(hist.AwayTeam)); por = {norm(e): e for e in equipos}
+    FIJO = {'atletico madrid': 'Ath Madrid', 'athletic club': 'Ath Bilbao', 'athletic bilbao': 'Ath Bilbao', 'rayo vallecano': 'Vallecano'}
     def mapa(n):
+        f = FIJO.get(G.unicodedata.normalize('NFKD', n).encode('ascii', 'ignore').decode().lower().strip())
+        if f in equipos: return f
         k = casar({x: x for x in por}, n)
         return por[k] if k else None
     prev = pd.read_csv(OUT, dtype={'id': str}) if os.path.exists(OUT) else pd.DataFrame(columns=['id', 'Date', 'HomeTeam', 'AwayTeam', 'Referee'])
